@@ -1,0 +1,35 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+credentials.json
+secrets/
+
+# Junk
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.log
+npm-debug.log*
+
+# Dependencies / build (not used by this site, but harmless to guard)
+node_modules/
+dist/
+build/
+out/
+.cache/
+
+# Jekyll (site uses .nojekyll, but keep ignored artifacts out)
+_site/
+.jekyll-cache/
+.jekyll-metadata

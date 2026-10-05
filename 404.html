@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page not found | Haql</title>
+  <style>
+    :root {
+      --bg: #0b0d10;
+      --text: #e6e8eb;
+      --muted: #9aa0a6;
+      --link: #4f9deb;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #ffffff;
+        --text: #1f2328;
+        --muted: #57606a;
+        --link: #0969da;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem;
+      text-align: center;
+    }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>Page not found</h1>
+  <p class="muted">The page you're looking for doesn't exist.</p>
+  <p><a href="./index.html">Return to home</a></p>
+</body>
+</html>
