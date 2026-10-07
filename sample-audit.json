@@ -1,0 +1,267 @@
+{
+  "tool": "haql-qc",
+  "tool_version": "0.4.1",
+  "ruleset_version": "1.2.0",
+  "input": {
+    "path": "/tmp/tmpkj4ckurw/tiny.csv",
+    "sha256": "997b5aa659fdf44e0feafbd7cdefb1050c42b94e02da99a0edc9ad58561ab78a",
+    "rows_read": 4,
+    "wells_seen": 2
+  },
+  "run": {
+    "started": "2026-10-01T23:27:44+00:00",
+    "finished": "2026-10-01T23:27:44+00:00"
+  },
+  "config": {
+    "ingest": {
+      "tool": "haql-qc",
+      "tool_version": "0.4.1",
+      "source": {
+        "path": "/tmp/tmpkj4ckurw/tiny.csv",
+        "sha256": "997b5aa659fdf44e0feafbd7cdefb1050c42b94e02da99a0edc9ad58561ab78a",
+        "detected_format": "csv",
+        "detection_reason": "comma-delimited text with a consistent field count",
+        "member": null,
+        "sheet": null,
+        "header_row": 1,
+        "available_sheets": [],
+        "rows_extracted": 4,
+        "truncated": false
+      },
+      "schema": {
+        "roles": {
+          "date": {
+            "role": "date",
+            "column": "DATEPRD",
+            "confidence": "high",
+            "basis": "exact match to known date name 'dateprd'; confirmed against column contents",
+            "verified": false
+          },
+          "gas": {
+            "role": "gas",
+            "column": "BORE_GAS_VOL",
+            "confidence": "medium",
+            "basis": "column name names the fluid",
+            "verified": false
+          },
+          "oil": {
+            "role": "oil",
+            "column": "BORE_OIL_VOL",
+            "confidence": "medium",
+            "basis": "column name names the fluid",
+            "verified": false
+          },
+          "uptime": {
+            "role": "uptime",
+            "column": "ON_STREAM_HRS",
+            "confidence": "high",
+            "basis": "name declares uptime in hours ('onstreamhrs'); confirmed against column contents",
+            "verified": false
+          },
+          "water": {
+            "role": "water",
+            "column": "BORE_WAT_VOL",
+            "confidence": "medium",
+            "basis": "column name names the fluid",
+            "verified": false
+          },
+          "well": {
+            "role": "well identifier",
+            "column": "WELL",
+            "confidence": "high",
+            "basis": "exact match to known well-identifier name 'well'; confirmed against column contents",
+            "verified": false
+          }
+        },
+        "cadence": {
+          "granularity": "daily",
+          "confidence": "medium",
+          "basis": "successive dates are one day apart"
+        },
+        "units_declared_by_file": {},
+        "units_declared_by_operator": {},
+        "unit_sources": {},
+        "needs_confirmation": [
+          {
+            "role": "well identifier",
+            "column": "WELL",
+            "confidence": "high",
+            "basis": "exact match to known well-identifier name 'well'; confirmed against column contents",
+            "verified": false
+          },
+          {
+            "role": "date",
+            "column": "DATEPRD",
+            "confidence": "high",
+            "basis": "exact match to known date name 'dateprd'; confirmed against column contents",
+            "verified": false
+          },
+          {
+            "role": "uptime",
+            "column": "ON_STREAM_HRS",
+            "confidence": "high",
+            "basis": "name declares uptime in hours ('onstreamhrs'); confirmed against column contents",
+            "verified": false
+          }
+        ],
+        "unresolved": [],
+        "notes": []
+      },
+      "role_overrides": {},
+      "warnings": [],
+      "notes": [],
+      "generated": "2026-10-01T23:27:44+00:00"
+    },
+    "granularity": "daily",
+    "well_column": "WELL",
+    "date_column": "DATEPRD",
+    "year_column": null,
+    "month_column": null,
+    "numeric_columns": [
+      "BORE_GAS_VOL",
+      "BORE_OIL_VOL",
+      "BORE_WAT_VOL",
+      "ON_STREAM_HRS"
+    ],
+    "text_columns": [],
+    "units_declared_by_file": {}
+  },
+  "summary": {
+    "rows_read": 4,
+    "wells_seen": 2,
+    "issue_count": 5,
+    "by_severity": {
+      "critical": 0,
+      "high": 4,
+      "medium": 0,
+      "low": 0,
+      "info": 1
+    },
+    "by_rule": {
+      "QC014_SHUTIN_PRODUCTION": 3,
+      "QC010_NEGATIVE_RATE": 1,
+      "QC015_IMPLAUSIBLE_RATE": 1
+    },
+    "auto_correctable": 0,
+    "corrections_applied": 0
+  },
+  "issues": [
+    {
+      "rule_id": "QC010_NEGATIVE_RATE",
+      "well_id": "25/1-A-1",
+      "date": "2024-01-02",
+      "severity": "high",
+      "message": "negative volume in 'BORE_OIL_VOL'",
+      "source_row": 4,
+      "column": "BORE_OIL_VOL",
+      "observed": -5.0,
+      "expected": ">= 0",
+      "unit": null,
+      "auto_correctable": false,
+      "suggestion": "confirm sign convention before flipping; negative production volume is not physically realisable",
+      "correction": "none",
+      "original_value": "-5",
+      "context": {
+        "injection": false
+      }
+    },
+    {
+      "rule_id": "QC014_SHUTIN_PRODUCTION",
+      "well_id": "25/1-A-1",
+      "date": "2024-01-03",
+      "severity": "high",
+      "message": "ON_STREAM_HRS = 0 but 'BORE_OIL_VOL' = 105, 105% of this well's typical 100; the well cannot be producing",
+      "source_row": 5,
+      "column": "BORE_OIL_VOL",
+      "observed": 105.0,
+      "expected": "0 when the well is not producing",
+      "unit": null,
+      "auto_correctable": false,
+      "suggestion": "either ON_STREAM_HRS is wrong or 'BORE_OIL_VOL' is. A shut-in well should report zero across all rate columns",
+      "correction": "none",
+      "original_value": "105",
+      "context": {
+        "uptime_column": "ON_STREAM_HRS",
+        "uptime_value": 0.0,
+        "volume_column": "BORE_OIL_VOL",
+        "volume_value": 105.0,
+        "well_median_for_column": 100.0,
+        "ratio_to_well_median": 1.05,
+        "material": true
+      }
+    },
+    {
+      "rule_id": "QC014_SHUTIN_PRODUCTION",
+      "well_id": "25/1-A-1",
+      "date": "2024-01-03",
+      "severity": "high",
+      "message": "ON_STREAM_HRS = 0 but 'BORE_WAT_VOL' = 52, 104% of this well's typical 50; the well cannot be producing",
+      "source_row": 5,
+      "column": "BORE_WAT_VOL",
+      "observed": 52.0,
+      "expected": "0 when the well is not producing",
+      "unit": null,
+      "auto_correctable": false,
+      "suggestion": "either ON_STREAM_HRS is wrong or 'BORE_WAT_VOL' is. A shut-in well should report zero across all rate columns",
+      "correction": "none",
+      "original_value": "52",
+      "context": {
+        "uptime_column": "ON_STREAM_HRS",
+        "uptime_value": 0.0,
+        "volume_column": "BORE_WAT_VOL",
+        "volume_value": 52.0,
+        "well_median_for_column": 50.0,
+        "ratio_to_well_median": 1.04,
+        "material": true
+      }
+    },
+    {
+      "rule_id": "QC014_SHUTIN_PRODUCTION",
+      "well_id": "25/1-A-1",
+      "date": "2024-01-03",
+      "severity": "high",
+      "message": "ON_STREAM_HRS = 0 but 'BORE_GAS_VOL' = 2050, 102% of this well's typical 2000; the well cannot be producing",
+      "source_row": 5,
+      "column": "BORE_GAS_VOL",
+      "observed": 2050.0,
+      "expected": "0 when the well is not producing",
+      "unit": null,
+      "auto_correctable": false,
+      "suggestion": "either ON_STREAM_HRS is wrong or 'BORE_GAS_VOL' is. A shut-in well should report zero across all rate columns",
+      "correction": "none",
+      "original_value": "2050",
+      "context": {
+        "uptime_column": "ON_STREAM_HRS",
+        "uptime_value": 0.0,
+        "volume_column": "BORE_GAS_VOL",
+        "volume_value": 2050.0,
+        "well_median_for_column": 2000.0,
+        "ratio_to_well_median": 1.025,
+        "material": true
+      }
+    },
+    {
+      "rule_id": "QC015_IMPLAUSIBLE_RATE",
+      "well_id": "",
+      "date": "",
+      "severity": "info",
+      "message": "3 column(s) skipped for plausibility: unit not declared, so readings were not converted to a comparable unit",
+      "source_row": 0,
+      "column": "BORE_GAS_VOL,BORE_OIL_VOL,BORE_WAT_VOL",
+      "observed": "BORE_GAS_VOL,BORE_OIL_VOL,BORE_WAT_VOL",
+      "expected": "declare a unit, e.g. --declare-unit BORE_OIL_VOL=Sm3",
+      "unit": null,
+      "auto_correctable": false,
+      "suggestion": "add --declare-unit <COLUMN>=<UNIT> to cover these columns",
+      "correction": "none",
+      "original_value": null,
+      "context": {
+        "skipped_columns": [
+          "BORE_GAS_VOL",
+          "BORE_OIL_VOL",
+          "BORE_WAT_VOL"
+        ]
+      }
+    }
+  ]
+}

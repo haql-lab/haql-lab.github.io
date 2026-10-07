@@ -4,15 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Oil and Gas Production Data QC — Catch Errors Before You File | Haql</title>
-<meta name="description" content="Deterministic production data QC and month-end closeout checks for oil and gas. Every finding cites the exact source row and the input file hash. Runs offline. Audits from $1,750.">
+<meta name="description" content="Deterministic production data QC and month-end closeout checks for oil and gas. Every finding cites the exact source row and the input file hash. Runs offline. Free sample check; licenses from $349/month.">
 <link rel="canonical" href="https://no1mlengineer.github.io/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Oil and Gas Production Data QC — Catch Errors Before You File | Haql">
-<meta property="og:description" content="Deterministic production data QC and month-end closeout checks. Every finding cites the exact source row. Runs offline.">
+<meta property="og:description" content="Deterministic production data QC and month-end closeout checks. Every finding cites the exact source row. Runs offline. Free sample check; licenses from $349/month.">
 <meta property="og:url" content="https://no1mlengineer.github.io/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Oil and Gas Production Data QC | Haql">
-<meta name="twitter:description" content="Catch production-data errors before you file or close the month. Deterministic, traceable, offline.">
+<meta name="twitter:description" content="Catch production-data errors before you file or close the month. Deterministic, traceable, offline. Free sample check; licenses from $349/month.">
 <meta name="theme-color" content="#0b0f14" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <link rel="stylesheet" href="assets/css/style.css">
@@ -50,13 +50,13 @@
         <a class="btn btn--p" href="mailto:no1mlengineer234@gmail.com?subject=Free%20sample%20check%20request">Send me your CSV — free sample check</a>
         <a class="btn btn--s" href="#sample">See a real finding</a>
       </div>
-      <p class="reassure">Nothing to install. Your file never leaves your machine unless you ask me to check it. Same rules every run.</p>
+      <p class="reassure"><b>Run it yourself:</b> <code class="mono">pip install haql-qc</code> (Python 3.9+) — nothing leaves your machine. <b>Or use the free sample check:</b> email one month of data, anonymised if you prefer. Same rules every run either way.</p>
     </div>
 
     <div class="hero__panel">
       <div class="panel__bar"><span class="dot"></span>audit.json</div>
       <pre class="panel__body"><span class="k">rows</span>=15634  <span class="k">wells</span>=7  <span class="k">issues</span>=<span class="w">80</span>
-  critical=<span class="g">0</span> high=<span class="r">12</span> medium=<span class="y">34</span> info=<span class="b">34</span>
+  critical=<span class="g">0</span> high=<span class="r">12</span> medium=<span class="y">34</span> low=<span class="b">0</span> info=<span class="b">34</span>
 
 <span class="c">// real finding, real export</span>
 {
@@ -67,7 +67,7 @@
   <span class="k">"source_row"</span>: <span class="n">1984</span>,
   <span class="k">"observed"</span>: <span class="n">-14.19</span>, <span class="k">"unit"</span>: <span class="s">"Sm3"</span>
 }</pre>
-      <p class="panel__cap">Equinor Volve daily export — public dataset. Open the row, check the number, done.</p>
+      <p class="panel__cap">Equinor Volve daily export — public dataset. Open the CSV, go to the cited line, check the number. <code class="mono">source_row</code> is the 1-indexed record number in the file, so the header is line 1 and the row shown here is line 1984.</p>
     </div>
   </div>
 </section>
@@ -86,7 +86,7 @@
       </article>
       <article class="pain">
         <h3>The partner dispute</h3>
-        <p>A joint-venture partner queries a volume. You pull the export. You cannot prove which figure was right on the day it was received, because the correction was made on a guess and the trail is gone.</p>
+        <p>A joint-venture partner queries a volume. You pull the export. You cannot establish which figure was right on the day it was received, because the correction was made on a guess and the trail is gone.</p>
       </article>
       <article class="pain">
         <h3>The month-end scramble</h3>
@@ -126,7 +126,7 @@
           </div>
           <div class="io__b">
             <h4>Comes out</h4>
-            <p>JSON or JSONL audit report: findings by rule and severity, per-well medians used for materiality, and a run-level SHA-256 so you can prove which bytes were audited.</p>
+            <p>JSON or JSONL audit report: findings by rule and severity, per-well medians used for materiality, and the run-level SHA-256 of the exact input so the run can be re-checked against the same bytes.</p>
           </div>
         </div>
         <details class="ex">
@@ -136,12 +136,13 @@
             <li><b>Negative production volumes</b> — not realisable; flag whether produced or injected, because the sign convention differs</li>
             <li><b>Cumulative totals that decrease</b> — impossible without a documented reset</li>
             <li><b>Shut-in contradictions</b> — zero uptime while still producing at normal rate</li>
-            <li><b>Date gaps</b> — judged against each well's own cadence, not a global assumption</li>
-            <li><b>Plausibility breaches</b> — decimal errors and unit mix-ups, not performance judgements</li>
+            <li><b>Date gaps</b> — a gap beyond the well's own cadence, where that cadence is inferred from that well's own history, not assumed globally</li>
+            <li><b>Plausibility breaches</b> — a daily rate above the fixed per-fluid ceiling (oil 200,000 bbl/d, water 500,000 bbl/d, gas 5,000,000 MCF/d default; overridable), not performance judgements</li>
           </ul>
-          <p class="fine">Materiality is measured against the well's own median. 0.003 Sm³ is nothing on a well producing 6,000 Sm³/d and an emergency on one producing 5. That is why 4 findings are high and 34 are informational.</p>
+          <p class="fine">Materiality is measured against the well's own median. 0.003 Sm³ is nothing on a well producing 6,000 Sm³/d and an emergency on one producing 5. That is why 12 findings are high — 4 negative water rates, 4 date gaps, 4 shut-in contradictions across 2 source rows — and 34 are informational.</p>
+          <p class="fine">Per-well relative outlier checks are not yet implemented.</p>
         </details>
-        <p class="tool__foot">Proprietary, source-available. Full Python source published so you can read exactly what it does to your data. Evaluation use needs no key. <span class="fine">237 tests, all offline.</span></p>
+        <p class="tool__foot">Proprietary. Deterministic and fully offline — the package makes no outbound calls, and the installed code is readable on your machine. Evaluation use needs no key. <span class="fine">237 tests, all offline.</span></p>
       </article>
 
       <article class="tool">
@@ -165,18 +166,34 @@
           <ul>
             <li><b>Well test vs. daily average</b> — a test rate that does not reconcile with reported daily volumes</li>
             <li><b>Downtime vs. production</b> — a well recorded shut-in while volumes say it was running</li>
-            <li><b>Date continuity</b> — reporting gaps measured against that well's own established cadence</li>
+            <li><b>Date continuity</b> — reporting gaps measured against that well's own cadence, inferred from that well's own history</li>
             <li><b>Field balance</b> — volumes sold or delivered exceeding what the field produced</li>
             <li><b>Cumulative continuity</b> — totals that go backwards inside the period</li>
             <li><b>Duplicate well-days</b> — the same well reported twice for one date</li>
           </ul>
           <p class="fine">Same design stance as haql-qc: read-only, offline, deterministic, traceable to the row.</p>
         </details>
-        <p class="tool__foot">Proprietary, source-available. <span class="fine">Best run after haql-qc — QC clears the records, closeout confirms the period ties out.</span></p>
+        <p class="tool__foot">Proprietary. <span class="fine">Best run after haql-qc — QC clears the records, closeout confirms the period ties out.</span></p>
       </article>
     </div>
 
     <p class="juris"><b>On regulators and filings.</b> These tools do not generate regulator-specific forms, and they do not know any state's format. They check the volumes those forms are built from — and they are jurisdiction-agnostic, so the same rules apply whether your wells are in Texas, Alberta, or the North Sea. If you need a state-specific formatter, say so and I will tell you honestly whether I can build it.</p>
+
+    <div class="hero__panel run">
+      <div class="panel__bar"><span class="dot"></span>install &amp; run — verbatim from the README</div>
+      <pre class="panel__body"><span class="c"># install</span>
+pip install haql-qc
+
+<span class="c"># quick start</span>
+haql-qc -i production.csv \
+         --well-column WELL_BORE_CODE \
+         --date-column DATEPRD \
+         --declare-unit BORE_OIL_VOL=Sm3 \
+         --declare-unit BORE_GAS_VOL=Sm3 \
+         --declare-unit BORE_WAT_VOL=Sm3 \
+         --declare-unit BORE_WI_VOL=Sm3 \
+         -r audit.json</pre>
+    </div>
   </div>
 </section>
 
@@ -186,6 +203,7 @@
     <p class="eyebrow">Proof</p>
     <h2>One finding, from a real export.</h2>
     <p class="lede lede--c">Equinor's Volve field is a mature offshore field on the Norwegian continental shelf. The dataset is public. This is an actual finding from the actual daily export — 15,634 rows, 7 wells.</p>
+    <p class="fine">Volve is published by Equinor; redistribution and commercial-use terms are not resolved here, and no Volve data is bundled with or downloaded by the tools.</p>
 
     <div class="finding">
       <div class="finding__hd">
@@ -200,6 +218,7 @@
         <tr><th>Observed</th><td>−14.19 Sm<sub>3</sub></td></tr>
         <tr><th>Suggestion</th><td>confirm sign convention before flipping; negative production volume is not physically realisable</td></tr>
       </table>
+      <p class="fine"><a href="sample-audit.json" download>Download sample audit.json</a> — the JSON report shape, with every field the real run produces. The finding above is the page's illustration; numbers in the downloaded file are from a small fixture run.</p>
     </div>
 
     <div class="after">
@@ -212,7 +231,7 @@
       <div class="after__c">
         <h3>After</h3>
         <p>Four rows are named, by well, by date, by line number, with the observed value and its unit. An engineer decides whether the sign convention or the meter failed.</p>
-        <p class="muted">Either way it never reaches a filing, and the report proves what the file said when it was read.</p>
+        <p class="muted">Either way it never reaches a filing, and the report records the SHA-256 of the exact input audited.</p>
       </div>
     </div>
 
@@ -223,7 +242,7 @@
       <div class="stat"><b>526</b><span>monthly rows — zero findings</span></div>
     </div>
 
-    <p class="verify">Peak oil, water and gas rates were recomputed independently outside the tool. All fell below the ceiling, which confirms the zero-breach result is correct rather than a silent skip. Peak rates: oil 152,878 bbl/d, water 71,600 bbl/d, gas 45,090 MCF/d.</p>
+    <p class="verify">Peak oil, water and gas rates were recomputed independently outside the tool. All fell below the ceiling, which confirms the zero-breach result is correct rather than a silent skip. Peak rates in canonical units: oil 152,878 bbl/d, water 71,600 bbl/d, gas 45,090 MCF/d. The source export is declared in Sm³ and converted using the README factors (1 Sm³ = 6.289810770432105 bbl for oil/water, 1 Sm³ = 0.0353146667215 MCF for gas); daily rates are normalised by ON_STREAM_HRS/24, days_on, or the inferred cadence before comparison.</p>
   </div>
 </section>
 
@@ -234,13 +253,13 @@
     <h2>One step added. Nothing replaced.</h2>
     <ol class="flow">
       <li><b>Export</b><span>Production data from whatever you already use — no change to your capture or accounting system.</span></li>
-      <li><b>Send or run</b><span>Email me the file for a free sample, or run the CLI yourself. Nothing is installed either way.</span></li>
+      <li><b>Send or run</b><span>Run the CLI yourself, or email me the file for a free sample — two separate paths, both using the same rules.</span></li>
       <li><b>Review</b><span>Every finding names the rule, the well, the date and the row. Open the CSV and look.</span></li>
       <li><b>Fix</b><span>You correct your source of truth. The tool never writes to your file.</span></li>
       <li><b>File or close</b><span>With a report that shows what was checked and what was found.</span></li>
     </ol>
     <div class="ben">
-      <div><b>Same rules every time</b><p>Deterministic. Identical bytes give an identical report — no variance run to run, which is what makes it defensible in an audit.</p></div>
+      <div><b>Same rules every time</b><p>Deterministic on findings. Identical input bytes and configuration produce identical findings; the embedded run timestamps vary, the findings do not.</p></div>
       <div><b>Every finding cites its row</b><p>Rule ID, 1-indexed source row, observed value, and the input SHA-256. "There was a problem" is not actionable; row 1984 is.</p></div>
       <div><b>Runs offline</b><p>No network call, no telemetry, no upload. Reservoir data frequently cannot leave your infrastructure, so the tool never asks it to.</p></div>
       <div><b>It says when it does not know</b><p>No unit declared means no unit-dependent check runs, and the report names the gap. It will not guess a unit and put a false claim in the audit record.</p></div>
@@ -253,6 +272,12 @@
   <div class="wrap">
     <p class="eyebrow">Pricing</p>
     <h2>Priced against the hours you already spend.</h2>
+
+    <div class="svc">
+      <h3>Field-specific work — <b>$175/hour</b></h3>
+      <p>Separate from any license. This is the part that knows your operator's export names the uptime column <code>ON_STREAM_HRS</code>, that a zero in it means the field is wrong rather than the well being shut in, and which sub-5% values are rounding artefacts. That knowledge is per-basin and per-operator, and it is what you are actually buying.</p>
+      <p class="fine">Published subsurface consulting rates run $125–180/hr (GeoTech pricelist). $175 sits inside that band.</p>
+    </div>
 
     <div class="tiers">
       <div class="tier">
@@ -273,11 +298,7 @@
       </div>
     </div>
 
-    <div class="svc">
-      <h3>Field-specific work — <b>$175/hour</b></h3>
-      <p>Separate from any license. This is the part that knows your operator's export names the uptime column <code>ON_STREAM_HRS</code>, that a zero in it means the field is wrong rather than the well being shut in, and which sub-5% values are rounding artefacts. That knowledge is per-basin and per-operator, and it is what you are actually buying.</p>
-      <p class="fine">Published subsurface consulting rates run $125–180/hr (GeoTech pricelist). $175 sits inside that band.</p>
-    </div>
+    <p class="fine">Evaluation: 30 days, no license key needed.</p>
   </div>
 </section>
 
@@ -287,7 +308,7 @@
     <p class="eyebrow">About</p>
     <h2>Why you should hand over a month of production data to a stranger.</h2>
     <p class="lede">Fair question. Here is the actual answer.</p>
-    <p>I build reservoir and production software, and I publish the source. The <span class="mono">haql-qc</span> package ships its complete Python source — the rules, the loader, the audit schema. You can read exactly what it does to your file before you run it. That is also why the rules are numbered permanently: adding a rule never renumbers an existing one, because audit logs referencing them are already in other people's hands.</p>
+    <p>I build reservoir and production software. The <span class="mono">haql-qc</span> and <span class="mono">haql-closeout</span> packages install the full source locally, so the code that touches your file is on your machine where you can read it before you run it. The rules are numbered permanently: adding a rule never renumbers an existing one, because audit logs referencing them are already in other people's hands.</p>
     <p>Three commitments shape the work, and they are the reason a rule that cannot be certain says so rather than guessing:</p>
     <ul class="plain">
       <li><b>Never corrupt source data.</b> The tool is read-only by construction. It cannot auto-correct, because correcting requires knowing which of two contradictory fields is wrong, and the data cannot supply that.</li>
@@ -295,6 +316,7 @@
       <li><b>Never be untraceable.</b> Every finding ties to a stable rule ID, a row you can open in an editor, and a hash of the input.</li>
     </ul>
     <p class="fine">Validation is against one public field — Volve, 15,634 daily rows and 526 monthly rows. One field is a starting point, not a general guarantee, and I will not claim otherwise. No Volve data is bundled with the package; it downloads nothing.</p>
+    <p class="fine">An independent reservoir and production software engineer. Contact is the email below.</p>
   </div>
 </section>
 
@@ -305,13 +327,13 @@
     <h2>Straight answers.</h2>
 
     <details><summary>Does it use AI?</summary><p>No. Every rule is deterministic arithmetic on your data — comparisons, monotonicity checks, medians. No model, no network call, no language model anywhere in the package. Running the same file twice gives the same answer.</p></details>
-    <details><summary>Does my data leave my computer?</summary><p>Run locally, nothing leaves your machine — the code makes no outbound calls, and you can confirm that yourself in the published source. If you use the free sample check instead, you are choosing to email me the file, and you can ask for it back anonymised or deleted.</p></details>
+    <details><summary>Does my data leave my computer?</summary><p>Run locally, nothing leaves your machine — the code makes no outbound calls. If you use the free sample check instead, you are choosing to email me the file, and you can ask for it back anonymised or deleted.</p></details>
     <details><summary>What do I need to install?</summary><p>Nothing, if you use the free sample check — email the file, I send the report. To run it yourself you need Python 3.9 or newer and nothing else; the audit engine is standard library only. Spreadsheet input needs one optional extra package.</p></details>
     <details><summary>What file formats?</summary><p>Production CSV for daily and monthly period exports. Monthly files that declare their own units in a second header row are read directly. XLSX, ZIP, JSON, JSONL, DBF and fixed-width are supported through the ingest layer.</p></details>
     <details><summary>Can I try it free?</summary><p>Yes. Email me one month of data — anonymised if you prefer — and you get the full report at no cost. Evaluation use of the CLI also needs no license key.</p></details>
-    <details><summary>How is it licensed?</summary><p><span class="mono">haql-qc</span> and <span class="mono">haql-closeout</span> are proprietary and source-available: full source published, running it commercially requires a license. Licenses are signed ed25519 tokens carrying company, tier, seats and expiry, verified entirely offline against an embedded public key — no activation server, no phone-home. <span class="mono">haql-units</span> and <span class="mono">haql-coords</span> are MIT and need no license at all.</p></details>
-    <details><summary>One offline check cannot tell whether a revoked license was revoked — why?</summary><p>Because nothing inside the token records that fact. A revoked license verifies correctly until it expires, unless the caller checks a registry. I would rather state that limit than imply revocation works offline when it does not.</p></details>
-    <details><summary>Will it decide whether my well is performing?</summary><p>No. Plausibility is not performance. It flags a reading of 500,000 bbl/d as a decimal error, not as unusual, and it refuses questions outside its competence.</p></details>
+    <details><summary>How is it licensed?</summary><p><span class="mono">haql-qc</span> and <span class="mono">haql-closeout</span> are proprietary: running them commercially requires a license. Licenses are signed ed25519 tokens carrying company, tier, seats and expiry, verified entirely offline against an embedded public key — no activation server, no phone-home. <span class="mono">haql-units</span> and <span class="mono">haql-coords</span> are MIT and need no license at all.</p></details>
+    <details><summary>Will it decide whether my well is performing?</summary><p>No. Plausibility is not performance. It flags a rate above the configured plausibility ceiling (500,000 bbl/d is the water default) — not because the rate is unusual. It refuses questions outside its competence.</p></details>
+    <details><summary>Is a revoked license still verified offline — why?</summary><p>Because nothing inside the token records that fact. A revoked license verifies correctly until it expires, unless the caller checks a registry. I would rather state that limit than imply revocation works offline when it does not.</p></details>
   </div>
 </section>
 
@@ -324,8 +346,7 @@
     <a class="btn btn--p btn--lg" href="mailto:no1mlengineer234@gmail.com?subject=Free%20sample%20check%20request">no1mlengineer234@gmail.com</a>
     <div class="links">
       <div><b>Source</b><a href="https://github.com/No1MLEngineer" rel="noopener">github.com/No1MLEngineer</a></div>
-      <div><b>haql-qc</b><a href="https://github.com/No1MLEngineer/haql-qc" rel="noopener">haql-qc repo</a></div>
-      <div><b>haql-closeout</b><a href="https://github.com/No1MLEngineer/haql-closeout" rel="noopener">haql-closeout repo</a></div>
+      <div><b>haql-qc</b><a href="https://pypi.org/project/haql-qc/" rel="noopener">pypi.org/project/haql-qc</a></div>
     </div>
     <p class="fine">This site is static, hosted free on GitHub Pages. No cookies, no trackers, no analytics, no backend.</p>
   </div>
@@ -336,6 +357,7 @@
 <footer class="ftr">
   <div class="wrap ftr__in">
     <p>&copy; <span id="yr">2026</span> haql</p>
+    <p class="fine">Last updated: October 7, 2026. haql-qc ruleset_version 1.2.0 · haql-closeout ruleset_version 1.0.0.</p>
     <p class="fine">Deterministic tools for oil and gas production data. Findings are advisory; the judgment is yours.</p>
   </div>
 </footer>

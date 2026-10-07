@@ -224,6 +224,8 @@ h1,h2,h3,h4{line-height:1.15;letter-spacing:-.022em;font-weight:700}
 .panel__body .w{color:var(--hi);font-weight:700}
 .panel__cap{padding:.85rem 1.25rem;border-top:1px solid var(--border);font-size:.8rem;color:var(--text-3)}
 
+.hero__panel.run{margin-top:1.75rem}
+
 /* ---------- problem ---------- */
 .pains{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,255px),1fr));gap:1.1rem;margin-bottom:2.5rem}
 .pain{
