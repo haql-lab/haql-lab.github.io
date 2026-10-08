@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>haql-units — Units You Can Cite, Not Guess | Haql Labs</title>
+<meta name="description" content="haql-units is a units library for production data that converts with explicit time bases, exact definitions and round-trip checking — so a unit mismatch is an error you catch, not a surprise you inherit.">
+<link rel="canonical" href="https://haql-lab.github.io/haql-units.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="haql-units — Convert Between Units, Not Between Interpretations">
+<meta property="og:description" content="Unit conversion with declared time bases and round-trip verification. Built for the workflows that haql-qc, haql-closeout and haql-45q are built for.">
+<meta property="og:url" content="https://haql-lab.github.io/haql-units.html">
+<meta name="theme-color" content="#0b0f14" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="logo" href="index.html">haql<span class="logo__dot">.</span></a>
+    <button class="burger" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="haql-qc.html">QC</a>
+      <a href="haql-closeout.html">Closeout</a>
+      <a href="haql-45q.html">45Q</a>
+      <a href="haql-units.html">Units</a>
+      <a href="haql-coords.html">Coords</a>
+      <a class="nav__cta" href="mailto:no1mlengineer234@gmail.com?subject=Free%20sample%20check%20request">Send me your CSV</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="wrap hero__in">
+    <div class="hero__copy">
+      <p class="eyebrow">haql-units · Free library</p>
+      <h1>The wrong unit is a <em>hidden</em> error.</h1>
+      <p class="lede">A column labelled "volume" is not a unit. Every production export mixes Sm³, BBL, MCF and rates with different time bases — and a factor of 1,000 quietly lands in a filing. haql-units converts with explicit definitions, declared time bases and round-trip checking, so a mismatch becomes an error you catch instead of a surprise you inherit. Free, MIT-licensed, no cloud, no account.</p>
+      <div class="cta">
+        <a class="btn btn--p" href="mailto:no1mlengineer234@gmail.com?subject=Free%20sample%20check%20request">Ask a question</a>
+        <a class="btn btn--s" href="#in">See how it works</a>
+      </div>
+      <p class="reassure"><b>Try it now:</b> <code class="mono">pip install haql-units</code> — seconds to first conversion.</p>
+    </div>
+
+    <div class="hero__panel">
+      <div class="panel__bar"><span class="dot"></span>units with a paper trail</div>
+      <pre class="panel__body"><span class="c"># install</span>
+pip install haql-units
+
+<span class="c"># convert a volume with an explicit definition and time base</span>
+from haql_units import Unit, convert  <span class="c"># import shape shown as an example</span>
+
+convert(1000, "Sm3", "BBL", time_base="day")
+<span class="k">6290</span> <span class="b">BBL/day</span>
+
+<span class="c"># round-trip check before you trust it downstream</span>
+convert(convert(1000, "Sm3", "BBL"), "BBL", "Sm3")
+<span class="k">1000.0</span> <span class="g">✓ round-trips</span></pre>
+      <p class="panel__cap">The conversions that power the haql suite are the same conversions you get in the library — one definition to trust, everywhere.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHY ============ -->
+<section class="sec sec--alt" id="why">
+  <div class="wrap">
+    <p class="eyebrow">Why you need it</p>
+    <h2>The factor-of-ten seats in a column nobody questions.</h2>
+    <div class="pains">
+      <article class="pain">
+        <h3>The silent factor</h3>
+        <p>One export in Sm³, one in BBL. The aggregation code multiplies by the wrong constant, the mismatch is under the summary's resolution, and it ships.</p>
+      </article>
+      <article class="pain">
+        <h3>The ambiguous rate</h3>
+        <p>A "daily" well rate is not the same as a rate on a 28-day assumed month. The denominator is a choice — and should be a declaration.</p>
+      </article>
+      <article class="pain">
+        <h3>The unreviewable spreadsheet</h3>
+        <p>Conversion formulas sit inside cells, inherited from the person who left in 2019, and nobody can say what base they assume.</p>
+      </article>
+      <article class="pain">
+        <h3>The QC gap</h3>
+        <p>QC only works if the units feeding the check are the units you think they are. haql-units is that guarantee, shared across the suite.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW ============ -->
+<section class="sec" id="in">
+  <div class="wrap wrap--narrow">
+    <p class="eyebrow">How it works</p>
+    <h2>Convert with a definition, not a magic number.</h2>
+    <p class="lede lede--c">Every conversion carries its own definition and time base. If the library cannot state the conversion, it errors instead of inventing a constant — the failure mode you want, up front.</p>
+    <div class="flow">
+      <div class="step"><b>1</b><h4>Declare</h4><p>State the unit and the time base it implies. The column name is never trusted.</p></div>
+      <div class="step"><b>2</b><h4>Convert</h4><p>The conversion is defined from first principles — not a constant pasted from a search result.</p></div>
+      <div class="step"><b>3</b><h4>Round-trip</h4><p>Going back to the origin lets you prove the factor before it feeds a filing.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="sec sec--alt" id="contact">
+  <div class="wrap wrap--narrow">
+    <p class="eyebrow">Free, MIT</p>
+    <h2>Use it on the next export you convert by hand.</h2>
+    <p class="lede">No license manager, no seat count, no telemetry. It is the foundation of the suite and it is free on purpose — because the suite is only as trustworthy as the units it is handed.</p>
+    <a class="btn btn--p btn--lg" href="https://github.com/haql-lab" rel="noopener">github.com/haql-lab</a>
+    <div class="links">
+      <div><b>Contact</b><a href="mailto:no1mlengineer234@gmail.com?subject=haql-units">no1mlengineer234@gmail.com</a></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ftr">
+  <div class="wrap ftr__in">
+    <p>&copy; <span id="yr">2026</span> haql labs</p>
+    <p class="fine">haql-units · MIT licensed · Last updated: October 8, 2026.</p>
+    <p class="fine">Deterministic tools for oil and gas production data. Findings are advisory; the judgment is yours.</p>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>

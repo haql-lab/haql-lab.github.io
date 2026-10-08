@@ -1,12 +1,15 @@
-# Haql Marketing Website
+# Haql Labs — Marketing Website
 
-Static marketing site for Haql - deterministic Python tools for oil and gas production data.
+Static multi-page site for Haql Labs — deterministic Python tools for oil and gas production data.
 
-## Tools
-- haql-qc: production data QC with verifiable audit trails
-- haql-closeout: month-end closeout QC (well tests vs daily, downtime vs production, gaps, field balance, cumulatives, negatives, duplicates)
-- haql-units: field-to-SI unit conversions (MIT)
-- haql-coords: minimum curvature, DLS, UTM/WGS84 (MIT)
+One page per product:
+
+- `index.html` — suite hub (what each tool is, pricing, how it works, FAQ)
+- `haql-qc.html` — production data QC with verifiable audit trails
+- `haql-closeout.html` — month-end closeout QC (well tests vs daily, downtime vs production, gaps, field balance, cumulatives, negatives, duplicates)
+- `haql-45q.html` — 45Q MRV packager (mass balance, statutory credit rates, certification pack, Subpart RR due clock)
+- `haql-units.html` — field-to-SI unit conversions (MIT)
+- `haql-coords.html` — minimum curvature, DLS, UTM/WGS84 (MIT)
 
 ## Run locally
 ```bash
@@ -15,6 +18,6 @@ python3 -m http.server 8000
 ```
 
 ## Deployment (GitHub Pages)
-1. Push to repo `haql` on `main` branch
+1. Push to repo `haql-lab/haql-lab.github.io` on `main` branch
 2. Settings → Pages → Deploy from branch (main / root)
-3. Live at https://no1mlengineer.github.io/
+3. Live at https://haql-lab.github.io/

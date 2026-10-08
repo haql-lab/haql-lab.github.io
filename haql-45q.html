@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>haql-45q — Package a Defensible 45Q Carbon Credit Claim | Haql Labs</title>
+<meta name="description" content="haql-45q turns a year of capture, injection, monitoring and lab records into a defensible 45Q credit claim: mass balance, statutory rate by construction year, Subpart RR due clock, certification pack. Runs offline.">
+<link rel="canonical" href="https://haql-lab.github.io/haql-45q.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="haql-45q — Price the Carbon You Actually Stored, and Prove It">
+<meta property="og:description" content="Mass balance, statutory 45Q rates, Subpart RR due clock and a certification pack — built to survive review, not just to calculate.">
+<meta property="og:url" content="https://haql-lab.github.io/haql-45q.html">
+<meta name="theme-color" content="#0b0f14" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="logo" href="index.html">haql<span class="logo__dot">.</span></a>
+    <button class="burger" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="haql-qc.html">QC</a>
+      <a href="haql-closeout.html">Closeout</a>
+      <a href="haql-45q.html">45Q</a>
+      <a href="haql-units.html">Units</a>
+      <a href="haql-coords.html">Coords</a>
+      <a class="nav__cta" href="mailto:no1mlengineer234@gmail.com?subject=Free%20sample%20check%20request">Send me your CSV</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="wrap hero__in">
+    <div class="hero__copy">
+      <p class="eyebrow">haql-45q · 45Q MRV packager</p>
+      <h1>A credit claim is a <em>story</em>. haql-45q makes it checkable.</h1>
+      <p class="lede">45Q pays you for CO₂ actually stored. But the credit is only as good as the mass balance behind it — and a vented tonne you forgot is a claim that dies in review. haql-45q reconciles the year, prices the tonnes at the statutory rate for your construction year, watches the Subpart RR clock, and packages everything a reviewer would want to see.</p>
+      <div class="cta">
+        <a class="btn btn--p" href="mailto:no1mlengineer234@gmail.com?subject=Free%20sample%20check%20request">Send me a year — free check</a>
+        <a class="btn btn--s" href="#catch">See what it catches</a>
+      </div>
+      <p class="reassure"><b>Run it yourself:</b> <code class="mono">pip install haql-45q</code> — a directory in, a certification pack out. Fully offline, deterministic, same rules every year.</p>
+    </div>
+
+    <div class="hero__panel">
+      <div class="panel__bar"><span class="dot"></span>one command, one reporting year</div>
+      <pre class="panel__body"><span class="c"># generate sample inputs (demo site + wells + 12 months)</span>
+haql-45q demo
+
+<span class="c"># audit + price the year</span>
+haql-45q demo_45q --no-open -o cert-pack
+
+<span class="c"># result</span>
+<span class="k">rows</span>=30 <span class="k">facilities</span>=1 <span class="k">issues</span>=<span class="w">6</span>
+  credits <span class="g">$8,399,700.00</span> over <span class="g">98,820.00</span> mt
+  fingerprint sha256=<span class="b">5e8c5b6f…</span>
+  cert-pack.json → cert-pack/cert-pack.json
+  cert-pack.html → cert-pack/cert-pack.html
+  credits.csv   → cert-pack/credits.csv
+
+<span class="c"># Subpart RR due (40 CFR §98.167): 2027-03-31</span></pre>
+      <p class="panel__cap">Credits.csv and the JSON parse cleanly; the HTML reads in any browser and prints for the file.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHAT IT IS ============ -->
+<section class="sec" id="what">
+  <div class="wrap">
+    <p class="eyebrow">What it is</p>
+    <h2>Four CSVs and a config in. A credit schedule and evidence trail out.</h2>
+    <p class="lede lede--c">No accounting system integration. No database. Just the records you already keep, checked against the physics of the storage site.</p>
+    <div class="io">
+      <div class="io__b">
+        <h4>Goes in</h4>
+        <p>Capture, injection, monitoring and lab CSVs plus a facility config: storage formation, construction and placed-in-service dates, disposition (storage / utilisation / DAC), and the MRV plan. Missing files are treated as gaps, not guessed around.</p>
+      </div>
+      <div class="io__b">
+        <h4>Comes out</h4>
+        <p>Credits priced year by year at the statutory rate for the construction year, a Subpart RR due-clock, and a certification pack (JSON + HTML) with the full mass balance, storage report, findings and credit schedule — plus a credits.csv you can audit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHY YOU NEED IT ============ -->
+<section class="sec sec--alt" id="why">
+  <div class="wrap">
+    <p class="eyebrow">Why you need it</p>
+    <h2>The credit is the easiest part. Proving it is the hard part.</h2>
+    <p class="lede lede--c">Calculating $85/tonne is a multiplication table. Surviving review — where a reviewer asks exactly what you claim, from exactly which wells, into exactly which formation — is where claims come apart.</p>
+    <div class="pains">
+      <article class="pain">
+        <h3>The vented tonne you forgot</h3>
+        <p>A monitoring quarter records a leak event. Nobody carries it into the balance. The stored number is overstated by exactly the emissions you recorded — and the reviewer finds it in one line.</p>
+      </article>
+      <article class="pain">
+        <h3>The formation mismatch</h3>
+        <p>Injection recorded into a formation that is not the storage formation in your filing. It is either a typo in the export or a fundamental problem with the claim — a reviewer will ask which.</p>
+      </article>
+      <article class="pain">
+        <h3>The incomplete year</h3>
+        <p>One monitoring quarter missing. One lab quarter missing. The claim is not wrong — it is incomplete, which is close enough to a rejection for most purposes.</p>
+      </article>
+      <article class="pain">
+        <h3>The wrong rate</h3>
+        <p>Construction before the Inflation Reduction Act means an inflation-adjusted rate table — not the full $85. Use the wrong table and the whole schedule restates. Nobody wants that letter.</p>
+      </article>
+    </div>
+    <div class="after">
+      <div class="after__c">
+        <h3>Without haql-45q</h3>
+        <p>The year is summed in a spreadsheet. Stored = injected − emitted. The reviewer asks for the formation, the quarters, the rate basis. The supporting evidence is scattered across four exports and a folder of emails.</p>
+        <p class="muted">Every answer is a fresh search. Every search is a chance to be wrong.</p>
+      </div>
+      <div class="after__arrow" aria-hidden="true">&rarr;</div>
+      <div class="after__c">
+        <h3>With haql-45q</h3>
+        <p>Six findings named before you file, the balance reconciled to the tonne, credits at the correct statutory rate, and a single certification pack that answers the questions before they are asked.</p>
+        <p class="muted">The claim arrives looking like it was built to be audited.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHAT IT CATCHES ============ -->
+<section class="sec" id="catch">
+  <div class="wrap">
+    <p class="eyebrow">What it actually catches</p>
+    <h2>Eight ways a claim is weaker than it looks.</h2>
+    <details class="ex" open>
+      <summary>The full check list</summary>
+      <ul>
+        <li><b>Mass-balance gaps</b> — captured CO<sub>2</sub> that did not end up injected or vented, beyond a 5% tolerance (RQ010)</li>
+        <li><b>Emissions eating the storage claim</b> — vented tonnes that make stored tonnes negative (RQ011)</li>
+        <li><b>Formation inconsistencies</b> — injection recorded outside the storage formation in the config (RQ101)</li>
+        <li><b>Depth unreported</b> — injection rows carrying no depth for the storage interval (RQ103)</li>
+        <li><b>Missing quarters</b> — a monitoring or lab gap that makes the year's claim incomplete before you file (RQ201, RQ203)</li>
+        <li><b>Credit-window violations</b> — construction after the Dec&nbsp;31 2032 deadline (RQ231), or reporting outside the 12-year window (RQ232)</li>
+        <li><b>Rate integrity</b> — pre-IRA construction uses the inflation-adjusted table, never a guessed number (RQ301)</li>
+        <li><b>The reporting clock</b> — Subpart RR annual report due date computed per 40 CFR §98.167(b), so the deadline is in the output, not in someone's calendar</li>
+      </ul>
+      <p class="fine">Same design stance as the rest of the suite: read-only, offline, deterministic, traceable to the row.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<section class="sec sec--alt" id="pricing">
+  <div class="wrap">
+    <p class="eyebrow">Pricing</p>
+    <h2>Priced against a restated claim, not a seat count.</h2>
+    <div class="anchor">
+      <p>One restated credit schedule costs more than a year of a license — in engineering hours, amended filings, and a conversation nobody wants to have. haql-45q is the cheap insurance.</p>
+    </div>
+    <div class="tiers">
+      <div class="tier">
+        <h3>Sample check</h3>
+        <p class="tier__p"><b>Free</b></p>
+        <p>One year of records, on the house. No key, no seat limit, no card. You get the full balance and findings back.</p>
+        <a class="btn btn--p btn--sm" href="mailto:no1mlengineer234@gmail.com?subject=Free%20sample%20check%20request">Send me the CSVs</a>
+      </div>
+      <div class="tier tier--mid">
+        <h3>Team</h3>
+        <p class="tier__p"><b>$349</b>/month</p>
+        <p>Annual commitment, up to 10 users, unlimited facilities and fields. Academic research and evaluation use needs no key.</p>
+      </div>
+      <div class="tier">
+        <h3>On-premise</h3>
+        <p class="tier__p"><b>$1,750</b>/month</p>
+        <p>Annual, per site, unlimited users on that site. Under most data-residency policy this is the premise, not a feature.</p>
+      </div>
+    </div>
+    <p class="fine">Evaluation: 30 days, no license key needed.</p>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="sec" id="contact">
+  <div class="wrap wrap--narrow">
+    <p class="eyebrow">Next</p>
+    <h2>Run a year through it today.</h2>
+    <p class="lede">Email the four exports — anonymised if you prefer — and get the full balance, findings and credit schedule back at no cost.</p>
+    <a class="btn btn--p btn--lg" href="mailto:no1mlengineer234@gmail.com?subject=Free%20sample%20check%20request">no1mlengineer234@gmail.com</a>
+    <div class="links">
+      <div><b>Source</b><a href="https://github.com/haql-lab" rel="noopener">github.com/haql-lab</a></div>
+      <div><b>haql-qc</b><a href="https://pypi.org/project/haql-qc/" rel="noopener">pypi.org/project/haql-qc</a></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="ftr">
+  <div class="wrap ftr__in">
+    <p>&copy; <span id="yr">2026</span> haql labs</p>
+    <p class="fine">haql-45q ruleset_version 1.0.0 · Last updated: October 8, 2026.</p>
+    <p class="fine">Deterministic tools for oil and gas production data. Findings are advisory; the judgment is yours.</p>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>

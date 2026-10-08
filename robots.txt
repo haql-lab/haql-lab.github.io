@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://no1mlengineer.github.io/sitemap.xml
+Sitemap: https://haql-lab.github.io/sitemap.xml
