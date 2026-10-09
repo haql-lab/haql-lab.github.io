@@ -68,7 +68,7 @@ haql-qc -i production.csv \
 <span class="c"># result</span>
 <span class="k">rows</span>=15634  <span class="k">wells</span>=7  <span class="k">issues</span>=<span class="w">80</span>
   critical=<span class="g">0</span> high=<span class="r">12</span> medium=<span class="y">34</span> info=<span class="b">34</span></pre>
-      <p class="panel__cap">Every run also records the SHA-256 of the exact input, so anyone can re-verify the audit against the same bytes later.</p>
+      <p class="panel__cap">Every run also records the SHA-256 of the exact input, so anyone can re-verify the audit against the same bytes later — and <code>--attest --sign-key seed.key</code> signs the report (Ed25519 over the file hash and a root over every finding) so the audit can be handed over provably unedited.</p>
     </div>
   </div>
 </section>
@@ -147,6 +147,7 @@ haql-qc -i production.csv \
         <li><b>Shut-in contradictions</b> — zero uptime while still producing at normal rate</li>
         <li><b>Date gaps</b> — a gap beyond the well's own cadence, where that cadence is inferred from that well's own history, not assumed globally</li>
         <li><b>Plausibility breaches</b> — a daily rate above the fixed per-fluid ceiling (oil 200,000 bbl/d, water 500,000 bbl/d, gas 5,000,000 MCF/d default; overridable), not performance judgements</li>
+        <li><b>Signed audit</b> — <code>--attest --sign-key seed.key</code> attaches an Ed25519 attestation over the report hash together with a root hash covering every finding, so a single edited finding breaks verification; <code>--bundle out.zip</code> packs report + attestation into a byte-reproducible zip for transmission</li>
       </ul>
       <p class="fine">Materiality is measured against the well's own median. 0.003 Sm³ is nothing on a well producing 6,000 Sm³/d and an emergency on one producing 5.</p>
     </details>

@@ -144,8 +144,9 @@ haql-closeout -i production.csv \
         <li><b>Field balance</b> — volumes sold or delivered exceeding what the field produced</li>
         <li><b>Cumulative continuity</b> — totals that go backwards inside the period</li>
         <li><b>Duplicate well-days</b> — the same well reported twice for one date</li>
+        <li><b>Signed closeout</b> — every report can carry an Ed25519 attestation (report hash + a root over every finding) and a deterministic inspection bundle, so "that isn't the file we signed" stops being a thing anyone can say</li>
       </ul>
-      <p class="fine">Same design stance as haql-qc: read-only, offline, deterministic, traceable to the row.</p>
+      <p class="fine">Same design stance as haql-qc: read-only, offline, deterministic, traceable to the row — and, with <code>--attest --sign-key seed.key</code>, provably unedited afterwards.</p>
     </details>
   </div>
 </section>

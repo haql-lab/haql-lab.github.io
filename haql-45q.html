@@ -148,8 +148,9 @@ haql-45q demo_45q --no-open -o cert-pack
         <li><b>Credit-window violations</b> — construction after the Dec&nbsp;31 2032 deadline (RQ231), or reporting outside the 12-year window (RQ232)</li>
         <li><b>Rate integrity</b> — pre-IRA construction uses the inflation-adjusted table, never a guessed number (RQ301)</li>
         <li><b>The reporting clock</b> — Subpart RR annual report due date computed per 40 CFR §98.167(b), so the deadline is in the output, not in someone's calendar</li>
+        <li><b>Signed evidence trail</b> — <code>--attest --bundle inspection.zip</code> signs the certification pack (Ed25519 over the pack hash and the findings root) and packages pack + credits + attestation into one byte-reproducible inspection bundle, so the "was this edited?" question dies before review</li>
       </ul>
-      <p class="fine">Same design stance as the rest of the suite: read-only, offline, deterministic, traceable to the row.</p>
+      <p class="fine">Same design stance as the rest of the suite: read-only, offline, deterministic, traceable to the row — and provably unedited, with the same key-hash verification a regulator-friendly audit expects.</p>
     </details>
   </div>
 </section>

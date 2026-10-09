@@ -65,7 +65,7 @@ distance((0, 0), (3, 4))
 <span class="c"># round-tripping an offset proves the result before it feeds QC</span>
 offset((5.0, 0), bearing=90, length=5)
 <span class="k">(0.0, 5.0)</span> <span class="g">✓ reversible</span></pre>
-      <p class="panel__cap">Same geometry library used to sanity-check well records inside the production suite.</p>
+      <p class="panel__cap">Same geometry library used to sanity-check well records inside the production suite — and to audit the whole survey and certify the as-drilled path deterministically.</p>
     </div>
   </div>
 </section>
@@ -101,11 +101,11 @@ offset((5.0, 0), bearing=90, length=5)
   <div class="wrap wrap--narrow">
     <p class="eyebrow">How it works</p>
     <h2>Small functions, checked both ways.</h2>
-    <p class="lede lede--c">Deliberately small API: distances, offsets, and geometry helpers that return numbers you can reproduce by hand. No dependencies pulling a whole analysis stack behind them.</p>
+    <p class="lede lede--c">Deliberately small API: minimum-curvature well paths, UTM conversion, dog-leg severity, and a survey certificate that recomputes the as-drilled path. No dependencies pulling a whole analysis stack behind them.</p>
     <div class="flow">
-      <div class="step"><b>1</b><h4>Compute</h4><p>Another coordinate, another distance — with a clear return and defined units.</p></div>
-      <div class="step"><b>2</b><h4>Round-trip</h4><p>Invert the result to prove the operation, rather than trusting the first answer.</p></div>
-      <div class="step"><b>3</b><h4>Reuse</h4><p>Drop the same functions into QC rules and site reviews so geometry behaves identically everywhere.</p></div>
+      <div class="step"><b>1</b><h4>Compute</h4><p>Minimum-curvature points from survey stations — TVD, NS/EW displacement, DLS per segment.</p></div>
+      <div class="step"><b>2</b><h4>Audit</h4><p><code>check_survey()</code> flags depth-order, inclination/azimuth range, and dog-legs above the 2.0°/100&nbsp;ft limit — each with a stable rule id.</p></div>
+      <div class="step"><b>3</b><h4>Certify</h4><p><code>survey_certificate()</code> emits a deterministic as-drilled certificate — final TVD, horizontal closure, max DLS, and a sha256 over the canonical station list. Same stations in, byte-identical certificate out.</p></div>
     </div>
   </div>
 </section>

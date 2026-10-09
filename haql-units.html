@@ -65,7 +65,7 @@ convert(1000, "Sm3", "BBL", time_base="day")
 <span class="c"># round-trip check before you trust it downstream</span>
 convert(convert(1000, "Sm3", "BBL"), "BBL", "Sm3")
 <span class="k">1000.0</span> <span class="g">✓ round-trips</span></pre>
-      <p class="panel__cap">The conversions that power the haql suite are the same conversions you get in the library — one definition to trust, everywhere.</p>
+      <p class="panel__cap">The conversions that power the haql suite are the same conversions you get in the library — one definition to trust, everywhere. Every factor also carries its source (NIST SP 811, BIPM SI Brochure, SPE), so the conversion is an argument, not a claim.</p>
     </div>
   </div>
 </section>
@@ -101,11 +101,12 @@ convert(convert(1000, "Sm3", "BBL"), "BBL", "Sm3")
   <div class="wrap wrap--narrow">
     <p class="eyebrow">How it works</p>
     <h2>Convert with a definition, not a magic number.</h2>
-    <p class="lede lede--c">Every conversion carries its own definition and time base. If the library cannot state the conversion, it errors instead of inventing a constant — the failure mode you want, up front.</p>
+    <p class="lede lede--c">Every conversion carries its own definition, time base and citation. If the library cannot state the conversion, it errors instead of inventing a constant — the failure mode you want, up front.</p>
     <div class="flow">
       <div class="step"><b>1</b><h4>Declare</h4><p>State the unit and the time base it implies. The column name is never trusted.</p></div>
       <div class="step"><b>2</b><h4>Convert</h4><p>The conversion is defined from first principles — not a constant pasted from a search result.</p></div>
-      <div class="step"><b>3</b><h4>Round-trip</h4><p>Going back to the origin lets you prove the factor before it feeds a filing.</p></div>
+      <div class="step"><b>3</b><h4>Prove</h4><p><code>convert_explained()</code> returns the factor plus the standard and citation (NIST, BIPM, SPE) that define it.</p></div>
+      <div class="step"><b>4</b><h4>Guard</h4><p><code>Quantity</code> refuses to add bbl to ft — dimension mismatches raise <code>TypeError</code> before they reach a filing.</p></div>
     </div>
   </div>
 </section>
