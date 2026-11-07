@@ -17,6 +17,10 @@ One page per product:
 - `haql-coords.html` — minimum curvature, DLS, UTM/WGS84 (MIT)
 - `credits.html` — image credits and licenses for the field photography
 - `haql-rs.html` — retired old URL; noindex redirect to `haql-engine.html`
+- `docs/engine/index.html` — engine documentation: architecture, quick start,
+  solver path, uncertainty workflow, forecast, evidence and limits
+- `docs/engine/parallel-ensembles.html` — feature page for
+  `run_uncertainty.py --workers N`
 
 ## Photography
 The homepage uses self-hosted field photography under public-domain, CC0 and

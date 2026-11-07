@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Parallel ensemble execution — haql-engine documentation</title>
+<meta name="description" content="How run_uncertainty.py --workers runs independent geological realizations in parallel while keeping deterministic ordering, provenance and failed-run reporting.">
+<link rel="canonical" href="https://haql-lab.github.io/docs/engine/parallel-ensembles.html">
+<meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="brand" href="/index.html" aria-label="Haql Labs — home">
+      <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#0B1B33"/><path fill="#F6F4EE" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#F6F4EE" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#4F9BFF" stroke-width="2.1" stroke-linecap="round"/></svg></span>
+      <span class="brand__word">haql<span class="brand__lab">Labs</span></span>
+    </a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="/haql-engine.html">haql-engine</a>
+      <a href="/docs/engine/index.html" aria-current="page">Docs</a>
+      <a href="/index.html#pricing">Pricing</a>
+      <a href="/downloads.html">Downloads</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=Parallel%20ensemble%20question">Ask a question</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="doc-hero">
+    <div class="wrap">
+      <p class="eyebrow">haql-engine · feature documentation</p>
+      <h1>Run the ensemble <em>in parallel</em> without losing the audit trail.</h1>
+      <p class="lede"><code>run_uncertainty.py --workers N</code> runs independent realizations as separate subprocesses. The solver stays single-threaded; the concurrency is at the realization level, where it is safe and useful.</p>
+      <div class="doc-badges">
+        <span class="doc-badge doc-badge--ok">new</span>
+        <span class="doc-badge">subprocess pool</span>
+        <span class="doc-badge">deterministic result order</span>
+        <span class="doc-badge">failures retained</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap doc-layout">
+    <aside class="doc-side" aria-label="Page contents">
+      <span class="doc-side__label">On this page</span>
+      <a href="#why" aria-current="page">Why it exists</a>
+      <a href="#usage">Usage</a>
+      <a href="#how">How it works</a>
+      <a href="#determinism">Determinism</a>
+      <a href="#failures">Failures and resume</a>
+      <a href="#resources">Resource guidance</a>
+      <a href="#test">Test evidence</a>
+      <a href="#limits">Limits</a>
+      <hr>
+      <a href="/docs/engine/index.html">← Documentation home</a>
+    </aside>
+
+    <article class="doc-main">
+      <p class="doc-meta">Feature: parallel ensemble execution · Engine surface: <code>run_uncertainty.py</code> · Status: shipped</p>
+
+      <section id="why">
+        <h2>Why it exists</h2>
+        <p>A geological uncertainty study is not one simulation. It is tens or hundreds of simulations, each with a different permeability field, structure, contact or scalar sample. Running them one after another wastes the machine.</p>
+        <p>The engine's solver is intentionally single-threaded and Python/NumPy. Rather than pretending it is an MPI code, ensemble execution uses process-level concurrency: each realization is a normal <code>run_spe1.py</code> process with its own run ID, manifest and JSON output.</p>
+      </section>
+
+      <section id="usage">
+        <h2>Usage</h2>
+        <pre><code>python3 run_uncertainty.py \
+  --input uncertainty_input.example.json \
+  --out /tmp/haql-ensemble \
+  --T 365 \
+  --workers 4</code></pre>
+        <p>Everything else is unchanged. <code>--workers</code> defaults to <code>1</code>, so existing scripts and regression tests keep the sequential behavior. Values below <code>1</code> are rejected.</p>
+        <table class="doc-table">
+          <thead><tr><th>Option</th><th>Behavior</th></tr></thead>
+          <tbody>
+            <tr><td><code>--workers 1</code></td><td>Sequential execution, identical to the previous driver behavior.</td></tr>
+            <tr><td><code>--workers N</code></td><td>At most <code>N</code> realizations run at once, capped by the number of pending realizations.</td></tr>
+            <tr><td><code>--dry-run</code></td><td>No solver processes; workers have no effect.</td></tr>
+            <tr><td><code>--resume</code></td><td>Matching completed runs are reused before the pool starts; only pending realizations are submitted.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="how">
+        <h2>How it works</h2>
+        <ol class="doc-steps">
+          <li><strong>Generate all realizations first.</strong> Each one is written to <code>realizations/</code> and hashed before execution.</li>
+          <li><strong>Classify work.</strong> Dry-run entries are recorded only. Matching <code>--resume</code> entries are reused only if experiment, realization hash, time settings and tolerance settings match.</li>
+          <li><strong>Submit pending jobs.</strong> A bounded <code>ThreadPoolExecutor</code> launches <code>run_spe1.py</code> subprocesses. Threads only coordinate process I/O; the solver itself does not share memory between realizations.</li>
+          <li><strong>Record as each finishes.</strong> The main thread updates <code>experiment.json</code> atomically after every completion, preserving an interrupted-run record.</li>
+          <li><strong>Sort the final results.</strong> Regardless of completion order, <code>experiment.json</code> and the forecast input use realization index order.</li>
+        </ol>
+        <div class="doc-callout doc-callout--ok">
+          <p><strong>Safe boundary:</strong> realizations are independent. There is no shared mutable solver state, no cross-realization Newton coupling and no race on a run directory because each process writes its own files.</p>
+        </div>
+      </section>
+
+      <section id="determinism">
+        <h2>Determinism</h2>
+        <p>Parallel completion order is nondeterministic. Result order is not. The driver sorts by <code>realization_index</code> before writing the final experiment and forecast input.</p>
+        <ul>
+          <li>Every realization keeps its own deterministic seed sequence.</li>
+          <li>Every run keeps its own provenance manifest and run ID.</li>
+          <li>The forecast input lists runs in realization order, not completion order.</li>
+          <li>The regression test checks that two workers still produce <code>real-0000</code> before <code>real-0001</code> in the experiment record.</li>
+        </ul>
+        <p>This does not make the wall-clock output byte-identical across worker counts. It makes the experiment's logical ordering and provenance stable.</p>
+      </section>
+
+      <section id="failures">
+        <h2>Failures and resume</h2>
+        <p>A failed subprocess is not removed. If <code>run_spe1.py</code> produces no JSON, the driver writes a parseable failure artifact at the expected run path, records the exit code and error, and continues with the remaining realizations.</p>
+        <p>When the pool finishes, the experiment status is <code>completed</code> only if every realization completed and passed its material-balance gate. Otherwise it is <code>partial</code>, and the command exits <code>3</code>. A later <code>--resume</code> run can reuse the good artifacts and retry the failed or missing ones.</p>
+        <div class="doc-callout doc-callout--warn">
+          <p><strong>Do not judge an ensemble by its average alone.</strong> A failed or water-filled realization can be the one that matters. The experiment record keeps it visible for exactly that reason.</p>
+        </div>
+      </section>
+
+      <section id="resources">
+        <h2>Resource guidance</h2>
+        <table class="doc-table">
+          <thead><tr><th>Resource</th><th>Recommendation</th></tr></thead>
+          <tbody>
+            <tr><td>CPU</td><td>Start with <code>--workers 2</code> on a 2-core laptop; use <code>N</code> ≤ physical cores for a shared machine.</td></tr>
+            <tr><td>Memory</td><td>Each worker is a separate Python process. Budget the solver's per-run memory times the worker count.</td></tr>
+            <tr><td>Disk</td><td>Every realization writes a run JSON, log and provenance manifest. Clean old experiment output deliberately; do not delete evidence mid-run.</td></tr>
+            <tr><td>Provenance store</td><td>Workers write distinct run directories. Use a dedicated <code>--store</code> for large ensembles so experiments do not mix.</td></tr>
+            <tr><td>Solver speed</td><td>Parallelism does not make one run faster. It only overlaps independent runs.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="test">
+        <h2>Test evidence</h2>
+        <p>The regression suite includes a two-realization, two-worker run against the SPE1 deck. It asserts:</p>
+        <pre><code>python3 -m unittest -v \
+  test_geology.TestCLI.test_parallel_workers_run_ensemble</code></pre>
+        <ul>
+          <li>exit code <code>0</code> when both realizations complete;</li>
+          <li><code>n_completed == 2</code> and <code>n_failed == 0</code>;</li>
+          <li>experiment records are ordered <code>0, 1</code>;</li>
+          <li>both runs are completed;</li>
+          <li>the forecast input exists.</li>
+        </ul>
+        <p>Run the full suite before trusting a larger ensemble:</p>
+        <pre><code>python3 test_geology.py
+python3 test_forecast.py
+python3 test_provenance.py
+python3 selftest.py</code></pre>
+      </section>
+
+      <section id="limits">
+        <h2>What this feature is not</h2>
+        <ul>
+          <li><strong>Not solver parallelism.</strong> Each solve is still single-threaded; no MPI, no GPU, no domain decomposition.</li>
+          <li><strong>Not distributed computing.</strong> Workers run on one host. A cluster/Slurm backend is a separate feature.</li>
+          <li><strong>Not a speed guarantee.</strong> Oversubscribing cores or memory will make the ensemble slower.</li>
+          <li><strong>Not a replacement for a scheduler.</strong> Large production runs still belong in a job scheduler with checkpoint/restart and resource limits.</li>
+        </ul>
+        <div class="doc-callout">
+          <p><strong>Next infrastructure step:</strong> a scheduler adapter (Slurm/Kubernetes) and per-realization resource accounting. That is not part of this commit.</p>
+        </div>
+      </section>
+
+      <div class="doc-pager">
+        <a href="/docs/engine/index.html">← Documentation home</a>
+        <a href="/haql-engine.html">haql-engine product page →</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__bottom">
+      <p>© <span id="yr">2026</span> Haql Labs · Feature documentation for <code>run_uncertainty.py</code>.</p>
+      <p><a href="/index.html">Home</a> · <a href="/haql-engine.html">haql-engine</a> · <a href="/docs/engine/index.html">Docs</a></p>
+    </div>
+  </div>
+</footer>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

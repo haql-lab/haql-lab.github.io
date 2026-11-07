@@ -46,6 +46,16 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://haql-lab.github.io/docs/engine/index.html</loc>
+    <lastmod>2026-11-07</lastmod>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://haql-lab.github.io/docs/engine/parallel-ensembles.html</loc>
+    <lastmod>2026-11-07</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://haql-lab.github.io/haql-units.html</loc>
     <lastmod>2026-10-17</lastmod>
     <priority>0.6</priority>
