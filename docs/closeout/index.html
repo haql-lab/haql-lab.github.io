@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>haql-closeout guide — what it does and what it checks | Haql Labs</title>
+<meta name="description" content="Public guide to haql-closeout: month-end production reconciliation, inputs, outputs, checks and limits.">
+<link rel="canonical" href="https://haql-lab.github.io/docs/closeout/index.html">
+<meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="brand" href="/index.html" aria-label="Haql Labs — home">
+      <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#0B1B33"/><path fill="#F6F4EE" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#F6F4EE" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#4F9BFF" stroke-width="2.1" stroke-linecap="round"/></svg></span>
+      <span class="brand__word">haql<span class="brand__lab">Labs</span></span>
+    </a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="/haql-engine.html">haql-engine</a>
+      <a href="/docs/index.html" aria-current="page">Docs</a>
+      <a href="/index.html#pricing">Pricing</a>
+      <a href="/downloads.html">Downloads</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=haql-closeout%20guide%20question">Ask a question</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="doc-hero">
+    <div class="wrap">
+      <p class="eyebrow">haql-closeout · public guide</p>
+      <h1>Does the month <em>actually tie together?</em></h1>
+      <p class="lede">A per-row QC pass can clear every record and still leave a month that cannot be closed. haql-closeout checks whether the period reconciles — well tests, downtime, field balances, cumulatives and duplicate well-days — before you commit the number.</p>
+      <div class="doc-badges"><span class="doc-badge doc-badge--ok">month-end reconciliation</span><span class="doc-badge">offline and deterministic</span><span class="doc-badge">clean or blocked</span></div>
+    </div>
+  </section>
+
+  <div class="wrap doc-layout">
+    <aside class="doc-side" aria-label="Guide contents">
+      <span class="doc-side__label">On this page</span>
+      <a href="#what" aria-current="page">What it does</a>
+      <a href="#why">Why it matters</a>
+      <a href="#inputs">What goes in</a>
+      <a href="#outputs">What comes out</a>
+      <a href="#checks">What it checks</a>
+      <a href="#limits">What it does not do</a>
+      <a href="#try">How to try it</a>
+      <a href="#questions">Questions</a>
+      <hr>
+      <a href="/docs/index.html">All product guides</a>
+      <a href="/haql-closeout.html">Product page</a>
+    </aside>
+
+    <article class="doc-main">
+      <p class="doc-meta">Product: haql-closeout · Public guide · Updated 8 November 2026</p>
+
+      <section id="what">
+        <h2>What haql-closeout does</h2>
+        <p>haql-closeout is the period-level check that follows row-level QC. It asks whether the month ties together, then names the wells and days that stand in the way of a clean close.</p>
+        <div class="doc-callout">
+          <p><strong>In one sentence:</strong> It turns “everything looked fine” into a clean-or-blocked decision with evidence.</p>
+        </div>
+        <div class="doc-audience"><div class="doc-audience__item"><span>Production and operations</span><h3>Protect the close</h3><p>Find the contradictory well or field balance before the number is committed.</p></div><div class="doc-audience__item"><span>Partners and JV teams</span><h3>Answer queries</h3><p>Show that the period was reconciled, not merely summed.</p></div><div class="doc-audience__item"><span>Reporting teams</span><h3>Carry a trail</h3><p>Give every blocker a rule ID, a well, a day and a source row.</p></div></div>
+      </section>
+
+      <section id="why">
+        <h2>Why it matters</h2>
+        <p>A period close is a commitment to partners, royalty owners or a filing. When a well test disagrees with the daily average or a field sells more than it produced, the contradiction usually surfaces on the last working day — after the number has already been sent.</p>
+        <ul><li>A row-level pass can clear every record while the period still contradicts itself.</li><li>A well can be marked shut-in in one column and produce normally in another.</li><li>A field can deliver more than it produced; the summary may not expose it.</li><li>The person who locks the close is often not the person who has to defend it later.</li></ul>
+        <div class="doc-compare">
+          <div class="doc-compare__item"><span>Without haql-closeout</span><strong>The hidden problem</strong><p>The period is locked because the summary looks plausible. A well test that disagrees with the daily average ships in the reporting package anyway.</p></div>
+          <div class="doc-compare__item doc-compare__item--accent"><span>With haql-closeout</span><strong>The visible answer</strong><p>The blockers are named before the lock: the well, the day, the rule and the source row. The close becomes a decision backed by a report.</p></div>
+        </div>
+      </section>
+
+      <section id="inputs">
+        <h2>What goes in</h2>
+        <p>Closeout uses the records you already keep. Missing optional inputs are treated as gaps, not guessed.</p>
+        <table class="doc-table"><thead><tr><th>What goes in</th><th>What it means</th></tr></thead><tbody><tr><td>Production CSV</td><td>Daily or monthly volumes for the period being closed.</td></tr><tr><td>Well test rates</td><td>Test results that should reconcile with reported daily volumes.</td></tr><tr><td>Downtime reason codes</td><td>The operational record that should agree with shut-in and producing days.</td></tr><tr><td>Field sales or disposition volumes</td><td>Where available, used to test whether the field sold more than it made.</td></tr></tbody></table>
+      </section>
+
+      <section id="outputs">
+        <h2>What comes out</h2>
+        <p>The report is built to support a close decision, not just to list exceptions.</p>
+        <table class="doc-table"><thead><tr><th>What comes out</th><th>How to use it</th></tr></thead><tbody><tr><td>Closeout report</td><td>Blockers by well, day, rule ID and source row.</td></tr><tr><td>Clean or blocked signal</td><td>A clear period-level verdict for the person locking the month.</td></tr><tr><td>Signed evidence</td><td>Optional digital signature (Ed25519) attestation and a deterministic inspection bundle.</td></tr><tr><td>Reconciliation trail</td><td>A record that the period was checked, not assumed.</td></tr></tbody></table>
+      </section>
+
+      <section id="checks">
+        <h2>What it checks</h2>
+        <p>The checks are period-level questions that a single-row review cannot answer.</p>
+        <table class="doc-table"><thead><tr><th>Check area</th><th>What it flags</th></tr></thead><tbody><tr><td>Well test vs daily average</td><td>A test rate that does not reconcile with reported daily volumes.</td></tr><tr><td>Downtime vs production</td><td>A well recorded shut-in while volumes say it was running.</td></tr><tr><td>Date continuity</td><td>A reporting gap measured against that well's own cadence.</td></tr><tr><td>Field balance</td><td>Volumes sold or delivered exceeding what the field produced.</td></tr><tr><td>Cumulative continuity</td><td>Totals that go backwards inside the period.</td></tr><tr><td>Duplicate well-days</td><td>The same well reported twice for one date.</td></tr><tr><td>Signed closeout</td><td>An optional attestation over the report and findings root.</td></tr></tbody></table>
+        <p>Closeout is best run after haql-qc: QC clears the records, then closeout confirms that the period ties together.</p>
+      </section>
+
+      <section id="limits">
+        <h2>What it does not do</h2>
+        <p>A useful tool should be clear about its boundaries. These are the current limits, not hidden caveats.</p>
+        <ul><li>It is a reconciliation check, not a full accounting close or an ERP posting.</li><li>It depends on the well-test, downtime and sales data you provide.</li><li>It does not generate regulator forms or make filing decisions.</li><li>It reports blockers; it does not decide whether a commercial disagreement is material.</li></ul>
+        <div class="doc-callout doc-callout--warn">
+          <p><strong>Findings are advisory.</strong> The tool names a contradiction or a risk with the evidence behind it. The engineering, legal or commercial judgement remains with you.</p>
+        </div>
+      </section>
+
+      <section id="try">
+        <h2>How to try it</h2>
+        <p>Send one month of data for a free check, or run the standalone binary on your own machine.</p>
+        <ol class="doc-steps"><li>Send a month of production data and, where available, well tests and downtime records.</li><li>Receive a closeout report naming the blockers, with source rows.</li><li>Decide whether to fix the records, investigate the operation or accept the finding.</li></ol>
+        <h3>Access</h3><table class="doc-table"><thead><tr><th>Access</th><th>What you get</th></tr></thead><tbody><tr><td>Sample check</td><td>Free. One month of data, no key and no card.</td></tr><tr><td>Team</td><td>$349/month. Annual commitment, up to 10 users and unlimited fields.</td></tr><tr><td>On-premise</td><td>$1,750/month. Annual, per site, unlimited users on that site.</td></tr></tbody></table>
+        <div class="doc-callout"><p><strong>Nothing leaves your machine.</strong> The paid tools run offline. The free libraries have no account, cloud call or telemetry.</p></div>
+      </section>
+
+      <section id="questions">
+        <h2>Common questions</h2>
+        <div class="doc-faq"><details><summary>Is this the same as haql-qc?</summary><p>No. QC asks whether a row is defensible; closeout asks whether the month ties together. They are designed to be used together.</p></details><details><summary>Does it need an accounting system connection?</summary><p>No. It works from exports and files, not a database or ERP integration.</p></details><details><summary>What does “blocked” mean?</summary><p>A blocker is a contradiction that needs a decision before the period can be signed off. It is not automatically an error; it is something a person must resolve.</p></details><details><summary>What is a well test?</summary><p>A measured flow rate taken while a well is tested. It should agree with the daily average reported for the same period.</p></details></div>
+      </section>
+
+      <div class="doc-pager">
+        <a href="/docs/index.html">← All product guides</a>
+        <a href="/haql-closeout.html">Product page →</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__bottom">
+      <p>© <span id="yr">2026</span> Haql Labs · Public guide to haql-closeout.</p>
+      <p><a href="/index.html">Home</a> · <a href="/docs/index.html">Docs</a> · <a href="mailto:kunleaz100@gmail.com">Contact</a></p>
+    </div>
+  </div>
+</footer>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

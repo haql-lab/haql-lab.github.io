@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>haql-rrc guide — what it does and what it checks | Haql Labs</title>
+<meta name="description" content="Public guide to haql-rrc: Texas RRC Form PR filing audit, inputs, outputs, checks and limits.">
+<link rel="canonical" href="https://haql-lab.github.io/docs/rrc/index.html">
+<meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="brand" href="/index.html" aria-label="Haql Labs — home">
+      <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#0B1B33"/><path fill="#F6F4EE" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#F6F4EE" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#4F9BFF" stroke-width="2.1" stroke-linecap="round"/></svg></span>
+      <span class="brand__word">haql<span class="brand__lab">Labs</span></span>
+    </a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="/haql-engine.html">haql-engine</a>
+      <a href="/docs/index.html" aria-current="page">Docs</a>
+      <a href="/index.html#pricing">Pricing</a>
+      <a href="/downloads.html">Downloads</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=haql-rrc%20guide%20question">Ask a question</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="doc-hero">
+    <div class="wrap">
+      <p class="eyebrow">haql-rrc · public guide</p>
+      <h1>Catch a Texas Form PR rejection <em>before the district does.</em></h1>
+      <p class="lede">Texas Railroad Commission Form PR is the state's monthly production filing, built on operator numbers and disposition codes. One missing P-5 number or an unknown code means a rejected filing and a late resubmission. haql-rrc runs the printed rules over your export and names the offending row.</p>
+      <div class="doc-badges"><span class="doc-badge doc-badge--ok">Texas RRC Form PR</span><span class="doc-badge">offline and deterministic</span><span class="doc-badge">row-level filing audit</span></div>
+    </div>
+  </section>
+
+  <div class="wrap doc-layout">
+    <aside class="doc-side" aria-label="Guide contents">
+      <span class="doc-side__label">On this page</span>
+      <a href="#what" aria-current="page">What it does</a>
+      <a href="#why">Why it matters</a>
+      <a href="#inputs">What goes in</a>
+      <a href="#outputs">What comes out</a>
+      <a href="#checks">What it checks</a>
+      <a href="#limits">What it does not do</a>
+      <a href="#try">How to try it</a>
+      <a href="#questions">Questions</a>
+      <hr>
+      <a href="/docs/index.html">All product guides</a>
+      <a href="/haql-rrc.html">Product page</a>
+    </aside>
+
+    <article class="doc-main">
+      <p class="doc-meta">Product: haql-rrc · Public guide · Updated 8 November 2026</p>
+
+      <section id="what">
+        <h2>What haql-rrc does</h2>
+        <p>haql-rrc checks a monthly production or Form PR export against the operator-number, district and disposition-code rules printed for the form. A P-5 number is the operator registration number the form uses to attribute the volume. It names each violation by source row and can show the filing deadline and a fine range based on your own penalty rate.</p>
+        <div class="doc-callout">
+          <p><strong>In one sentence:</strong> It turns the district's rejection reasons into a pre-filing checklist.</p>
+        </div>
+        <div class="doc-audience"><div class="doc-audience__item"><span>Regulatory and production teams</span><h3>File cleanly</h3><p>Catch missing operator numbers and unknown codes before submission.</p></div><div class="doc-audience__item"><span>Operations</span><h3>Protect the clock</h3><p>See the deadline and the rows that could trigger a resubmission.</p></div><div class="doc-audience__item"><span>Reviewers</span><h3>Keep a trail</h3><p>Every violation points to a row and a printed rule identifier.</p></div></div>
+      </section>
+
+      <section id="why">
+        <h2>Why it matters</h2>
+        <p>An RRC reject is not a bug report. It is a late filing, an amended filing and a clock that starts before the correction is ready. The PR form is validated against a printed table; every rule is knowable before submission.</p>
+        <ul><li>A missing P-5 operator number makes the volume unattributable.</li><li>A code that looks plausible but is not on the printed form is still rejected.</li><li>A volume with no disposition code cannot be balanced.</li><li>A district outside the valid range prevents the row from being routed.</li></ul>
+        <div class="doc-compare">
+          <div class="doc-compare__item"><span>Without haql-rrc</span><strong>The hidden problem</strong><p>The export is filed as produced. Days later the district rejects it on an operator number or a disposition code. The fix is cheap on Monday and expensive after filing.</p></div>
+          <div class="doc-compare__item doc-compare__item--accent"><span>With haql-rrc</span><strong>The visible answer</strong><p>Every tripped rule is named to the row before submission, with the deadline and a fine range calculated from your own rate.</p></div>
+        </div>
+      </section>
+
+      <section id="inputs">
+        <h2>What goes in</h2>
+        <p>The tool accepts the monthly export your system already produces and maps column names to the roles it needs.</p>
+        <table class="doc-table"><thead><tr><th>What goes in</th><th>What it means</th></tr></thead><tbody><tr><td>Monthly production export</td><td>Operator number, RRC district, disposition code and oil, gas and water volumes.</td></tr><tr><td>Column mapping</td><td>The tool maps common header synonyms; --map ROLE=COLUMN overrides a guess.</td></tr><tr><td>Fine rate (optional)</td><td>Your own penalty schedule, used only when you ask for a dollar range.</td></tr><tr><td>Deadline input (optional)</td><td>The filing period, used to calculate the due date.</td></tr></tbody></table>
+      </section>
+
+      <section id="outputs">
+        <h2>What comes out</h2>
+        <p>The output is a pre-filing review, not an eFiling submission.</p>
+        <table class="doc-table"><thead><tr><th>What comes out</th><th>How to use it</th></tr></thead><tbody><tr><td>Filing audit</td><td>JSON and HTML with each rule violation traced to its source row.</td></tr><tr><td>Deadline clock</td><td>The filing due date, shown in the output rather than left in a calendar.</td></tr><tr><td>Fine exposure</td><td>A dollar range calculated only when you supply your own fine rate.</td></tr><tr><td>Embedded QC</td><td>Structural and numeric checks run first, so unparseable rows are caught early.</td></tr></tbody></table>
+      </section>
+
+      <section id="checks">
+        <h2>What it checks</h2>
+        <p>The rules follow the printed Form PR tables and the filing structure.</p>
+        <table class="doc-table"><thead><tr><th>Check area</th><th>What it flags</th></tr></thead><tbody><tr><td>Operator number</td><td>A row with no P-5 number, or a file carrying more than one operator number.</td></tr><tr><td>Oil and gas codes</td><td>A disposition code that is not in the printed Form PR tables.</td></tr><tr><td>Volume without a code</td><td>A disposition volume with no code saying what happened to it.</td></tr><tr><td>Flare remark</td><td>A flared or vented gas code without the required remark.</td></tr><tr><td>District</td><td>A missing district or a district outside 1–9.</td></tr><tr><td>Embedded QC</td><td>The same structural and numeric checks used by haql-qc run first.</td></tr><tr><td>Deadline and fine</td><td>The due date and a user-supplied penalty rate turn findings into a clock and a range.</td></tr></tbody></table>
+        <p>Fine amounts are never asserted from an internal schedule. The tool quantifies only when you provide --fine-rate.</p>
+      </section>
+
+      <section id="limits">
+        <h2>What it does not do</h2>
+        <p>A useful tool should be clear about its boundaries. These are the current limits, not hidden caveats.</p>
+        <ul><li>It does not submit to RRC eFiling and does not replace the official form.</li><li>It is specific to Texas RRC Form PR, not a general regulatory engine.</li><li>It does not provide legal advice or assert a fine amount without your rate.</li><li>It depends on the export containing the fields the form requires.</li></ul>
+        <div class="doc-callout doc-callout--warn">
+          <p><strong>Findings are advisory.</strong> The tool names a contradiction or a risk with the evidence behind it. The engineering, legal or commercial judgement remains with you.</p>
+        </div>
+      </section>
+
+      <section id="try">
+        <h2>How to try it</h2>
+        <p>Run a month through it before the next filing, or send a sample for a free check.</p>
+        <ol class="doc-steps"><li>Send one month of production data for a free rule report.</li><li>Or run the standalone binary on your own export.</li><li>Fix the named rows, then re-run before the filing deadline.</li></ol>
+        <h3>Access</h3><table class="doc-table"><thead><tr><th>Access</th><th>What you get</th></tr></thead><tbody><tr><td>Sample check</td><td>Free. One month of production data, no key and no card.</td></tr><tr><td>Team</td><td>$349/month. Annual commitment, up to 10 users and unlimited leases.</td></tr><tr><td>On-premise</td><td>$1,750/month. Annual, per site, unlimited users on that site.</td></tr></tbody></table>
+        <div class="doc-callout"><p><strong>Nothing leaves your machine.</strong> The paid tools run offline. The free libraries have no account, cloud call or telemetry.</p></div>
+      </section>
+
+      <section id="questions">
+        <h2>Common questions</h2>
+        <div class="doc-faq"><details><summary>Does it file to the RRC?</summary><p>No. It checks the export before you file. Submission remains with your existing process.</p></details><details><summary>Are the fines official?</summary><p>No. A dollar range is produced only from the rate you supply; the tool does not invent a penalty schedule.</p></details><details><summary>Can it check a different state?</summary><p>The current product is built around Texas RRC Form PR. Other jurisdictions would be a separate rule set.</p></details><details><summary>What is Form PR?</summary><p>The Texas Railroad Commission's monthly production report, used to report oil, gas and water volumes by lease or well.</p></details></div>
+      </section>
+
+      <div class="doc-pager">
+        <a href="/docs/index.html">← All product guides</a>
+        <a href="/haql-rrc.html">Product page →</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__bottom">
+      <p>© <span id="yr">2026</span> Haql Labs · Public guide to haql-rrc.</p>
+      <p><a href="/index.html">Home</a> · <a href="/docs/index.html">Docs</a> · <a href="mailto:kunleaz100@gmail.com">Contact</a></p>
+    </div>
+  </div>
+</footer>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

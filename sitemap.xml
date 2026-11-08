@@ -80,4 +80,54 @@
     <lastmod>2026-10-23</lastmod>
     <priority>0.2</priority>
   </url>
+  <url>
+    <loc>https://haql-lab.github.io/docs/index.html</loc>
+    <lastmod>2026-11-08</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://haql-lab.github.io/docs/qc/index.html</loc>
+    <lastmod>2026-11-08</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://haql-lab.github.io/docs/closeout/index.html</loc>
+    <lastmod>2026-11-08</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://haql-lab.github.io/docs/revenue/index.html</loc>
+    <lastmod>2026-11-08</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://haql-lab.github.io/docs/dataroom/index.html</loc>
+    <lastmod>2026-11-08</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://haql-lab.github.io/docs/45q/index.html</loc>
+    <lastmod>2026-11-08</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://haql-lab.github.io/docs/emission/index.html</loc>
+    <lastmod>2026-11-08</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://haql-lab.github.io/docs/rrc/index.html</loc>
+    <lastmod>2026-11-08</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://haql-lab.github.io/docs/units/index.html</loc>
+    <lastmod>2026-11-08</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://haql-lab.github.io/docs/coords/index.html</loc>
+    <lastmod>2026-11-08</lastmod>
+    <priority>0.5</priority>
+  </url>
 </urlset>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>haql-revenue guide — what it does and what it checks | Haql Labs</title>
+<meta name="description" content="Public guide to haql-revenue: purchaser statement reconciliation, inputs, outputs, checks and limits.">
+<link rel="canonical" href="https://haql-lab.github.io/docs/revenue/index.html">
+<meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="brand" href="/index.html" aria-label="Haql Labs — home">
+      <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#0B1B33"/><path fill="#F6F4EE" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#F6F4EE" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#4F9BFF" stroke-width="2.1" stroke-linecap="round"/></svg></span>
+      <span class="brand__word">haql<span class="brand__lab">Labs</span></span>
+    </a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="/haql-engine.html">haql-engine</a>
+      <a href="/docs/index.html" aria-current="page">Docs</a>
+      <a href="/index.html#pricing">Pricing</a>
+      <a href="/downloads.html">Downloads</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=haql-revenue%20guide%20question">Ask a question</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="doc-hero">
+    <div class="wrap">
+      <p class="eyebrow">haql-revenue · public guide</p>
+      <h1>Find the revenue that a statement summary <em>hides.</em></h1>
+      <p class="lede">An independent operator sees the purchaser's statement, not the metering or pricing logic behind it. haql-revenue reconciles production against every statement, ranks each exception by dollar impact, and attaches the evidence.</p>
+      <div class="doc-badges"><span class="doc-badge doc-badge--ok">purchaser statements</span><span class="doc-badge">dollar-ranked exceptions</span><span class="doc-badge">offline review</span></div>
+    </div>
+  </section>
+
+  <div class="wrap doc-layout">
+    <aside class="doc-side" aria-label="Guide contents">
+      <span class="doc-side__label">On this page</span>
+      <a href="#what" aria-current="page">What it does</a>
+      <a href="#why">Why it matters</a>
+      <a href="#inputs">What goes in</a>
+      <a href="#outputs">What comes out</a>
+      <a href="#checks">What it checks</a>
+      <a href="#limits">What it does not do</a>
+      <a href="#try">How to try it</a>
+      <a href="#questions">Questions</a>
+      <hr>
+      <a href="/docs/index.html">All product guides</a>
+      <a href="/haql-revenue.html">Product page</a>
+    </aside>
+
+    <article class="doc-main">
+      <p class="doc-meta">Product: haql-revenue · Public guide · Updated 8 November 2026</p>
+
+      <section id="what">
+        <h2>What haql-revenue does</h2>
+        <p>haql-revenue compares production, lease records, purchaser statements and optional run tickets or contracts. It looks for missing statements, price and volume variances, unscheduled deductions, duplicate lines and value that does not add up.</p>
+        <div class="doc-callout">
+          <p><strong>In one sentence:</strong> It turns “the statement looks about right” into a dollar-ranked exception list.</p>
+        </div>
+        <div class="doc-audience"><div class="doc-audience__item"><span>Revenue and accounting</span><h3>Recover the difference</h3><p>Review every lease and purchaser instead of spot-checking one.</p></div><div class="doc-audience__item"><span>Land and contracts</span><h3>Test the terms</h3><p>See where a price or deduction departs from the contract.</p></div><div class="doc-audience__item"><span>Management</span><h3>Prioritise the work</h3><p>Start with the exceptions that carry the largest dollar impact.</p></div></div>
+      </section>
+
+      <section id="why">
+        <h2>Why it matters</h2>
+        <p>Differences that look like rounding on one lease become real money across hundreds of wells and several purchasers. A revenue accountant does not have time to re-derive every lease, so the check becomes a spot check that never reaches the quiet shortfall.</p>
+        <ul><li>Production can be booked with no statement line at all.</li><li>A stale price or keying error can repeat every month it goes unnoticed.</li><li>Paid volume can fall below the produced and ticketed volume.</li><li>Deductions can exceed the contract, or a line can be paid twice.</li></ul>
+        <div class="doc-compare">
+          <div class="doc-compare__item"><span>Without haql-revenue</span><strong>The hidden problem</strong><p>One purchaser is spot-checked and the rest are paid as received. Differences under a thousand dollars per lease stay invisible against the month's gross.</p></div>
+          <div class="doc-compare__item doc-compare__item--accent"><span>With haql-revenue</span><strong>The visible answer</strong><p>Every lease, product and month is reconciled; exceptions are ordered by dollars and arrive with the statement line and source file behind them.</p></div>
+        </div>
+      </section>
+
+      <section id="inputs">
+        <h2>What goes in</h2>
+        <p>The tool uses the CSVs you already export. Purchaser names are matched through aliases, not guessed silently.</p>
+        <table class="doc-table"><thead><tr><th>What goes in</th><th>What it means</th></tr></thead><tbody><tr><td>Lease master</td><td>Lease identities and the purchaser's spellings as aliases.</td></tr><tr><td>Production by lease, product and month</td><td>The volumes that should be accounted for.</td></tr><tr><td>Purchaser statements</td><td>The statement lines that stand in for invoices.</td></tr><tr><td>Run tickets (optional)</td><td>Ticket volumes for a second volume check.</td></tr><tr><td>Contracts (optional)</td><td>Fixed prices and allowed deductions for variance checks.</td></tr></tbody></table>
+      </section>
+
+      <section id="outputs">
+        <h2>What comes out</h2>
+        <p>The report is designed for a controller or revenue accountant to review and act on.</p>
+        <table class="doc-table"><thead><tr><th>What comes out</th><th>How to use it</th></tr></thead><tbody><tr><td>Reconciliation</td><td>JSON, text, CSV and a self-contained HTML report.</td></tr><tr><td>Dollar-ranked exceptions</td><td>Each finding carries severity, confidence, dollar impact and an evidence trail.</td></tr><tr><td>Evidence trail</td><td>Statement ID, source filename and line number.</td></tr><tr><td>Summary</td><td>Dollars reviewed and the implied leakage rate.</td></tr></tbody></table>
+      </section>
+
+      <section id="checks">
+        <h2>What it checks</h2>
+        <p>The checks cover the full statement chain, from missing lines to value arithmetic.</p>
+        <table class="doc-table"><thead><tr><th>Check area</th><th>What it flags</th></tr></thead><tbody><tr><td>Missing statement or production</td><td>A booked volume with no statement line, or a paid line with no production behind it.</td></tr><tr><td>Volume variance and zero volume</td><td>Paid volume differs from produced volume beyond tolerance, or production pays zero.</td></tr><tr><td>Price variance</td><td>Statement price differs from the fixed contract price.</td></tr><tr><td>Unscheduled deduction</td><td>Deductions exceed the allowed contract rate.</td></tr><tr><td>Value mismatch</td><td>Net value does not equal volume times price minus deductions.</td></tr><tr><td>Duplicate and negative lines</td><td>Identical lines for one lease/product/month, or an unexplained negative adjustment.</td></tr><tr><td>Unmapped lease and unit mismatch</td><td>A purchaser name with no alias, or units that cannot be converted.</td></tr><tr><td>Run-ticket checks</td><td>A missing ticket or a ticket volume that disagrees with production.</td></tr></tbody></table>
+        <p>Severity follows dollar impact: high at $10,000 or more, medium at $1,000, low below that. Thresholds are configurable, and findings are advisory questions with evidence.</p>
+      </section>
+
+      <section id="limits">
+        <h2>What it does not do</h2>
+        <p>A useful tool should be clear about its boundaries. These are the current limits, not hidden caveats.</p>
+        <ul><li>No PDF or scanned statement extraction yet; the CSVs must come from an export or data file.</li><li>Index-based formulas such as West Texas Intermediate (WTI) plus a differential, or a gas basis, are not applied in this version.</li><li>Multiple purchasers on one lease are aggregated; price and deduction checks are skipped with a warning.</li><li>No gas-plant or natural gas liquids (NGL) settlement, prior-period accruals, recoupment, severance tax or net revenue interest.</li><li>No enterprise resource planning (ERP), accounting or supervisory control and data acquisition (SCADA) connector; the bundled review UI is a local pilot surface, not a hosted multi-tenant app.</li></ul>
+        <div class="doc-callout doc-callout--warn">
+          <p><strong>Findings are advisory.</strong> The tool names a contradiction or a risk with the evidence behind it. The engineering, legal or commercial judgement remains with you.</p>
+        </div>
+      </section>
+
+      <section id="try">
+        <h2>How to try it</h2>
+        <p>Send one month of production and statements for a free exception list, or request a private build to run locally.</p>
+        <ol class="doc-steps"><li>Send a month of production and purchaser statements, anonymised if preferred.</li><li>Receive the full exception list and evidence packet at no cost.</li><li>Review the highest-dollar findings with the statement line and source file in hand.</li></ol>
+        <h3>Access</h3><table class="doc-table"><thead><tr><th>Access</th><th>What you get</th></tr></thead><tbody><tr><td>Sample check</td><td>Free. One month of production and statements, no key and no card.</td></tr><tr><td>Team</td><td>$349/month. Annual commitment, up to 10 users and unlimited leases.</td></tr><tr><td>On-premise</td><td>$1,750/month. Annual, per site, unlimited users on that site.</td></tr></tbody></table>
+        <div class="doc-callout"><p><strong>Nothing leaves your machine.</strong> The paid tools run offline. The free libraries have no account, cloud call or telemetry.</p></div>
+      </section>
+
+      <section id="questions">
+        <h2>Common questions</h2>
+        <div class="doc-faq"><details><summary>Does it read PDF statements?</summary><p>Not yet. The current version works from CSV exports and data files.</p></details><details><summary>Does it decide whether a deduction is legal?</summary><p>No. It flags a variance against the supplied contract and evidence; the commercial or legal judgement remains with you.</p></details><details><summary>Can it handle multiple purchasers on one lease?</summary><p>It aggregates them and skips price and deduction checks for that key with a warning. Per-purchaser allocation is a future feature.</p></details><details><summary>What is a purchaser statement?</summary><p>The monthly statement from the company that buys the oil or gas. It records volumes, prices, deductions and net value.</p></details></div>
+      </section>
+
+      <div class="doc-pager">
+        <a href="/docs/index.html">← All product guides</a>
+        <a href="/haql-revenue.html">Product page →</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__bottom">
+      <p>© <span id="yr">2026</span> Haql Labs · Public guide to haql-revenue.</p>
+      <p><a href="/index.html">Home</a> · <a href="/docs/index.html">Docs</a> · <a href="mailto:kunleaz100@gmail.com">Contact</a></p>
+    </div>
+  </div>
+</footer>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>haql-units guide — what it does and what it checks | Haql Labs</title>
+<meta name="description" content="Public guide to haql-units: explicit oil and gas unit conversions, time bases, citations and dimension checks. Free and MIT-licensed.">
+<link rel="canonical" href="https://haql-lab.github.io/docs/units/index.html">
+<meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="brand" href="/index.html" aria-label="Haql Labs — home">
+      <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#0B1B33"/><path fill="#F6F4EE" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#F6F4EE" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#4F9BFF" stroke-width="2.1" stroke-linecap="round"/></svg></span>
+      <span class="brand__word">haql<span class="brand__lab">Labs</span></span>
+    </a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="/haql-engine.html">haql-engine</a>
+      <a href="/docs/index.html" aria-current="page">Docs</a>
+      <a href="/index.html#pricing">Pricing</a>
+      <a href="/downloads.html">Downloads</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=haql-units%20guide%20question">Ask a question</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="doc-hero">
+    <div class="wrap">
+      <p class="eyebrow">haql-units · public guide</p>
+      <h1>Convert units with a <em>definition, not a guess.</em></h1>
+      <p class="lede">A column labelled “volume” is not a unit. Production exports mix cubic metres (Sm³), barrels (BBL), thousand cubic feet (MCF) and rates with different time bases. haql-units converts with explicit definitions, declared time bases and round-trip checking, so a mismatch becomes an error you catch.</p>
+      <div class="doc-badges"><span class="doc-badge doc-badge--ok">free and MIT</span><span class="doc-badge">explicit definitions</span><span class="doc-badge">dimension checked</span></div>
+    </div>
+  </section>
+
+  <div class="wrap doc-layout">
+    <aside class="doc-side" aria-label="Guide contents">
+      <span class="doc-side__label">On this page</span>
+      <a href="#what" aria-current="page">What it does</a>
+      <a href="#why">Why it matters</a>
+      <a href="#inputs">What goes in</a>
+      <a href="#outputs">What comes out</a>
+      <a href="#checks">What it checks</a>
+      <a href="#limits">What it does not do</a>
+      <a href="#try">How to try it</a>
+      <a href="#questions">Questions</a>
+      <hr>
+      <a href="/docs/index.html">All product guides</a>
+      <a href="/haql-units.html">Product page</a>
+    </aside>
+
+    <article class="doc-main">
+      <p class="doc-meta">Product: haql-units · Public guide · Updated 8 November 2026</p>
+
+      <section id="what">
+        <h2>What haql-units does</h2>
+        <p>haql-units is a small Python library for converting oil and gas quantities without hiding the assumption. Every conversion carries its definition, time base and source. If the library cannot state the conversion, it raises an error instead of inventing a constant.</p>
+        <div class="doc-callout">
+          <p><strong>In one sentence:</strong> It gives the suite one cited unit definition instead of a column of inherited spreadsheet factors.</p>
+        </div>
+        <div class="doc-audience"><div class="doc-audience__item"><span>Production and reservoir engineers</span><h3>Convert with confidence</h3><p>Use declared units and time bases instead of a guessed factor.</p></div><div class="doc-audience__item"><span>Data and QC teams</span><h3>Stop silent factors</h3><p>Make a dimension mismatch fail before it reaches a filing.</p></div><div class="doc-audience__item"><span>Developers</span><h3>Reuse a small library</h3><p>Add checked conversions without a whole analysis stack.</p></div></div>
+      </section>
+
+      <section id="why">
+        <h2>Why it matters</h2>
+        <p>A wrong unit can survive a summary because the factor is under its resolution. An ambiguous “daily” rate can use a 28-day assumed month. A spreadsheet formula can be inherited with no citation. Units are part of the evidence.</p>
+        <ul><li>One export is in Sm³ and another in BBL; the aggregation multiplies by the wrong constant.</li><li>A daily rate is not the same as a rate on a 28-day assumed month; the denominator is a choice.</li><li>Conversion formulas live inside cells, inherited from someone who left in 2019.</li><li>QC only works if the units feeding it are the units you think they are.</li></ul>
+        <div class="doc-compare">
+          <div class="doc-compare__item"><span>Without haql-units</span><strong>The hidden problem</strong><p>A column is labelled “volume”. The aggregation picks a factor, the mismatch lands under the summary's resolution, and it ships.</p></div>
+          <div class="doc-compare__item doc-compare__item--accent"><span>With haql-units</span><strong>The visible answer</strong><p>The unit and time base are declared, the conversion is defined from first principles, and a dimension mismatch raises an error.</p></div>
+        </div>
+      </section>
+
+      <section id="inputs">
+        <h2>What goes in</h2>
+        <p>The library is used in Python; the important input is the declared unit, not the column name.</p>
+        <table class="doc-table"><thead><tr><th>What goes in</th><th>What it means</th></tr></thead><tbody><tr><td>A quantity</td><td>A numeric value with a unit and, where relevant, a time base.</td></tr><tr><td>A target unit</td><td>The unit you want the result in.</td></tr><tr><td>A declared rate basis</td><td>For rates, the time denominator is stated explicitly.</td></tr></tbody></table>
+      </section>
+
+      <section id="outputs">
+        <h2>What comes out</h2>
+        <p>Every result can carry the reasoning behind it.</p>
+        <table class="doc-table"><thead><tr><th>What comes out</th><th>How to use it</th></tr></thead><tbody><tr><td>Converted value</td><td>The numeric result in the requested unit.</td></tr><tr><td>Conversion explanation</td><td>The factor plus the standard and citation that define it.</td></tr><tr><td>Dimension guard</td><td>A TypeError instead of an invalid addition such as bbl plus ft.</td></tr><tr><td>Round-trip check</td><td>The conversion can be inverted and checked.</td></tr></tbody></table>
+      </section>
+
+      <section id="checks">
+        <h2>What it checks</h2>
+        <p>The library checks the things a spreadsheet formula usually leaves implicit.</p>
+        <table class="doc-table"><thead><tr><th>Check area</th><th>What it flags</th></tr></thead><tbody><tr><td>Dimension compatibility</td><td>Adding or comparing quantities with different dimensions fails early.</td></tr><tr><td>Time-base declarations</td><td>A rate must state the denominator instead of assuming a month length.</td></tr><tr><td>Conversion definition</td><td>The factor is defined from first principles, not copied without a source.</td></tr><tr><td>Round-trip behaviour</td><td>A conversion can be inverted and return the original quantity within tolerance.</td></tr></tbody></table>
+        <p>Every factor carries a source such as NIST SP 811 (US National Institute of Standards and Technology), the BIPM SI Brochure (International Bureau of Weights and Measures) or SPE (Society of Petroleum Engineers), so the conversion is an argument rather than a claim.</p>
+      </section>
+
+      <section id="limits">
+        <h2>What it does not do</h2>
+        <p>A useful tool should be clear about its boundaries. These are the current limits, not hidden caveats.</p>
+        <ul><li>It is a conversion library, not an automatic data-cleaning or unit-inference tool.</li><li>You still have to declare the unit and time base; the library will not guess from a column name.</li><li>It does not replace a company's measurement standards or regulatory reporting rules.</li><li>A correct conversion does not make the underlying measurement correct.</li></ul>
+        <div class="doc-callout doc-callout--warn">
+          <p><strong>Findings are advisory.</strong> The tool names a contradiction or a risk with the evidence behind it. The engineering, legal or commercial judgement remains with you.</p>
+        </div>
+      </section>
+
+      <section id="try">
+        <h2>How to try it</h2>
+        <p>Install it in seconds and convert the next export you would otherwise do by hand.</p>
+        <ol class="doc-steps"><li><code>pip install haql-units</code></li><li>Create a quantity with an explicit unit and time base.</li><li>Call <code>convert_explained()</code> and keep the factor and citation with the result.</li></ol>
+
+        <div class="doc-callout"><p><strong>Nothing leaves your machine.</strong> The paid tools run offline. The free libraries have no account, cloud call or telemetry.</p></div>
+      </section>
+
+      <section id="questions">
+        <h2>Common questions</h2>
+        <div class="doc-faq"><details><summary>Is it really free?</summary><p>Yes. haql-units is MIT-licensed, with no account, cloud call, seat count or telemetry.</p></details><details><summary>Does it guess units from column names?</summary><p>No. That is the failure mode it is designed to avoid. You declare the unit.</p></details><details><summary>Can it convert anything?</summary><p>It covers the oil and gas units and time bases used by the suite. If it cannot state the conversion, it errors rather than inventing a factor.</p></details><details><summary>What is a time base?</summary><p>The denominator in a rate, such as per day or per month. The same number means different things on a 28-day assumed month versus a calendar day.</p></details></div>
+      </section>
+
+      <div class="doc-pager">
+        <a href="/docs/index.html">← All product guides</a>
+        <a href="/haql-units.html">Product page →</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__bottom">
+      <p>© <span id="yr">2026</span> Haql Labs · Public guide to haql-units.</p>
+      <p><a href="/index.html">Home</a> · <a href="/docs/index.html">Docs</a> · <a href="mailto:kunleaz100@gmail.com">Contact</a></p>
+    </div>
+  </div>
+</footer>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

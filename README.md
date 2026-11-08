@@ -17,12 +17,16 @@ One page per product:
 - `haql-coords.html` — minimum curvature, DLS, UTM/WGS84 (MIT)
 - `credits.html` — image credits and licenses for the field photography
 - `haql-rs.html` — retired old URL; noindex redirect to `haql-engine.html`
+- `docs/index.html` — public documentation hub for every product
 - `docs/engine/index.html` — public engine guide: plain-language explanation
   of the problem, workflow, results, evidence and limits
 - `docs/engine/parallel-ensembles.html` — public guide to parallel scenario
   execution and what it does (and does not) change
 - `docs/engine/technical-reference.html` — engineering reference: numerical
   method, file map, commands, uncertainty schema and validation detail
+- `docs/qc/`, `docs/closeout/`, `docs/revenue/`, `docs/dataroom/`,
+  `docs/45q/`, `docs/emission/`, `docs/rrc/`, `docs/units/`, `docs/coords/` —
+  public guides for the corresponding products
 
 ## Photography
 The homepage uses self-hosted field photography under public-domain, CC0 and

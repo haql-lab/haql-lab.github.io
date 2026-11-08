@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>haql-coords guide — what it does and what it checks | Haql Labs</title>
+<meta name="description" content="Public guide to haql-coords: minimum-curvature well geometry, survey checks and certificates. Free and MIT-licensed.">
+<link rel="canonical" href="https://haql-lab.github.io/docs/coords/index.html">
+<meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="brand" href="/index.html" aria-label="Haql Labs — home">
+      <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#0B1B33"/><path fill="#F6F4EE" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#F6F4EE" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#4F9BFF" stroke-width="2.1" stroke-linecap="round"/></svg></span>
+      <span class="brand__word">haql<span class="brand__lab">Labs</span></span>
+    </a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="/haql-engine.html">haql-engine</a>
+      <a href="/docs/index.html" aria-current="page">Docs</a>
+      <a href="/index.html#pricing">Pricing</a>
+      <a href="/downloads.html">Downloads</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=haql-coords%20guide%20question">Ask a question</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="doc-hero">
+    <div class="wrap">
+      <p class="eyebrow">haql-coords · public guide</p>
+      <h1>Wellbore geometry you can <em>check, not just copy.</em></h1>
+      <p class="lede">Copied trigonometry sits in spreadsheets and well records with no one able to explain its datum or convention. haql-coords provides minimum-curvature well paths (calculated from survey stations), UTM map conversion, dog-leg severity and a deterministic survey certificate.</p>
+      <div class="doc-badges"><span class="doc-badge doc-badge--ok">free and MIT</span><span class="doc-badge">wellbore geometry</span><span class="doc-badge">round-trip checked</span></div>
+    </div>
+  </section>
+
+  <div class="wrap doc-layout">
+    <aside class="doc-side" aria-label="Guide contents">
+      <span class="doc-side__label">On this page</span>
+      <a href="#what" aria-current="page">What it does</a>
+      <a href="#why">Why it matters</a>
+      <a href="#inputs">What goes in</a>
+      <a href="#outputs">What comes out</a>
+      <a href="#checks">What it checks</a>
+      <a href="#limits">What it does not do</a>
+      <a href="#try">How to try it</a>
+      <a href="#questions">Questions</a>
+      <hr>
+      <a href="/docs/index.html">All product guides</a>
+      <a href="/haql-coords.html">Product page</a>
+    </aside>
+
+    <article class="doc-main">
+      <p class="doc-meta">Product: haql-coords · Public guide · Updated 8 November 2026</p>
+
+      <section id="what">
+        <h2>What haql-coords does</h2>
+        <p>haql-coords is a small Python library for the geometry that well records depend on: survey stations, true vertical depth, north/east displacement, dog-leg severity, UTM conversion and a certificate that recomputes the as-drilled path.</p>
+        <div class="doc-callout">
+          <p><strong>In one sentence:</strong> It gives the suite one checked geometry definition instead of a hundred inherited spreadsheet formulas.</p>
+        </div>
+        <div class="doc-audience"><div class="doc-audience__item"><span>Drilling and wells teams</span><h3>Verify a path</h3><p>Recompute TVD, displacement and dog-leg severity from survey stations.</p></div><div class="doc-audience__item"><span>Data and QC teams</span><h3>Catch a shifted record</h3><p>Flag a survey or coordinate that fails a basic geometry check.</p></div><div class="doc-audience__item"><span>Developers</span><h3>Reuse a small library</h3><p>Add well geometry without pulling in a full analysis stack.</p></div></div>
+      </section>
+
+      <section id="why">
+        <h2>Why it matters</h2>
+        <p>A copied formula can be correct and still be the wrong convention. A coordinate shifted by one digit can quietly change the nearest-well calculation. A number is not proof; a round-trip and a reproducible certificate are.</p>
+        <ul><li>The spreadsheet formula came from someone who left years ago; its datum is unknown.</li><li>One well coordinate is shifted by a digit and the geometry quietly changes.</li><li>A distance cannot be inverted or checked, so a wrong answer looks like a right one.</li><li>QC rules that compare wells need trustworthy geometry upstream.</li></ul>
+        <div class="doc-compare">
+          <div class="doc-compare__item"><span>Without haql-coords</span><strong>The hidden problem</strong><p>A spreadsheet gives a plausible distance. Nobody can say which datum, sign convention or survey method produced it.</p></div>
+          <div class="doc-compare__item doc-compare__item--accent"><span>With haql-coords</span><strong>The visible answer</strong><p>The survey is recomputed with a documented method, checked for depth order, range and dog-leg severity, and certified deterministically.</p></div>
+        </div>
+      </section>
+
+      <section id="inputs">
+        <h2>What goes in</h2>
+        <p>The library takes survey stations and coordinate values directly in Python.</p>
+        <table class="doc-table"><thead><tr><th>What goes in</th><th>What it means</th></tr></thead><tbody><tr><td>Survey stations</td><td>Measured depth, inclination and azimuth for the well path.</td></tr><tr><td>Coordinates</td><td>UTM or geographic values for conversion and offset calculations.</td></tr><tr><td>Python code</td><td>The library is imported into your own script; there is no portal or account.</td></tr></tbody></table>
+      </section>
+
+      <section id="outputs">
+        <h2>What comes out</h2>
+        <p>The outputs are plain values and deterministic evidence, not a hosted report.</p>
+        <table class="doc-table"><thead><tr><th>What comes out</th><th>How to use it</th></tr></thead><tbody><tr><td>Well-path values</td><td>True vertical depth (TVD), north/east displacement and dog-leg severity (DLS) per segment.</td></tr><tr><td>Survey check</td><td>Depth-order, inclination/azimuth range and dog-leg findings with stable rule IDs.</td></tr><tr><td>Survey certificate</td><td>Final TVD, horizontal closure, maximum DLS and a SHA-256 over the canonical station list.</td></tr><tr><td>UTM conversion</td><td>Coordinate conversion with an explicit method.</td></tr></tbody></table>
+      </section>
+
+      <section id="checks">
+        <h2>What it checks</h2>
+        <p>The checks are deliberately small and auditable.</p>
+        <table class="doc-table"><thead><tr><th>Check area</th><th>What it flags</th></tr></thead><tbody><tr><td>Depth order</td><td>Survey stations that do not progress in measured depth.</td></tr><tr><td>Angle range</td><td>Inclination or azimuth outside the valid range.</td></tr><tr><td>Dog-leg severity</td><td>A dog-leg above the 2.0°/100 ft limit used by the library.</td></tr><tr><td>Round-trip geometry</td><td>A coordinate or distance that cannot be checked both ways.</td></tr></tbody></table>
+        <p>The certificate is deterministic: the same stations produce a byte-identical result and hash.</p>
+      </section>
+
+      <section id="limits">
+        <h2>What it does not do</h2>
+        <p>A useful tool should be clear about its boundaries. These are the current limits, not hidden caveats.</p>
+        <ul><li>It is a geometry library, not a full well-planning, anti-collision or drilling-engineering application.</li><li>It depends on the quality and completeness of the survey stations you provide.</li><li>A passing survey check is not a substitute for engineering review of the well design.</li><li>The library does not replace a company's survey standards or regulatory requirements.</li></ul>
+        <div class="doc-callout doc-callout--warn">
+          <p><strong>Findings are advisory.</strong> The tool names a contradiction or a risk with the evidence behind it. The engineering, legal or commercial judgement remains with you.</p>
+        </div>
+      </section>
+
+      <section id="try">
+        <h2>How to try it</h2>
+        <p>Install it in seconds and try the geometry on a survey you already have.</p>
+        <ol class="doc-steps"><li><code>pip install haql-coords</code></li><li>Build a minimum-curvature path from survey stations and inspect true vertical depth (TVD), displacement and dog-leg severity (DLS).</li><li>Run <code>check_survey()</code> and <code>survey_certificate()</code> on the same stations.</li></ol>
+
+        <div class="doc-callout"><p><strong>Nothing leaves your machine.</strong> The paid tools run offline. The free libraries have no account, cloud call or telemetry.</p></div>
+      </section>
+
+      <section id="questions">
+        <h2>Common questions</h2>
+        <div class="doc-faq"><details><summary>Is it really free?</summary><p>Yes. haql-coords is MIT-licensed, with no account, cloud call, seat count or telemetry.</p></details><details><summary>Does it need a database?</summary><p>No. It is a Python library; data is passed in code.</p></details><details><summary>Can it plan a well?</summary><p>No. It computes and checks geometry from survey data. Well planning and anti-collision are larger disciplines.</p></details><details><summary>What is dog-leg severity?</summary><p>How sharply the well path bends over a measured distance, usually expressed in degrees per 100 feet.</p></details></div>
+      </section>
+
+      <div class="doc-pager">
+        <a href="/docs/index.html">← All product guides</a>
+        <a href="/haql-coords.html">Product page →</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__bottom">
+      <p>© <span id="yr">2026</span> Haql Labs · Public guide to haql-coords.</p>
+      <p><a href="/index.html">Home</a> · <a href="/docs/index.html">Docs</a> · <a href="mailto:kunleaz100@gmail.com">Contact</a></p>
+    </div>
+  </div>
+</footer>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

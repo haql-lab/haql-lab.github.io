@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>haql-45q guide — what it does and what it checks | Haql Labs</title>
+<meta name="description" content="Public guide to haql-45q: 45Q carbon-storage credit reconciliation, inputs, outputs, checks and limits.">
+<link rel="canonical" href="https://haql-lab.github.io/docs/45q/index.html">
+<meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="brand" href="/index.html" aria-label="Haql Labs — home">
+      <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#0B1B33"/><path fill="#F6F4EE" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#F6F4EE" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#4F9BFF" stroke-width="2.1" stroke-linecap="round"/></svg></span>
+      <span class="brand__word">haql<span class="brand__lab">Labs</span></span>
+    </a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="/haql-engine.html">haql-engine</a>
+      <a href="/docs/index.html" aria-current="page">Docs</a>
+      <a href="/index.html#pricing">Pricing</a>
+      <a href="/downloads.html">Downloads</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=haql-45q%20guide%20question">Ask a question</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="doc-hero">
+    <div class="wrap">
+      <p class="eyebrow">haql-45q · public guide</p>
+      <h1>Turn a 45Q credit claim into a <em>mass balance a reviewer can follow.</em></h1>
+      <p class="lede">A 45Q claim is only as strong as the evidence behind it. haql-45q reconciles capture, injection, monitoring and lab records, prices the stored tonnes at the statutory rate for the construction year, tracks the Subpart RR reporting clock (the US EPA rule for geologic sequestration), and packages the evidence.</p>
+      <div class="doc-badges"><span class="doc-badge doc-badge--ok">45Q credit evidence</span><span class="doc-badge">offline and deterministic</span><span class="doc-badge">certification pack</span></div>
+    </div>
+  </section>
+
+  <div class="wrap doc-layout">
+    <aside class="doc-side" aria-label="Guide contents">
+      <span class="doc-side__label">On this page</span>
+      <a href="#what" aria-current="page">What it does</a>
+      <a href="#why">Why it matters</a>
+      <a href="#inputs">What goes in</a>
+      <a href="#outputs">What comes out</a>
+      <a href="#checks">What it checks</a>
+      <a href="#limits">What it does not do</a>
+      <a href="#try">How to try it</a>
+      <a href="#questions">Questions</a>
+      <hr>
+      <a href="/docs/index.html">All product guides</a>
+      <a href="/haql-45q.html">Product page</a>
+    </aside>
+
+    <article class="doc-main">
+      <p class="doc-meta">Product: haql-45q · Public guide · Updated 8 November 2026</p>
+
+      <section id="what">
+        <h2>What haql-45q does</h2>
+        <p>The US 45Q tax credit supports carbon capture and storage (CCS). A claim needs more than a total: it needs a defensible mass balance, a consistent storage formation, complete reporting periods and the correct rate basis. haql-45q checks those links before a reviewer does.</p>
+        <div class="doc-callout">
+          <p><strong>In one sentence:</strong> It turns a credit calculation into a reviewed, traceable evidence pack.</p>
+        </div>
+        <div class="doc-audience"><div class="doc-audience__item"><span>Carbon capture and storage (CCS) operators</span><h3>Prepare the claim</h3><p>Reconcile the year and see the gaps before the certification pack is filed.</p></div><div class="doc-audience__item"><span>MRV and compliance teams</span><h3>Follow the chain</h3><p>Trace stored and vented tonnes to the rows and quarters behind them.</p></div><div class="doc-audience__item"><span>Finance and tax teams</span><h3>Check the basis</h3><p>See the rate basis and the reporting clock in the same output as the mass balance.</p></div></div>
+      </section>
+
+      <section id="why">
+        <h2>Why it matters</h2>
+        <p>Calculating a dollar value per tonne is arithmetic. Surviving review is harder: a vented tonne that never reached the balance, an injection row outside the storage formation, or a missing monitoring quarter can undermine the claim.</p>
+        <ul><li>A vent or leak recorded in monitoring can be left out of the stored-tonne calculation.</li><li>Injection can be attributed to the wrong formation or interval.</li><li>A missing monitoring or lab quarter makes the year incomplete before it is filed.</li><li>The wrong construction-year rate table can restate the entire schedule.</li></ul>
+        <div class="doc-compare">
+          <div class="doc-compare__item"><span>Without haql-45q</span><strong>The hidden problem</strong><p>The year is summed in a spreadsheet. Stored equals injected minus emitted. The reviewer asks for the formation, the quarters and the rate basis, and the evidence is scattered across four exports.</p></div>
+          <div class="doc-compare__item doc-compare__item--accent"><span>With haql-45q</span><strong>The visible answer</strong><p>The mass balance, the credit schedule, the reporting clock and the supporting evidence arrive as one inspection pack, with findings named before filing.</p></div>
+        </div>
+      </section>
+
+      <section id="inputs">
+        <h2>What goes in</h2>
+        <p>The tool expects the records you already keep for the storage site. Missing files are treated as gaps, not silently estimated.</p>
+        <table class="doc-table"><thead><tr><th>What goes in</th><th>What it means</th></tr></thead><tbody><tr><td>Capture CSV</td><td>Captured CO2 volumes and the activity records behind them.</td></tr><tr><td>Injection CSV</td><td>Injection volumes, wells and the storage interval or formation.</td></tr><tr><td>Monitoring CSV</td><td>Monitoring periods, vent or leak events and coverage.</td></tr><tr><td>Lab CSV</td><td>Supporting lab or composition records where applicable.</td></tr><tr><td>Facility configuration</td><td>Storage formation, construction and placed-in-service dates, disposition and the monitoring, reporting and verification (MRV) plan.</td></tr></tbody></table>
+      </section>
+
+      <section id="outputs">
+        <h2>What comes out</h2>
+        <p>The output is intended to answer a reviewer's questions in one place.</p>
+        <table class="doc-table"><thead><tr><th>What comes out</th><th>How to use it</th></tr></thead><tbody><tr><td>Credit schedule</td><td>Stored tonnes priced year by year at the statutory rate for the construction year.</td></tr><tr><td>Mass balance</td><td>Captured, injected, stored and vented tonnes reconciled across the year.</td></tr><tr><td>Subpart RR clock</td><td>The annual reporting due date computed from the applicable rule.</td></tr><tr><td>Certification pack</td><td>JSON and HTML evidence pack plus a credits.csv for audit.</td></tr><tr><td>Signed evidence</td><td>Optional Ed25519 attestation and a byte-reproducible inspection bundle.</td></tr></tbody></table>
+      </section>
+
+      <section id="checks">
+        <h2>What it checks</h2>
+        <p>The checks cover the physical balance, the claim configuration and the reporting window.</p>
+        <table class="doc-table"><thead><tr><th>Check area</th><th>What it flags</th></tr></thead><tbody><tr><td>Mass-balance gaps</td><td>Captured CO2 that did not end up injected or vented beyond tolerance.</td></tr><tr><td>Negative stored tonnes</td><td>Vented emissions that exceed the stored claim.</td></tr><tr><td>Formation inconsistencies</td><td>Injection recorded outside the storage formation in the configuration.</td></tr><tr><td>Missing intervals</td><td>Injection rows that do not identify the storage interval or depth.</td></tr><tr><td>Incomplete periods</td><td>Missing monitoring or lab quarters that leave the year incomplete.</td></tr><tr><td>Credit window and rate</td><td>Construction or reporting outside the allowed window, or the wrong rate table.</td></tr><tr><td>Reporting clock</td><td>The Subpart RR annual report due date (the US EPA geologic sequestration rule), calculated rather than remembered.</td></tr></tbody></table>
+        <p>Rule IDs and the full check list are shown on the product page and in the report, so a finding can be discussed without ambiguity.</p>
+      </section>
+
+      <section id="limits">
+        <h2>What it does not do</h2>
+        <p>A useful tool should be clear about its boundaries. These are the current limits, not hidden caveats.</p>
+        <ul><li>It does not provide legal, tax or accounting advice; it produces evidence for a professional to review.</li><li>It depends on the completeness and accuracy of the capture, injection, monitoring and lab records you provide.</li><li>It does not integrate with an accounting or EHS platform; files are the interface.</li><li>The facility configuration — formation, dates, disposition and MRV plan — must reflect the actual project.</li></ul>
+        <div class="doc-callout doc-callout--warn">
+          <p><strong>Findings are advisory.</strong> The tool names a contradiction or a risk with the evidence behind it. The engineering, legal or commercial judgement remains with you.</p>
+        </div>
+      </section>
+
+      <section id="try">
+        <h2>How to try it</h2>
+        <p>Send one year of records for a free check, or run the standalone binary locally.</p>
+        <ol class="doc-steps"><li>Send the four exports and the facility configuration for a free review.</li><li>Receive the mass balance, findings and credit schedule without a key or card.</li><li>Use the certification pack to fix the gaps before the claim goes to review.</li></ol>
+        <h3>Access</h3><table class="doc-table"><thead><tr><th>Access</th><th>What you get</th></tr></thead><tbody><tr><td>Sample check</td><td>Free. One year of records, no key and no card.</td></tr><tr><td>Team</td><td>$349/month. Annual commitment, up to 10 users and unlimited facilities.</td></tr><tr><td>On-premise</td><td>$1,750/month. Annual, per site, unlimited users on that site.</td></tr></tbody></table>
+        <div class="doc-callout"><p><strong>Nothing leaves your machine.</strong> The paid tools run offline. The free libraries have no account, cloud call or telemetry.</p></div>
+      </section>
+
+      <section id="questions">
+        <h2>Common questions</h2>
+        <div class="doc-faq"><details><summary>Is this a tax-return or legal-opinion tool?</summary><p>No. It reconciles the technical and documentary evidence behind a claim. Legal, tax and accounting judgements belong to the relevant professionals.</p></details><details><summary>Does it support pre-IRA projects?</summary><p>The rate schedule uses the statutory table for the construction year; a pre-IRA project is not silently priced at the full current rate.</p></details><details><summary>What happens when a file is missing?</summary><p>Missing files are treated as gaps and reported, not guessed around. A missing required column is an error.</p></details><details><summary>What is 45Q?</summary><p>A US tax credit for carbon capture and storage. The credit depends on proving how much CO2 was stored and under what rules. This tool builds the technical evidence, not the tax return.</p></details><details><summary>What is Subpart RR?</summary><p>The US EPA reporting rule for geologic sequestration. It sets the annual reporting clock and the storage-site evidence a claim should line up with.</p></details></div>
+      </section>
+
+      <div class="doc-pager">
+        <a href="/docs/index.html">← All product guides</a>
+        <a href="/haql-45q.html">Product page →</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__bottom">
+      <p>© <span id="yr">2026</span> Haql Labs · Public guide to haql-45q.</p>
+      <p><a href="/index.html">Home</a> · <a href="/docs/index.html">Docs</a> · <a href="mailto:kunleaz100@gmail.com">Contact</a></p>
+    </div>
+  </div>
+</footer>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

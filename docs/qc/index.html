@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>haql-qc guide — what it does and what it checks | Haql Labs</title>
+<meta name="description" content="Public guide to haql-qc: row-level production data quality checks, inputs, outputs, evidence and limits.">
+<link rel="canonical" href="https://haql-lab.github.io/docs/qc/index.html">
+<meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="brand" href="/index.html" aria-label="Haql Labs — home">
+      <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#0B1B33"/><path fill="#F6F4EE" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#F6F4EE" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#4F9BFF" stroke-width="2.1" stroke-linecap="round"/></svg></span>
+      <span class="brand__word">haql<span class="brand__lab">Labs</span></span>
+    </a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="/haql-engine.html">haql-engine</a>
+      <a href="/docs/index.html" aria-current="page">Docs</a>
+      <a href="/index.html#pricing">Pricing</a>
+      <a href="/downloads.html">Downloads</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=haql-qc%20guide%20question">Ask a question</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="doc-hero">
+    <div class="wrap">
+      <p class="eyebrow">haql-qc · public guide</p>
+      <h1>A row-by-row check for production data that <em>looks fine.</em></h1>
+      <p class="lede">haql-qc reads the production export you already have and names the rows that are missing, negative, contradictory or physically impossible. It is a second pair of eyes for the data behind a filing, a partner query or a month-end close.</p>
+      <div class="doc-badges"><span class="doc-badge doc-badge--ok">production data quality</span><span class="doc-badge">offline and deterministic</span><span class="doc-badge">row-level evidence</span></div>
+    </div>
+  </section>
+
+  <div class="wrap doc-layout">
+    <aside class="doc-side" aria-label="Guide contents">
+      <span class="doc-side__label">On this page</span>
+      <a href="#what" aria-current="page">What it does</a>
+      <a href="#why">Why it matters</a>
+      <a href="#inputs">What goes in</a>
+      <a href="#outputs">What comes out</a>
+      <a href="#checks">What it checks</a>
+      <a href="#limits">What it does not do</a>
+      <a href="#try">How to try it</a>
+      <a href="#questions">Questions</a>
+      <hr>
+      <a href="/docs/index.html">All product guides</a>
+      <a href="/haql-qc.html">Product page</a>
+    </aside>
+
+    <article class="doc-main">
+      <p class="doc-meta">Product: haql-qc · Public guide · Updated 8 November 2026</p>
+
+      <section id="what">
+        <h2>What haql-qc does</h2>
+        <p>A production file can have a correct total and still contain bad rows. haql-qc checks the records themselves — every well, every date, every value — and gives each finding a rule ID, a source row and a severity.</p>
+        <div class="doc-callout">
+          <p><strong>In one sentence:</strong> It turns a spreadsheet review into a repeatable, row-level audit.</p>
+        </div>
+        <div class="doc-audience"><div class="doc-audience__item"><span>Operations data</span><h3>Find bad rows first</h3><p>Catch missing, negative or impossible values before they reach a filing, a partner or a close.</p></div><div class="doc-audience__item"><span>Production engineers</span><h3>Review with evidence</h3><p>See the well, date, source line and observed value behind every finding.</p></div><div class="doc-audience__item"><span>Compliance teams</span><h3>Keep a record</h3><p>A deterministic report with an input fingerprint can be rechecked later.</p></div></div>
+      </section>
+
+      <section id="why">
+        <h2>Why it matters</h2>
+        <p>A total does not care about signs, gaps or contradictions. Four wells can carry negative water volumes while the summary still adds up. A manual scan across thousands of rows is not a review; it is a hope.</p>
+        <ul><li>A total can balance while individual rows contradict each other.</li><li>Mistakes surface on the last working day, when there is no time to investigate.</li><li>A correction made on a guess destroys the trail of what was received.</li><li>A finding seen in March is hard to compare with the same issue in December.</li></ul>
+        <div class="doc-compare">
+          <div class="doc-compare__item"><span>Without haql-qc</span><strong>The hidden problem</strong><p>The export looks complete and the summary adds up. A negative water volume or a shut-in well still producing slips through because no one can read every row.</p></div>
+          <div class="doc-compare__item doc-compare__item--accent"><span>With haql-qc</span><strong>The visible answer</strong><p>Four rows are named by well, date, line number, observed value and unit. An engineer decides whether the sign convention or the meter failed — before it reaches a filing.</p></div>
+        </div>
+      </section>
+
+      <section id="inputs">
+        <h2>What goes in</h2>
+        <p>The tool works from files, not a database connection. You keep control of the data and the units.</p>
+        <table class="doc-table"><thead><tr><th>What goes in</th><th>What it means</th></tr></thead><tbody><tr><td>Production CSV</td><td>Daily or monthly production records with well and date columns identified.</td></tr><tr><td>Declared units</td><td>You state the units. The tool never guesses a unit from a column name.</td></tr><tr><td>Optional signing key</td><td>A seed key for a digital signature (Ed25519) attestation when a report must be provably unedited.</td></tr></tbody></table>
+      </section>
+
+      <section id="outputs">
+        <h2>What comes out</h2>
+        <p>The output is designed to be read by a person and checked by another tool.</p>
+        <table class="doc-table"><thead><tr><th>What comes out</th><th>How to use it</th></tr></thead><tbody><tr><td>JSON or JSONL audit report</td><td>Findings by rule and severity, with per-well medians and source-row references.</td></tr><tr><td>Run fingerprint</td><td>The SHA-256 of the exact input, so the audit can be rechecked against the same bytes.</td></tr><tr><td>Signed attestation</td><td>Optional signature over the report hash and a root covering every finding.</td></tr><tr><td>Inspection bundle</td><td>A byte-reproducible zip for sending the report and attestation together.</td></tr></tbody></table>
+      </section>
+
+      <section id="checks">
+        <h2>What it checks</h2>
+        <p>The checks focus on contradictions that survive a summary-level glance.</p>
+        <table class="doc-table"><thead><tr><th>Check area</th><th>What it flags</th></tr></thead><tbody><tr><td>Missing or unparseable identifiers</td><td>A row that cannot be attributed to a well.</td></tr><tr><td>Negative volumes</td><td>A production or injection volume that cannot be physically realised.</td></tr><tr><td>Decreasing cumulative totals</td><td>A total goes backwards without a documented reset.</td></tr><tr><td>Shut-in contradictions</td><td>The well reports zero uptime but still produces at a normal rate.</td></tr><tr><td>Date gaps</td><td>A reporting gap beyond that well's own inferred cadence.</td></tr><tr><td>Implausible rates</td><td>A daily rate above a declared fluid ceiling; the ceiling is configurable.</td></tr><tr><td>Signed evidence</td><td>An optional attestation and bundle make later edits detectable.</td></tr></tbody></table>
+        <p>Materiality is measured against the well's own median, not a single global threshold. The tool is jurisdiction-agnostic and does not generate regulator-specific forms.</p>
+      </section>
+
+      <section id="limits">
+        <h2>What it does not do</h2>
+        <p>A useful tool should be clear about its boundaries. These are the current limits, not hidden caveats.</p>
+        <ul><li>It does not generate state or regulator forms, and it does not know a state's filing format.</li><li>It does not correct or overwrite the source data; it reports findings for a person to judge.</li><li>It needs declared units. A column called “volume” is not a unit.</li><li>It is a file-based command-line tool, not a database, portal or multi-user workflow.</li></ul>
+        <div class="doc-callout doc-callout--warn">
+          <p><strong>Findings are advisory.</strong> The tool names a contradiction or a risk with the evidence behind it. The engineering, legal or commercial judgement remains with you.</p>
+        </div>
+      </section>
+
+      <section id="try">
+        <h2>How to try it</h2>
+        <p>A free sample check is the quickest way to see whether your export contains a finding you did not know about.</p>
+        <ol class="doc-steps"><li>Send one month of production data for a free check — no key, no card, no seat limit.</li><li>Or download the standalone binary and run it locally; no Python installation is needed.</li><li>Use the report to decide whether the issue is a sign convention, a meter problem or a real data gap.</li></ol>
+        <h3>Access</h3><table class="doc-table"><thead><tr><th>Access</th><th>What you get</th></tr></thead><tbody><tr><td>Sample check</td><td>Free. One month of data, no key and no card.</td></tr><tr><td>Team</td><td>$349/month. Annual commitment, up to 10 users and unlimited fields.</td></tr><tr><td>On-premise</td><td>$1,750/month. Annual, per site, unlimited users on that site.</td></tr></tbody></table>
+        <div class="doc-callout"><p><strong>Nothing leaves your machine.</strong> The paid tools run offline. The free libraries have no account, cloud call or telemetry.</p></div>
+      </section>
+
+      <section id="questions">
+        <h2>Common questions</h2>
+        <div class="doc-faq"><details><summary>Does it need a database or a cloud account?</summary><p>No. It reads CSV files and writes a local report. The paid tool runs offline.</p></details><details><summary>Does it replace a production engineer?</summary><p>No. It finds contradictions and attaches evidence; an engineer decides what they mean and what to do.</p></details><details><summary>Can I use it for any state or country?</summary><p>The QC checks are jurisdiction-agnostic. Regulator-specific form validation is a different job.</p></details><details><summary>What is a production export?</summary><p>A file from a production accounting system, usually a CSV, with one row per well and reporting period.</p></details></div>
+      </section>
+
+      <div class="doc-pager">
+        <a href="/docs/index.html">← All product guides</a>
+        <a href="/haql-qc.html">Product page →</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__bottom">
+      <p>© <span id="yr">2026</span> Haql Labs · Public guide to haql-qc.</p>
+      <p><a href="/index.html">Home</a> · <a href="/docs/index.html">Docs</a> · <a href="mailto:kunleaz100@gmail.com">Contact</a></p>
+    </div>
+  </div>
+</footer>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

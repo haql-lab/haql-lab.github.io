@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>haql-dataroom guide — what it does and what it checks | Haql Labs</title>
+<meta name="description" content="Public guide to haql-dataroom: acquisition dataroom cross-checks, inputs, outputs, checks and limits.">
+<link rel="canonical" href="https://haql-lab.github.io/docs/dataroom/index.html">
+<meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="brand" href="/index.html" aria-label="Haql Labs — home">
+      <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#0B1B33"/><path fill="#F6F4EE" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#F6F4EE" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#4F9BFF" stroke-width="2.1" stroke-linecap="round"/></svg></span>
+      <span class="brand__word">haql<span class="brand__lab">Labs</span></span>
+    </a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="/haql-engine.html">haql-engine</a>
+      <a href="/docs/index.html" aria-current="page">Docs</a>
+      <a href="/index.html#pricing">Pricing</a>
+      <a href="/downloads.html">Downloads</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=haql-dataroom%20guide%20question">Ask a question</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="doc-hero">
+    <div class="wrap">
+      <p class="eyebrow">haql-dataroom · public guide</p>
+      <h1>Cross-check the seller's dataroom <em>before you bid.</em></h1>
+      <p class="lede">In an acquisition, the seller's export is the claim. Production, well master, Texas Railroad Commission (RRC) volumes, revenue, severance tax, reserves and LAS well-log headers (the standard well-log file format) should agree. haql-dataroom checks them against each other and names the contradictions to the row.</p>
+      <div class="doc-badges"><span class="doc-badge doc-badge--ok">acquisition due diligence</span><span class="doc-badge">offline and deterministic</span><span class="doc-badge">cross-table evidence</span></div>
+    </div>
+  </section>
+
+  <div class="wrap doc-layout">
+    <aside class="doc-side" aria-label="Guide contents">
+      <span class="doc-side__label">On this page</span>
+      <a href="#what" aria-current="page">What it does</a>
+      <a href="#why">Why it matters</a>
+      <a href="#inputs">What goes in</a>
+      <a href="#outputs">What comes out</a>
+      <a href="#checks">What it checks</a>
+      <a href="#limits">What it does not do</a>
+      <a href="#try">How to try it</a>
+      <a href="#questions">Questions</a>
+      <hr>
+      <a href="/docs/index.html">All product guides</a>
+      <a href="/haql-dataroom.html">Product page</a>
+    </aside>
+
+    <article class="doc-main">
+      <p class="doc-meta">Product: haql-dataroom · Public guide · Updated 8 November 2026</p>
+
+      <section id="what">
+        <h2>What haql-dataroom does</h2>
+        <p>haql-dataroom is built for acquisition and divestiture (A&amp;D) technical review. It reads the seller's package, maps the files to their roles and checks whether the production, well, regulatory, revenue, tax, reserve and log tables tell the same story.</p>
+        <div class="doc-callout">
+          <p><strong>In one sentence:</strong> It turns the seller's folder into a row-traced question list for the deal team.</p>
+        </div>
+        <div class="doc-audience"><div class="doc-audience__item"><span>A&amp;D and business development</span><h3>Find the red flags</h3><p>See contradictions before they are buried in a purchase price.</p></div><div class="doc-audience__item"><span>Technical reviewers</span><h3>Cross-check the story</h3><p>Compare production, wells, RRC volumes, revenue, taxes and reserves exhaustively.</p></div><div class="doc-audience__item"><span>Legal and finance</span><h3>Ask better questions</h3><p>Every finding points to the source row behind the question.</p></div></div>
+      </section>
+
+      <section id="why">
+        <h2>Why it matters</h2>
+        <p>The contradictions that move a price are spread across files. None is visible in a single table. Each takes an analyst cross-referencing two exports by hand — exactly the work that runs out of time before the bid.</p>
+        <ul><li>A producing well can be missing from the well master.</li><li>Internal production can disagree with the RRC-reported lease volume.</li><li>A plugged or inactive well can still report production.</li><li>A claimed remaining volume can be unsupported by the history behind it.</li></ul>
+        <div class="doc-compare">
+          <div class="doc-compare__item"><span>Without haql-dataroom</span><strong>The hidden problem</strong><p>An analyst spot-checks production and the reserve summary, then moves on. Cross-table contradictions are found after signing, or not at all.</p></div>
+          <div class="doc-compare__item doc-compare__item--accent"><span>With haql-dataroom</span><strong>The visible answer</strong><p>The contradictions are named before the bid, each traced to a row, and become the question list for the seller.</p></div>
+        </div>
+      </section>
+
+      <section id="inputs">
+        <h2>What goes in</h2>
+        <p>The tool runs on the files the seller handed over. Nothing is uploaded to a portal.</p>
+        <table class="doc-table"><thead><tr><th>What goes in</th><th>What it means</th></tr></thead><tbody><tr><td>Production CSV</td><td>Well-level volumes and dates.</td></tr><tr><td>Well master CSV</td><td>Well identity, status, API number and ownership context.</td></tr><tr><td>Texas RRC volumes CSV</td><td>Regulator-reported lease or well volumes for comparison.</td></tr><tr><td>Revenue and severance-tax CSVs</td><td>Statement values and taxable volumes for back-checks.</td></tr><tr><td>Reserve summary CSV</td><td>Claimed remaining volumes and the basis to test.</td></tr><tr><td>LAS well-log headers (the standard well-log file format)</td><td>Well-log headers that should match the well master.</td></tr><tr><td>Column mapping</td><td>The tool maps common header synonyms; --map ROLE=PATH overrides a guess.</td></tr></tbody></table>
+      </section>
+
+      <section id="outputs">
+        <h2>What comes out</h2>
+        <p>The output is designed to become a deal-team question list, not a valuation.</p>
+        <table class="doc-table"><thead><tr><th>What comes out</th><th>How to use it</th></tr></thead><tbody><tr><td>Dataroom audit</td><td>JSON and HTML red-flag sheet with one record per cross-table finding.</td></tr><tr><td>Row-level evidence</td><td>The source file and row behind each contradiction.</td></tr><tr><td>Machine-checkable JSON</td><td>A structured output for your own models and review workflow.</td></tr><tr><td>Embedded QC</td><td>Structural and numeric checks run before the cross-table rules.</td></tr></tbody></table>
+      </section>
+
+      <section id="checks">
+        <h2>What it checks</h2>
+        <p>The checks compare tables that are normally reviewed in isolation.</p>
+        <table class="doc-table"><thead><tr><th>Check area</th><th>What it flags</th></tr></thead><tbody><tr><td>Orphan and barren wells</td><td>Production without a well record, or a well with no production history.</td></tr><tr><td>RRC variance</td><td>Internal production that disagrees with the reported lease volume.</td></tr><tr><td>Interest and API identity</td><td>Ownership lines that violate the revenue-interest identity, or malformed API numbers.</td></tr><tr><td>Duplicates and status</td><td>The same well appearing twice, or a plugged/inactive well still producing.</td></tr><tr><td>Shut-in and timing</td><td>Days-on and volume contradictions, or production dated before completion.</td></tr><tr><td>LAS and revenue links</td><td>Log headers that do not match, or revenue referencing a missing lease.</td></tr><tr><td>Severance and decline</td><td>Severance-taxable volume versus produced volume; claimed reserves unsupported by history.</td></tr><tr><td>Revenue internal value</td><td>A statement whose volume, price, deductions and value do not agree.</td></tr></tbody></table>
+        <p>The full rule list and rule identifiers are shown in the report and on the product page.</p>
+      </section>
+
+      <section id="limits">
+        <h2>What it does not do</h2>
+        <p>A useful tool should be clear about its boundaries. These are the current limits, not hidden caveats.</p>
+        <ul><li>It is not a valuation, reserve certification or investment recommendation.</li><li>It depends on the completeness of the seller's package; missing files limit what can be checked.</li><li>It does not run a data-room portal, upload service or multi-user deal workspace.</li><li>Findings are advisory: a contradiction is a question to resolve, not a conclusion about price.</li></ul>
+        <div class="doc-callout doc-callout--warn">
+          <p><strong>Findings are advisory.</strong> The tool names a contradiction or a risk with the evidence behind it. The engineering, legal or commercial judgement remains with you.</p>
+        </div>
+      </section>
+
+      <section id="try">
+        <h2>How to try it</h2>
+        <p>Send a dataroom package for a free red-flag check, or run the standalone binary locally.</p>
+        <ol class="doc-steps"><li>Send the seller exports — anonymised if preferred — for a free review.</li><li>Receive a red-flag sheet with each finding traced to its source row.</li><li>Use the findings as the technical question list before the bid.</li></ol>
+        <h3>Access</h3><table class="doc-table"><thead><tr><th>Access</th><th>What you get</th></tr></thead><tbody><tr><td>Sample check</td><td>Free. One dataroom package, no key and no card.</td></tr><tr><td>Team</td><td>$349/month. Annual commitment, up to 10 users and unlimited packages.</td></tr><tr><td>On-premise</td><td>$1,750/month. Annual, per site, unlimited users on that site.</td></tr></tbody></table>
+        <div class="doc-callout"><p><strong>Nothing leaves your machine.</strong> The paid tools run offline. The free libraries have no account, cloud call or telemetry.</p></div>
+      </section>
+
+      <section id="questions">
+        <h2>Common questions</h2>
+        <div class="doc-faq"><details><summary>Does it replace technical due diligence?</summary><p>No. It makes the cross-file review exhaustive and reproducible, but a qualified reviewer still interprets the findings and the asset.</p></details><details><summary>Do I have to upload the dataroom?</summary><p>No. The tool runs locally on the files you provide.</p></details><details><summary>Does it value the asset?</summary><p>No. It finds contradictions in the package; valuation and reserve judgement are separate.</p></details><details><summary>What is a dataroom?</summary><p>The folder of technical and commercial files a seller provides during an acquisition review.</p></details></div>
+      </section>
+
+      <div class="doc-pager">
+        <a href="/docs/index.html">← All product guides</a>
+        <a href="/haql-dataroom.html">Product page →</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__bottom">
+      <p>© <span id="yr">2026</span> Haql Labs · Public guide to haql-dataroom.</p>
+      <p><a href="/index.html">Home</a> · <a href="/docs/index.html">Docs</a> · <a href="mailto:kunleaz100@gmail.com">Contact</a></p>
+    </div>
+  </div>
+</footer>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

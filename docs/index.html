@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentation — plain-language guides to every Haql Labs tool</title>
+<meta name="description" content="Public documentation for the Haql Labs suite: production data QC, closeout, revenue, dataroom, 45Q, emissions, RRC, reservoir simulation, units and wellbore geometry.">
+<link rel="canonical" href="https://haql-lab.github.io/docs/index.html">
+<meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="brand" href="/index.html" aria-label="Haql Labs — home">
+      <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#0B1B33"/><path fill="#F6F4EE" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#F6F4EE" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#4F9BFF" stroke-width="2.1" stroke-linecap="round"/></svg></span>
+      <span class="brand__word">haql<span class="brand__lab">Labs</span></span>
+    </a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="/haql-engine.html">haql-engine</a>
+      <a href="/docs/index.html" aria-current="page">Docs</a>
+      <a href="/index.html#pricing">Pricing</a>
+      <a href="/downloads.html">Downloads</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=Documentation%20question">Ask a question</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="doc-hero">
+    <div class="wrap">
+      <p class="eyebrow">Haql Labs · public documentation</p>
+      <h1>Plain-language guides to <em>every Haql Labs tool.</em></h1>
+      <p class="lede">Each guide explains the problem a tool solves, what goes in and comes out, what it checks, what it does not do, and how to try it. You do not need to read the source code to understand the product.</p>
+      <div class="doc-badges">
+        <span class="doc-badge doc-badge--accent">10 product guides</span>
+        <span class="doc-badge">offline by design</span>
+        <span class="doc-badge">deterministic</span>
+        <span class="doc-badge doc-badge--ok">row-level evidence</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap doc-layout">
+    <aside class="doc-side" aria-label="Documentation contents">
+      <span class="doc-side__label">Documentation</span>
+      <a href="#jobs" aria-current="page">Start with a job</a>
+      <a href="#all">All product guides</a>
+      <a href="#fit">How the tools fit</a>
+      <a href="#promises">Common promises</a>
+      <a href="#free">Free libraries</a>
+      <hr>
+      <a href="/docs/engine/index.html">Engine guide</a>
+      <a href="/docs/engine/parallel-ensembles.html">Scenario speed</a>
+      <a href="/index.html">Haql Labs home</a>
+    </aside>
+
+    <article class="doc-main">
+      <section id="jobs">
+        <h2>Start with the job you need to do</h2>
+        <p>The suite is not one product with ten names. Each tool answers a different question, and several are designed to be used together.</p>
+        <div class="doc-audience">
+          <div class="doc-audience__item">
+            <span>I need to trust an export</span>
+            <h3>Check the rows first</h3>
+            <p><a href="/docs/qc/index.html">haql-qc</a> finds bad records. <a href="/docs/closeout/index.html">haql-closeout</a> checks whether the month ties together.</p>
+          </div>
+          <div class="doc-audience__item">
+            <span>I need to follow the money</span>
+            <h3>Find what the summary hides</h3>
+            <p><a href="/docs/revenue/index.html">haql-revenue</a> reconciles purchaser statements. <a href="/docs/dataroom/index.html">haql-dataroom</a> cross-checks a seller's package.</p>
+          </div>
+          <div class="doc-audience__item">
+            <span>I need to defend a claim</span>
+            <h3>Make the evidence checkable</h3>
+            <p><a href="/docs/45q/index.html">haql-45q</a>, <a href="/docs/emission/index.html">haql-emission</a> and <a href="/docs/rrc/index.html">haql-rrc</a> check credits, emissions and filings.</p>
+          </div>
+        </div>
+        <div class="doc-audience">
+          <div class="doc-audience__item">
+            <span>I need to check a simulation</span>
+            <h3>Look behind the forecast</h3>
+            <p><a href="/docs/engine/index.html">haql-engine</a> explains the reservoir engine in plain language, with evidence and limits.</p>
+          </div>
+          <div class="doc-audience__item">
+            <span>I am building something</span>
+            <h3>Use the free foundations</h3>
+            <p><a href="/docs/units/index.html">haql-units</a> and <a href="/docs/coords/index.html">haql-coords</a> are MIT-licensed libraries for conversions and wellbore geometry.</p>
+          </div>
+          <div class="doc-audience__item">
+            <span>I am evaluating the company</span>
+            <h3>Read the claims and limits</h3>
+            <p>Every guide separates what a tool does from what it does not do. That is deliberate.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="all">
+        <h2>All product guides</h2>
+        <p>These are the public guides for the products listed on the Haql Labs site. Each one follows the same structure so the claims are comparable.</p>
+        <div class="doc-product-grid">
+          <a class="doc-card doc-card--link" href="/docs/qc/index.html">
+            <span class="doc-card__tag">Production data quality</span>
+            <h3>haql-qc</h3>
+            <p>Row-level checks for missing, negative, contradictory and impossible production records.</p>
+            <span class="doc-card__more">Read the guide →</span>
+          </a>
+          <a class="doc-card doc-card--link" href="/docs/closeout/index.html">
+            <span class="doc-card__tag">Production data quality</span>
+            <h3>haql-closeout</h3>
+            <p>Period-level reconciliation that finds the wells and days blocking a clean month-end close.</p>
+            <span class="doc-card__more">Read the guide →</span>
+          </a>
+          <a class="doc-card doc-card--link" href="/docs/revenue/index.html">
+            <span class="doc-card__tag">Revenue and settlements</span>
+            <h3>haql-revenue</h3>
+            <p>Reconcile production against purchaser statements and rank every exception by dollar impact.</p>
+            <span class="doc-card__more">Read the guide →</span>
+          </a>
+          <a class="doc-card doc-card--link" href="/docs/dataroom/index.html">
+            <span class="doc-card__tag">Acquisition due diligence</span>
+            <h3>haql-dataroom</h3>
+            <p>Cross-check seller production, wells, RRC, revenue, severance, reserves and LAS headers before a bid.</p>
+            <span class="doc-card__more">Read the guide →</span>
+          </a>
+          <a class="doc-card doc-card--link" href="/docs/45q/index.html">
+            <span class="doc-card__tag">Compliance and credits</span>
+            <h3>haql-45q</h3>
+            <p>Reconcile capture, injection and monitoring records into a 45Q credit schedule and evidence pack.</p>
+            <span class="doc-card__more">Read the guide →</span>
+          </a>
+          <a class="doc-card doc-card--link" href="/docs/emission/index.html">
+            <span class="doc-card__tag">Compliance and credits</span>
+            <h3>haql-emission</h3>
+            <p>Reconcile a GHG inventory to activity data and show the EU ETS allowance position.</p>
+            <span class="doc-card__more">Read the guide →</span>
+          </a>
+          <a class="doc-card doc-card--link" href="/docs/rrc/index.html">
+            <span class="doc-card__tag">Regulatory filings</span>
+            <h3>haql-rrc</h3>
+            <p>Pre-filing audit for Texas RRC Form PR operator numbers, disposition codes, districts and deadlines.</p>
+            <span class="doc-card__more">Read the guide →</span>
+          </a>
+          <a class="doc-card doc-card--link" href="/docs/engine/index.html">
+            <span class="doc-card__tag">Reservoir engineering</span>
+            <h3>haql-engine</h3>
+            <p>A plain-language guide to the reservoir simulator: what a forecast means, how uncertainty is handled, and what the evidence proves.</p>
+            <span class="doc-card__more">Read the guide →</span>
+          </a>
+          <a class="doc-card doc-card--link" href="/docs/units/index.html">
+            <span class="doc-card__tag">Free engineering library · MIT</span>
+            <h3>haql-units</h3>
+            <p>Conversions with explicit definitions, time bases, citations and dimension checks.</p>
+            <span class="doc-card__more">Read the guide →</span>
+          </a>
+          <a class="doc-card doc-card--link" href="/docs/coords/index.html">
+            <span class="doc-card__tag">Free engineering library · MIT</span>
+            <h3>haql-coords</h3>
+            <p>Minimum-curvature well paths, UTM conversion and deterministic survey certificates.</p>
+            <span class="doc-card__more">Read the guide →</span>
+          </a>
+        </div>
+      </section>
+
+      <section id="fit">
+        <h2>How the tools fit together</h2>
+        <p>The products are deliberately separate. Data quality, period close, revenue and compliance are different questions; mixing them into one opaque system would hide the evidence.</p>
+        <div class="doc-flow" aria-label="A typical production data flow from QC to closeout to revenue or compliance">
+          <div class="doc-flow__step">
+            <span>01</span>
+            <strong>Check the rows</strong>
+            <p><a href="/docs/qc/index.html">haql-qc</a> clears missing, negative and contradictory records.</p>
+          </div>
+          <div class="doc-flow__step">
+            <span>02</span>
+            <strong>Close the period</strong>
+            <p><a href="/docs/closeout/index.html">haql-closeout</a> checks that the month reconciles.</p>
+          </div>
+          <div class="doc-flow__step">
+            <span>03</span>
+            <strong>Follow the value</strong>
+            <p><a href="/docs/revenue/index.html">haql-revenue</a> reconciles statements and ranks exceptions by dollars.</p>
+          </div>
+          <div class="doc-flow__step">
+            <span>04</span>
+            <strong>Prove the claim</strong>
+            <p><a href="/docs/45q/index.html">haql-45q</a>, <a href="/docs/emission/index.html">haql-emission</a> and <a href="/docs/rrc/index.html">haql-rrc</a> prepare the evidence.</p>
+          </div>
+        </div>
+        <p>For an acquisition, <a href="/docs/dataroom/index.html">haql-dataroom</a> cross-checks the seller's package. For a reservoir forecast, <a href="/docs/engine/index.html">haql-engine</a> explains how the model and its uncertainty are checked.</p>
+      </section>
+
+      <section id="promises">
+        <h2>Common promises</h2>
+        <p>These are the design choices shared across the paid suite. They are also the questions to ask before trusting any output.</p>
+        <div class="doc-grid">
+          <div class="doc-card">
+            <span class="doc-card__tag">Local</span>
+            <h3>Files in, reports out</h3>
+            <p>The paid tools run offline. The data stays on your machine; there is no portal upload, database connection or telemetry.</p>
+          </div>
+          <div class="doc-card">
+            <span class="doc-card__tag">Deterministic</span>
+            <h3>Same input, same findings</h3>
+            <p>A rule has a stable identifier. The same bytes should produce the same report, which makes a later review possible.</p>
+          </div>
+          <div class="doc-card">
+            <span class="doc-card__tag">Traceable</span>
+            <h3>Every finding has a source</h3>
+            <p>Reports point to the rule, source row and input fingerprint. Optional signed attestations make later edits detectable.</p>
+          </div>
+        </div>
+        <div class="doc-callout doc-callout--warn">
+          <p><strong>Advisory by design:</strong> a finding is a question with evidence, not an automatic legal, financial or engineering conclusion. The judgement remains with the professional reviewing it.</p>
+        </div>
+      </section>
+
+      <section id="free">
+        <h2>Free engineering libraries</h2>
+        <p>Two foundations of the suite are free and MIT-licensed. They are deliberately small, so they can be inspected and reused without a commercial relationship.</p>
+        <div class="doc-product-grid">
+          <a class="doc-card doc-card--link" href="/docs/units/index.html">
+            <span class="doc-card__tag">MIT · Python</span>
+            <h3>haql-units</h3>
+            <p>Explicit unit definitions, time bases and citations. If the conversion cannot be stated, it errors instead of guessing.</p>
+            <span class="doc-card__more">Read the guide →</span>
+          </a>
+          <a class="doc-card doc-card--link" href="/docs/coords/index.html">
+            <span class="doc-card__tag">MIT · Python</span>
+            <h3>haql-coords</h3>
+            <p>Minimum-curvature well paths, survey checks and a deterministic as-drilled certificate.</p>
+            <span class="doc-card__more">Read the guide →</span>
+          </a>
+        </div>
+      </section>
+
+      <section id="questions">
+        <h2>How to read a guide</h2>
+        <p>Every product guide answers the same questions in the same order: what it does, why it matters, what goes in, what comes out, what it checks, what it does not do, and how to try it. If a claim is not supported, it should not be in the guide.</p>
+        <p>For the reservoir engine specifically, the <a href="/docs/engine/index.html">public engine guide</a> also explains the evidence and the current scientific limits. The <a href="/docs/engine/technical-reference.html">technical reference</a> is there for engineers who want the equations and file map.</p>
+      </section>
+
+      <div class="doc-pager">
+        <a href="/index.html">← Haql Labs home</a>
+        <a href="/docs/engine/index.html">Engine guide →</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__bottom">
+      <p>© <span id="yr">2026</span> Haql Labs · Public documentation for the product suite.</p>
+      <p><a href="/index.html">Home</a> · <a href="/haql-engine.html">haql-engine</a> · <a href="mailto:kunleaz100@gmail.com">Contact</a></p>
+    </div>
+  </div>
+</footer>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>
