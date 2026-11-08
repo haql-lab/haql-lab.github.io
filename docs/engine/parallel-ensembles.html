@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Parallel ensemble execution — haql-engine documentation</title>
-<meta name="description" content="How run_uncertainty.py --workers runs independent geological realizations in parallel while keeping deterministic ordering, provenance and failed-run reporting.">
+<title>Run many scenarios at once — haql-engine scenario guide</title>
+<meta name="description" content="A plain-language guide to parallel scenario execution in haql-engine: why uncertainty studies need many simulations, how parallel running helps, and why every result stays traceable.">
 <link rel="canonical" href="https://haql-lab.github.io/docs/engine/parallel-ensembles.html">
 <meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
@@ -30,7 +30,7 @@
       <a href="/docs/engine/index.html" aria-current="page">Docs</a>
       <a href="/index.html#pricing">Pricing</a>
       <a href="/downloads.html">Downloads</a>
-      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=Parallel%20ensemble%20question">Ask a question</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=Scenario%20study%20question">Ask a question</a>
     </nav>
   </div>
 </header>
@@ -38,145 +38,189 @@
 <main id="main">
   <section class="doc-hero">
     <div class="wrap">
-      <p class="eyebrow">haql-engine · feature documentation</p>
-      <h1>Run the ensemble <em>in parallel</em> without losing the audit trail.</h1>
-      <p class="lede"><code>run_uncertainty.py --workers N</code> runs independent realizations as separate subprocesses. The solver stays single-threaded; the concurrency is at the realization level, where it is safe and useful.</p>
+      <p class="eyebrow">haql-engine · scenario guide</p>
+      <h1>Run many scenarios at once. <em>Keep every result.</em></h1>
+      <p class="lede">A scenario study is a set of independent simulations. Parallel running lets the set finish sooner on a capable machine — without changing the result of any single simulation or losing the audit trail.</p>
       <div class="doc-badges">
         <span class="doc-badge doc-badge--ok">new</span>
-        <span class="doc-badge">subprocess pool</span>
-        <span class="doc-badge">deterministic result order</span>
-        <span class="doc-badge">failures retained</span>
+        <span class="doc-badge">shorter scenario studies</span>
+        <span class="doc-badge">no lost cases</span>
+        <span class="doc-badge">result order preserved</span>
       </div>
     </div>
   </section>
 
   <div class="wrap doc-layout">
-    <aside class="doc-side" aria-label="Page contents">
+    <aside class="doc-side" aria-label="Scenario guide contents">
       <span class="doc-side__label">On this page</span>
-      <a href="#why" aria-current="page">Why it exists</a>
-      <a href="#usage">Usage</a>
-      <a href="#how">How it works</a>
-      <a href="#determinism">Determinism</a>
-      <a href="#failures">Failures and resume</a>
-      <a href="#resources">Resource guidance</a>
-      <a href="#test">Test evidence</a>
+      <a href="#idea" aria-current="page">The idea</a>
+      <a href="#changed">What changed</a>
+      <a href="#get">What you get</a>
+      <a href="#example">A simple example</a>
+      <a href="#safe">What stays safe</a>
+      <a href="#failures">If a run fails</a>
+      <a href="#not">What it is not</a>
+      <a href="#operators">For operators</a>
+      <a href="#evidence">Evidence</a>
       <a href="#limits">Limits</a>
       <hr>
-      <a href="/docs/engine/index.html">← Documentation home</a>
+      <a href="/docs/engine/index.html">← Public guide</a>
+      <a href="/docs/engine/technical-reference.html">Technical reference</a>
     </aside>
 
     <article class="doc-main">
-      <p class="doc-meta">Feature: parallel ensemble execution · Engine surface: <code>run_uncertainty.py</code> · Status: shipped</p>
+      <p class="doc-meta">Feature: parallel scenario execution · Available in <code>run_uncertainty.py</code> · Status: shipped</p>
 
-      <section id="why">
-        <h2>Why it exists</h2>
-        <p>A geological uncertainty study is not one simulation. It is tens or hundreds of simulations, each with a different permeability field, structure, contact or scalar sample. Running them one after another wastes the machine.</p>
-        <p>The engine's solver is intentionally single-threaded and Python/NumPy. Rather than pretending it is an MPI code, ensemble execution uses process-level concurrency: each realization is a normal <code>run_spe1.py</code> process with its own run ID, manifest and JSON output.</p>
+      <section id="idea">
+        <h2>The idea, in one picture</h2>
+        <p>Imagine a toll plaza with four booths and a queue of twenty cars. Each car still takes the same time to pass through a booth. But with four booths open, the queue clears sooner than with one.</p>
+        <p>A scenario study works the same way. Each simulation is a car; the workers are the booths. The engine does not make an individual simulation faster. It runs independent simulations at the same time.</p>
+        <div class="doc-compare">
+          <div class="doc-compare__item">
+            <span>Before</span>
+            <strong>One at a time</strong>
+            <p>A 20-scenario study waits for each scenario to finish before starting the next.</p>
+          </div>
+          <div class="doc-compare__item doc-compare__item--accent">
+            <span>Now</span>
+            <strong>Up to N at once</strong>
+            <p>With four workers, four independent scenarios can be in progress together.</p>
+          </div>
+        </div>
+        <p>This matters because uncertainty studies are not one run. They are many plausible versions of the field, and the useful answer is the range they produce.</p>
       </section>
 
-      <section id="usage">
-        <h2>Usage</h2>
-        <pre><code>python3 run_uncertainty.py \
-  --input uncertainty_input.example.json \
-  --out /tmp/haql-ensemble \
-  --T 365 \
-  --workers 4</code></pre>
-        <p>Everything else is unchanged. <code>--workers</code> defaults to <code>1</code>, so existing scripts and regression tests keep the sequential behavior. Values below <code>1</code> are rejected.</p>
-        <table class="doc-table">
-          <thead><tr><th>Option</th><th>Behavior</th></tr></thead>
-          <tbody>
-            <tr><td><code>--workers 1</code></td><td>Sequential execution, identical to the previous driver behavior.</td></tr>
-            <tr><td><code>--workers N</code></td><td>At most <code>N</code> realizations run at once, capped by the number of pending realizations.</td></tr>
-            <tr><td><code>--dry-run</code></td><td>No solver processes; workers have no effect.</td></tr>
-            <tr><td><code>--resume</code></td><td>Matching completed runs are reused before the pool starts; only pending realizations are submitted.</td></tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section id="how">
-        <h2>How it works</h2>
-        <ol class="doc-steps">
-          <li><strong>Generate all realizations first.</strong> Each one is written to <code>realizations/</code> and hashed before execution.</li>
-          <li><strong>Classify work.</strong> Dry-run entries are recorded only. Matching <code>--resume</code> entries are reused only if experiment, realization hash, time settings and tolerance settings match.</li>
-          <li><strong>Submit pending jobs.</strong> A bounded <code>ThreadPoolExecutor</code> launches <code>run_spe1.py</code> subprocesses. Threads only coordinate process I/O; the solver itself does not share memory between realizations.</li>
-          <li><strong>Record as each finishes.</strong> The main thread updates <code>experiment.json</code> atomically after every completion, preserving an interrupted-run record.</li>
-          <li><strong>Sort the final results.</strong> Regardless of completion order, <code>experiment.json</code> and the forecast input use realization index order.</li>
-        </ol>
-        <div class="doc-callout doc-callout--ok">
-          <p><strong>Safe boundary:</strong> realizations are independent. There is no shared mutable solver state, no cross-realization Newton coupling and no race on a run directory because each process writes its own files.</p>
+      <section id="changed">
+        <h2>What changed</h2>
+        <p>The scenario runner now accepts a worker count. The default is still one, so an existing study behaves exactly as before. Choosing a higher number opens more “booths” on the same machine.</p>
+        <div class="doc-audience">
+          <div class="doc-audience__item">
+            <span>Before</span>
+            <h3>Sequential</h3>
+            <p>One scenario runs, writes its result, then the next begins. Simple, but the machine is mostly waiting.</p>
+          </div>
+          <div class="doc-audience__item">
+            <span>Now</span>
+            <h3>Process-level parallel</h3>
+            <p>Several independent scenario processes run together. Each one has its own output and receipt.</p>
+          </div>
+          <div class="doc-audience__item">
+            <span>Still true</span>
+            <h3>Same individual physics</h3>
+            <p>The solver is unchanged. Parallelism does not alter a single scenario's equations or timestep decisions.</p>
+          </div>
         </div>
       </section>
 
-      <section id="determinism">
-        <h2>Determinism</h2>
-        <p>Parallel completion order is nondeterministic. Result order is not. The driver sorts by <code>realization_index</code> before writing the final experiment and forecast input.</p>
+      <section id="get">
+        <h2>What you get — and what you don't</h2>
+        <table class="doc-table">
+          <thead><tr><th>You get</th><th>You do not get</th></tr></thead>
+          <tbody>
+            <tr><td>Shorter wall-clock time for a set of independent scenarios, when the machine has spare cores and memory</td><td>A faster single simulation; the solver remains single-threaded</td></tr>
+            <tr><td>The same inputs, physics and checks for every scenario</td><td>Different numerical results just because the worker count changed</td></tr>
+            <tr><td>Every failed or incomplete scenario kept visible in the study record</td><td>Automatic deletion of difficult cases to make the study look cleaner</td></tr>
+            <tr><td>A stable result order and a separate digital receipt for each run</td><td>A cluster scheduler, MPI, GPU execution or distributed computing</td></tr>
+          </tbody>
+        </table>
+        <div class="doc-callout doc-callout--ok">
+          <p><strong>In one sentence:</strong> parallel running changes how quickly the set is completed, not what an individual simulation means.</p>
+        </div>
+      </section>
+
+      <section id="example">
+        <h2>A simple example</h2>
+        <p>Suppose a study has 20 scenarios and each takes 10 minutes.</p>
         <ul>
-          <li>Every realization keeps its own deterministic seed sequence.</li>
-          <li>Every run keeps its own provenance manifest and run ID.</li>
-          <li>The forecast input lists runs in realization order, not completion order.</li>
-          <li>The regression test checks that two workers still produce <code>real-0000</code> before <code>real-0001</code> in the experiment record.</li>
+          <li>Run one at a time: about 200 minutes of waiting.</li>
+          <li>Run four at a time: about 50 minutes in an ideal world.</li>
         </ul>
-        <p>This does not make the wall-clock output byte-identical across worker counts. It makes the experiment's logical ordering and provenance stable.</p>
+        <p>The real number will be different. Disk speed, memory, processor contention and the size of each scenario all matter. The example shows the shape of the benefit, not a guarantee.</p>
+        <div class="doc-callout">
+          <p><strong>For a client:</strong> the useful question is not “how many workers?” but “what machine will run the study, and how long does one scenario take?” Those two facts determine the realistic completion time.</p>
+        </div>
+      </section>
+
+      <section id="safe">
+        <h2>What stays safe</h2>
+        <p>A scenario study is only useful if the evidence survives the speed-up. Four things remain true:</p>
+        <ol class="doc-steps">
+          <li><strong>Each scenario is isolated.</strong> A separate process writes its own result files, log and digital receipt. One scenario cannot corrupt another's output.</li>
+          <li><strong>The final order is deterministic.</strong> Scenarios are listed by their planned index, not by whichever worker happens to finish first.</li>
+          <li><strong>The result is traceable.</strong> Inputs and settings are fingerprinted before execution, and the output is recorded. Changing one byte changes the identity.</li>
+          <li><strong>Failures stay visible.</strong> A scenario that cannot produce a valid result is recorded as failed, not quietly dropped from the summary.</li>
+        </ol>
+        <blockquote class="doc-quote">Speed is useful only when the result can still be defended. The audit trail is part of the feature, not an extra report added afterwards.</blockquote>
       </section>
 
       <section id="failures">
-        <h2>Failures and resume</h2>
-        <p>A failed subprocess is not removed. If <code>run_spe1.py</code> produces no JSON, the driver writes a parseable failure artifact at the expected run path, records the exit code and error, and continues with the remaining realizations.</p>
-        <p>When the pool finishes, the experiment status is <code>completed</code> only if every realization completed and passed its material-balance gate. Otherwise it is <code>partial</code>, and the command exits <code>3</code>. A later <code>--resume</code> run can reuse the good artifacts and retry the failed or missing ones.</p>
+        <h2>If a scenario fails</h2>
+        <p>A failed scenario is kept in the study record with its status and an explanatory artifact. The study is marked <strong>partial</strong> rather than <strong>complete</strong>. That distinction matters: a clean average over only the easy cases is not an honest uncertainty study.</p>
+        <p>A later resume run can reuse the scenarios that completed and retry the ones that did not. It does not reuse a result merely because a file exists; the input and settings must still match.</p>
         <div class="doc-callout doc-callout--warn">
-          <p><strong>Do not judge an ensemble by its average alone.</strong> A failed or water-filled realization can be the one that matters. The experiment record keeps it visible for exactly that reason.</p>
+          <p><strong>Do not judge a study by its average alone.</strong> The failed or water-filled case may be the one that changes the decision. Keeping it visible is the point.</p>
         </div>
       </section>
 
-      <section id="resources">
-        <h2>Resource guidance</h2>
-        <table class="doc-table">
-          <thead><tr><th>Resource</th><th>Recommendation</th></tr></thead>
-          <tbody>
-            <tr><td>CPU</td><td>Start with <code>--workers 2</code> on a 2-core laptop; use <code>N</code> ≤ physical cores for a shared machine.</td></tr>
-            <tr><td>Memory</td><td>Each worker is a separate Python process. Budget the solver's per-run memory times the worker count.</td></tr>
-            <tr><td>Disk</td><td>Every realization writes a run JSON, log and provenance manifest. Clean old experiment output deliberately; do not delete evidence mid-run.</td></tr>
-            <tr><td>Provenance store</td><td>Workers write distinct run directories. Use a dedicated <code>--store</code> for large ensembles so experiments do not mix.</td></tr>
-            <tr><td>Solver speed</td><td>Parallelism does not make one run faster. It only overlaps independent runs.</td></tr>
-          </tbody>
-        </table>
+      <section id="not">
+        <h2>What this feature is not</h2>
+        <ul>
+          <li><strong>Not a faster solver.</strong> A single simulation still takes the same time.</li>
+          <li><strong>Not a cluster.</strong> Workers run on one machine. Distributed execution and job-scheduler integration are separate work.</li>
+          <li><strong>Not infinite.</strong> Each worker needs memory and disk space. Oversubscribing the machine can make the study slower.</li>
+          <li><strong>Not a replacement for engineering judgement.</strong> More scenarios do not make a weak model trustworthy.</li>
+        </ul>
       </section>
 
-      <section id="test">
-        <h2>Test evidence</h2>
-        <p>The regression suite includes a two-realization, two-worker run against the SPE1 deck. It asserts:</p>
-        <pre><code>python3 -m unittest -v \
-  test_geology.TestCLI.test_parallel_workers_run_ensemble</code></pre>
+      <section id="operators">
+        <h2>For operators</h2>
+        <p>If you run the engine yourself, the command is:</p>
+        <pre><code>python3 run_uncertainty.py \
+  --input uncertainty_input.example.json \
+  --out uncertainty_out \
+  --T 365 \
+  --workers 4</code></pre>
+        <p><code>--workers</code> defaults to <code>1</code>; values below <code>1</code> are rejected. The run writes a separate process, log and digital receipt per scenario. A failed scenario produces a parseable failure artifact and leaves the experiment <code>partial</code>.</p>
+        <div class="doc-operator">
+          <h3>Choosing a worker count</h3>
+          <p>Start with two workers on a laptop and increase only while the machine remains responsive. A practical ceiling is the number of physical processor cores available to the engine; memory usually becomes the real limit first.</p>
+          <p>Use a dedicated output directory and receipt store for a large study. Do not delete evidence while a study is running.</p>
+        </div>
+        <p>Full command options and the technical failure contract are in the <a href="/docs/engine/technical-reference.html#parallel">technical reference</a>.</p>
+      </section>
+
+      <section id="evidence">
+        <h2>Evidence</h2>
+        <p>The regression suite includes a two-scenario study run with two workers. It verifies that:</p>
         <ul>
-          <li>exit code <code>0</code> when both realizations complete;</li>
-          <li><code>n_completed == 2</code> and <code>n_failed == 0</code>;</li>
-          <li>experiment records are ordered <code>0, 1</code>;</li>
-          <li>both runs are completed;</li>
-          <li>the forecast input exists.</li>
+          <li>both scenarios complete;</li>
+          <li>no failure is reported;</li>
+          <li>the experiment lists results in planned order <code>0, 1</code>;</li>
+          <li>both scenario records are marked complete;</li>
+          <li>the forecast input is created.</li>
         </ul>
-        <p>Run the full suite before trusting a larger ensemble:</p>
-        <pre><code>python3 test_geology.py
-python3 test_forecast.py
-python3 test_provenance.py
-python3 selftest.py</code></pre>
+        <p>That is a small test, but it checks the properties that matter: isolation, ordering, completion reporting and a usable downstream study.</p>
       </section>
 
       <section id="limits">
-        <h2>What this feature is not</h2>
-        <ul>
-          <li><strong>Not solver parallelism.</strong> Each solve is still single-threaded; no MPI, no GPU, no domain decomposition.</li>
-          <li><strong>Not distributed computing.</strong> Workers run on one host. A cluster/Slurm backend is a separate feature.</li>
-          <li><strong>Not a speed guarantee.</strong> Oversubscribing cores or memory will make the ensemble slower.</li>
-          <li><strong>Not a replacement for a scheduler.</strong> Large production runs still belong in a job scheduler with checkpoint/restart and resource limits.</li>
-        </ul>
+        <h2>Current limits</h2>
+        <table class="doc-table">
+          <thead><tr><th>Area</th><th>Limit</th></tr></thead>
+          <tbody>
+            <tr><td>Execution</td><td>One host. No MPI, GPU, Kubernetes or Slurm integration.</td></tr>
+            <tr><td>Solver</td><td>The individual simulation remains single-threaded.</td></tr>
+            <tr><td>Speed-up</td><td>Depends on cores, memory, disk and scenario size; it is not automatically proportional to the worker count.</td></tr>
+            <tr><td>Operations</td><td>No live dashboard or automatic resource scheduler; it is a command-line study runner.</td></tr>
+          </tbody>
+        </table>
         <div class="doc-callout">
-          <p><strong>Next infrastructure step:</strong> a scheduler adapter (Slurm/Kubernetes) and per-realization resource accounting. That is not part of this commit.</p>
+          <p><strong>Next infrastructure step:</strong> a scheduler adapter and per-scenario resource accounting. That is a separate feature, not part of this release.</p>
         </div>
       </section>
 
       <div class="doc-pager">
-        <a href="/docs/engine/index.html">← Documentation home</a>
-        <a href="/haql-engine.html">haql-engine product page →</a>
+        <a href="/docs/engine/index.html">← Public guide</a>
+        <a href="/docs/engine/technical-reference.html">Technical reference →</a>
       </div>
     </article>
   </div>
@@ -185,7 +229,7 @@ python3 selftest.py</code></pre>
 <footer class="ftr">
   <div class="wrap">
     <div class="ftr__bottom">
-      <p>© <span id="yr">2026</span> Haql Labs · Feature documentation for <code>run_uncertainty.py</code>.</p>
+      <p>© <span id="yr">2026</span> Haql Labs · Public guide to parallel scenario execution.</p>
       <p><a href="/index.html">Home</a> · <a href="/haql-engine.html">haql-engine</a> · <a href="/docs/engine/index.html">Docs</a></p>
     </div>
   </div>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Technical reference — haql-engine documentation</title>
+<meta name="description" content="Technical reference for haql-engine: equations, file structure, commands, geological uncertainty, ensemble execution, forecast aggregation, provenance and validation limits.">
+<link rel="canonical" href="https://haql-lab.github.io/docs/engine/technical-reference.html">
+<meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="brand" href="/index.html" aria-label="Haql Labs — home">
+      <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#0B1B33"/><path fill="#F6F4EE" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#F6F4EE" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#4F9BFF" stroke-width="2.1" stroke-linecap="round"/></svg></span>
+      <span class="brand__word">haql<span class="brand__lab">Labs</span></span>
+    </a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="/haql-engine.html">haql-engine</a>
+      <a href="/docs/engine/index.html" aria-current="page">Docs</a>
+      <a href="/index.html#pricing">Pricing</a>
+      <a href="/downloads.html">Downloads</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=Engine%20documentation%20question">Ask a question</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="doc-hero">
+    <div class="wrap">
+      <p class="eyebrow">haql-engine · technical reference</p>
+      <h1>The technical reference for <em>engineers and reviewers.</em></h1>
+      <p class="lede">This page assumes familiarity with reservoir simulation and software. It covers the numerical method, file map, command-line options, uncertainty schema, forecast layer and validation evidence. New to the engine? Start with the <a href="/docs/engine/index.html">plain-language guide</a>.</p>
+      <div class="doc-badges">
+        <span class="doc-badge doc-badge--accent">three-phase black oil</span>
+        <span class="doc-badge">variable switching</span>
+        <span class="doc-badge">SPE1 evidence</span>
+        <span class="doc-badge doc-badge--ok">reproducible runs</span>
+        <span class="doc-badge">research-grade</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap doc-layout">
+    <aside class="doc-side" aria-label="Documentation contents">
+      <span class="doc-side__label">Contents</span>
+      <a href="#what" aria-current="page">What it is</a>
+      <a href="#quickstart">Quick start</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#solve">How a run works</a>
+      <a href="#uncertainty">Uncertainty workflow</a>
+      <a href="#forecast">Forecast layer</a>
+      <a href="#parallel">Parallel ensembles</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#limits">Limits</a>
+      <a href="#files">File map</a>
+      <a href="#glossary">Glossary</a>
+      <hr>
+      <a href="/docs/engine/index.html">Public guide</a>
+      <a href="/haql-engine.html">Product page</a>
+      <a href="#feature-log">Feature log</a>
+    </aside>
+
+    <article class="doc-main">
+      <div class="doc-callout">
+        <p><strong>Audience:</strong> engineers, reviewers and readers who want the equations and implementation detail. For a plain-language introduction, read the <a href="/docs/engine/index.html">public guide</a> first.</p>
+      </div>
+
+      <section id="what">
+        <h2>What this engine is</h2>
+        <p><code>haql-engine</code> is a from-scratch, correctness-first three-phase black-oil simulator written in Python and NumPy. It is built to make a reservoir result inspectable: every run writes a machine-readable record, a provenance manifest and a material-balance ledger.</p>
+        <div class="doc-grid">
+          <div class="doc-card">
+            <span class="doc-card__tag">The solver</span>
+            <h3>Physics you can check</h3>
+            <p>Oil, water, free gas and dissolved gas. Conservative TPFA fluxes, upstream mobility, Peaceman wells and Newton iteration with variable switching between <code>Sg</code> and <code>Rs</code>.</p>
+          </div>
+          <div class="doc-card">
+            <span class="doc-card__tag">The ensemble</span>
+            <h3>Uncertainty around the case</h3>
+            <p>Correlated permeability and porosity, facies, structural depth shifts and fault throws, contacts, scalar controls, and optional PVT/relperm multipliers.</p>
+          </div>
+          <div class="doc-card">
+            <span class="doc-card__tag">The evidence</span>
+            <h3>A result you can reproduce</h3>
+            <p>SPE1 comparison against OPM Flow, mass-balance gates, deterministic fixtures, run manifests, and a forecast layer that reports failed or incomplete runs instead of hiding them.</p>
+          </div>
+        </div>
+        <div class="doc-callout">
+          <p><strong>Read this first:</strong> the engine is a verification and teaching instrument, not a replacement for Eclipse, CMG or tNavigator. It currently supports SPE1-style Cartesian grids and a deliberately narrow well/schedule model.</p>
+        </div>
+      </section>
+
+      <section id="quickstart">
+        <h2>Quick start</h2>
+        <p>Run the smallest useful checks first. These commands assume the engine directory is the current directory.</p>
+        <pre><code>cd engine
+
+# 1. Fast internal checks: Jacobian, conservation, determinism.
+python3 selftest.py
+
+# 2. One short SPE1 run.
+python3 run_spe1.py --T 30 --quiet --json /tmp/spe1_30.json
+
+# 3. A small ensemble. Use --workers only when you have CPU/RAM to spare.
+python3 run_uncertainty.py \
+  --input uncertainty_input.example.json \
+  --out /tmp/haql-ensemble \
+  --T 30 --workers 2
+
+# 4. Aggregate the ensemble into P10/P50/P90 and CSV exports.
+python3 run_forecast.py \
+  --input /tmp/haql-ensemble/forecast_input.json \
+  --json /tmp/haql-forecast.json \
+  --csv-dir /tmp/haql-forecast-csv</code></pre>
+        <p>If a command fails, read the last log under <code>/tmp/haql-ensemble/logs/</code>. A failed realization is recorded in <code>experiment.json</code>; it is not silently removed.</p>
+      </section>
+
+      <section id="architecture">
+        <h2>Architecture</h2>
+        <p>The code is deliberately split into a numerical core, a case driver and two surrounding layers: geological realizations and forecast aggregation.</p>
+        <pre><code>deckparse.py ──► fieldgrid.py ──► blackoil_vs.py ──► run_spe1.py
+     │                │                  │                 │
+     │                │                  │                 ├── provenance.py
+     │                │                  │                 └── JSON / material balance
+     │                │                  │
+     │                │                  └── PVT + relperm + wells + Newton
+     │                └── Cartesian grid, depth, transmissibility
+     └── SPE1 deck reader
+
+geology.py ──► run_uncertainty.py ──► run_spe1.py (one process per realization)
+                     │
+                     └── experiment.json + realization_summary.csv + forecast_input.json
+                                                   │
+                                                   ▼
+                                          forecast.py / run_forecast.py</code></pre>
+        <h3>Design rules</h3>
+        <ul>
+          <li><strong>No hidden state.</strong> Inputs, solver settings and source identity are hashed into a run manifest.</li>
+          <li><strong>No silent failures.</strong> A failed or incomplete realization remains in the experiment record.</li>
+          <li><strong>No fake precision.</strong> Every published number is tied to a fixture, a gate or a named limitation.</li>
+          <li><strong>No claim without a test.</strong> The regression suites are part of the product, not an afterthought.</li>
+        </ul>
+      </section>
+
+      <section id="solve">
+        <h2>How a run works</h2>
+        <ol class="doc-steps">
+          <li><strong>Parse the deck.</strong> <code>deckparse.py</code> tokenises the SPE1-style input. The current driver is intentionally explicit about its supported subset.</li>
+          <li><strong>Build the grid.</strong> <code>fieldgrid.py</code> creates the Cartesian cells, layer depths, volumes, transmissibilities and well indices.</li>
+          <li><strong>Initialise the state.</strong> Pressure, solution GOR and saturations are set from the datum pressure, contacts and optional scalar overrides.</li>
+          <li><strong>Assemble the residual.</strong> <code>blackoil_vs.py</code> writes the mass-balance equations for oil, water and gas, including well source terms.</li>
+          <li><strong>Solve Newton.</strong> The Jacobian is assembled and the linear system is solved until the residual gate is met or the timestep is cut.</li>
+          <li><strong>Switch variables when needed.</strong> Each cell carries either free-gas saturation or dissolved gas, depending on its phase state.</li>
+          <li><strong>Record the result.</strong> The driver writes report-step records, material-balance drift, a terminal status and a provenance block.</li>
+        </ol>
+        <p>The full numerical detail is in <code>engine/README.md</code> and <code>engine/VALIDATION.md</code>; this page is the map, not a substitute for those documents.</p>
+      </section>
+
+      <section id="uncertainty">
+        <h2>Uncertainty workflow</h2>
+        <p><code>geology.py</code> turns one base grid into reproducible realizations. A realization is data, not a hidden random seed: it is written to JSON and hashed before the solver sees it.</p>
+        <table class="doc-table">
+          <thead><tr><th>Layer</th><th>What varies</th><th>Where it is applied</th></tr></thead>
+          <tbody>
+            <tr><td>Petrophysics</td><td>Lognormal permeability, normal porosity, porosity–permeability correlation, vertical anisotropy</td><td><code>kx/ky/kz</code> and <code>poro</code> arrays</td></tr>
+            <tr><td>Facies</td><td>Truncated-Gaussian categories, requested proportions, per-facies permeability and porosity effects</td><td>After continuous multipliers, before clipping</td></tr>
+            <tr><td>Structure</td><td>Correlated vertical shift per x-y column; optional planar fault throws</td><td>Cell-centre depth and hydrostatic initial pressure</td></tr>
+            <tr><td>Contacts</td><td>OWC depth, saturations above/below, optional transition width</td><td>Initial water saturation</td></tr>
+            <tr><td>Scalars</td><td>Initial pressure, well controls, PVT multipliers, relperm multipliers</td><td>Solver initial state and well/PVT setup</td></tr>
+          </tbody>
+        </table>
+        <p>The generated ensemble is driven by <code>run_uncertainty.py</code>. It writes one run per realization, records failures, and produces a <code>forecast_input.json</code> for the aggregation layer.</p>
+        <div class="doc-callout doc-callout--warn">
+          <p><strong>Contact warning:</strong> a completely water-filled cell gives the three-phase unknowns no oil left to solve. Keep a residual oil saturation below the contact (<code>sw_below</code> default is <code>0.8</code>), and treat a contact that crosses the producer as a case to inspect, not a routine default.</p>
+        </div>
+      </section>
+
+      <section id="forecast">
+        <h2>Forecast layer</h2>
+        <p><code>forecast.py</code> is analysis-only. It reads completed runs, aligns them on a common time horizon, and reports per-case statistics. It never calls the solver and never mutates a run.</p>
+        <ul>
+          <li><strong>Quantile or exceedance</strong> P10/P50/P90 conventions, selectable in the input.</li>
+          <li><strong>Common-horizon interpolation</strong> with explicit no-extrapolation behavior.</li>
+          <li><strong>Mean, median, sample standard deviation, min and max</strong> for each metric.</li>
+          <li><strong>Failed-run reporting</strong> and parent experiment links, not silent exclusion.</li>
+          <li><strong>JSON and CSV outputs</strong> for downstream review.</li>
+        </ul>
+        <p>If the ensemble is small, the quantiles are descriptive, not a certified reserve estimate. If the horizon differs between runs, the forecast truncates and says so.</p>
+      </section>
+
+      <section id="parallel">
+        <h2>Parallel ensembles <span class="doc-badge doc-badge--ok">new</span></h2>
+        <p><code>run_uncertainty.py --workers N</code> now runs independent realizations through separate subprocesses. The solver itself remains single-threaded; the parallelism is at the ensemble level.</p>
+        <pre><code>python3 run_uncertainty.py \
+  --input uncertainty_input.example.json \
+  --out /tmp/haql-ensemble \
+  --T 365 --workers 4
+
+# deterministic experiment order is always real-0000, real-0001, ...
+# failed runs are still written and linked, not removed.</code></pre>
+        <p>Read the dedicated page for determinism, resource guidance and failure behavior: <a href="/docs/engine/parallel-ensembles.html">Parallel ensemble execution →</a></p>
+      </section>
+
+      <section id="evidence">
+        <h2>Evidence, not adjectives</h2>
+        <table class="doc-table">
+          <thead><tr><th>Claim</th><th>Evidence</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>SPE1 oil material balance</td><td>−4.59e-7 over 3,285 days; gate 1e-6</td><td>PASS</td></tr>
+            <tr><td>Cumulative oil vs OPM Flow</td><td>RMS 1.57%, max 3.14%</td><td>Published comparison, not the pre-registered 1 psi gate</td></tr>
+            <tr><td>Flowing BHP vs OPM Flow</td><td>RMS 3.63%, max 20.1%</td><td>Published comparison</td></tr>
+            <tr><td>Determinism</td><td>Fixture replay and provenance identity tests</td><td>PASS</td></tr>
+            <tr><td>Full-field simulation</td><td>No EGRID/corner-point reader</td><td>NOT SUPPORTED</td></tr>
+          </tbody>
+        </table>
+        <p>Full detail: <a href="/haql-engine.html#evidence">the public evidence page</a> and <code>engine/VALIDATION.md</code>.</p>
+      </section>
+
+      <section id="limits">
+        <h2>Limits you must state before showing it</h2>
+        <ul>
+          <li><strong>Not a full-field simulator.</strong> Cartesian SPE1-class grids; no corner-point/EGRID, no SPE9, no real field grids.</li>
+          <li><strong>Not fast.</strong> It is slower than OPM Flow; the value is inspection and cross-checking, not throughput.</li>
+          <li><strong>Not history-matched.</strong> The uncertainty ensemble is not conditioned to observed production.</li>
+          <li><strong>Not a reserves certification.</strong> P10/P50/P90 are descriptive outputs of the supplied model and distributions.</li>
+          <li><strong>Not a commercial support product.</strong> There is no SLA, no enterprise security certification and no client field audit yet.</li>
+        </ul>
+        <div class="doc-callout doc-callout--warn">
+          <p><strong>Do not tell a lecturer or engineer this replaces Eclipse.</strong> Tell them it is a reproducible black-oil engine with explicit validation and limitations. That is a claim the evidence supports.</p>
+        </div>
+      </section>
+
+      <section id="files">
+        <h2>File map</h2>
+        <table class="doc-table">
+          <thead><tr><th>File</th><th>Responsibility</th></tr></thead>
+          <tbody>
+            <tr><td><code>deckparse.py</code></td><td>SPE1-style deck tokenizer and parser</td></tr>
+            <tr><td><code>fieldgrid.py</code></td><td>Cartesian grid, depths, volumes, transmissibilities</td></tr>
+            <tr><td><code>blackoil_vs.py</code></td><td>Three-phase black oil with variable switching</td></tr>
+            <tr><td><code>run_spe1.py</code></td><td>Case driver, initial state, schedule, material balance, provenance</td></tr>
+            <tr><td><code>geology.py</code></td><td>Facies, petrophysics, structure, contacts, scalars</td></tr>
+            <tr><td><code>run_uncertainty.py</code></td><td>Ensemble generation, execution and experiment record</td></tr>
+            <tr><td><code>forecast.py</code></td><td>Common-horizon aggregation and statistics</td></tr>
+            <tr><td><code>run_forecast.py</code></td><td>Forecast CLI and JSON/CSV export</td></tr>
+            <tr><td><code>provenance.py</code></td><td>Run manifests, sealing and verification</td></tr>
+            <tr><td><code>test_geology.py</code></td><td>Geology and ensemble regression suite</td></tr>
+            <tr><td><code>test_forecast.py</code></td><td>Forecast regression suite</td></tr>
+            <tr><td><code>test_provenance.py</code></td><td>Provenance and manifest regression suite</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="glossary">
+        <h2>Glossary</h2>
+        <table class="doc-table">
+          <thead><tr><th>Term</th><th>Meaning here</th></tr></thead>
+          <tbody>
+            <tr><td>TPFA</td><td>Two-point flux approximation: the face flux uses the two adjacent cell potentials.</td></tr>
+            <tr><td>Variable switching</td><td>The third unknown per cell is either free-gas saturation or dissolved gas, depending on the phase state.</td></tr>
+            <tr><td>Realization</td><td>One reproducible geological/scalar sample, written as JSON before it is run.</td></tr>
+            <tr><td>Common horizon</td><td>The last time shared by every eligible run; longer runs are truncated for a fair comparison.</td></tr>
+            <tr><td>Provenance manifest</td><td>Content-addressed record of inputs, settings, outputs and environment for one run.</td></tr>
+            <tr><td>Mass-balance gate</td><td>The relative material-balance drift that must be below a configured threshold for a run to pass.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="feature-log">
+        <h2>Feature log</h2>
+        <p>Each shipped feature gets a page here so the documentation and the code move together.</p>
+        <table class="doc-table">
+          <thead><tr><th>Feature</th><th>Documentation</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Geological uncertainty</td><td><a href="/docs/engine/index.html#uncertainty">Uncertainty workflow</a></td><td>shipped</td></tr>
+            <tr><td>Forecast aggregation</td><td><a href="/docs/engine/index.html#forecast">Forecast layer</a></td><td>shipped</td></tr>
+            <tr><td>Parallel ensemble execution</td><td><a href="/docs/engine/parallel-ensembles.html">Parallel ensembles</a></td><td><span class="doc-badge doc-badge--ok">new</span></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <div class="doc-pager">
+        <a href="/docs/engine/index.html">← Public guide</a>
+        <a href="/haql-engine.html">haql-engine product page →</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__bottom">
+      <p>© <span id="yr">2026</span> Haql Labs · Documentation is part of the engine, not an afterthought.</p>
+      <p><a href="/index.html">Home</a> · <a href="/haql-engine.html">haql-engine</a> · <a href="mailto:kunleaz100@gmail.com">Contact</a></p>
+    </div>
+  </div>
+</footer>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>
