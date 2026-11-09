@@ -59,6 +59,7 @@
       <a href="#architecture">Architecture</a>
       <a href="#solve">How a run works</a>
       <a href="#uncertainty">Uncertainty workflow</a>
+      <a href="#faults">Fault barriers</a>
       <a href="#forecast">Forecast layer</a>
       <a href="#parallel">Parallel ensembles</a>
       <a href="#evidence">Evidence</a>
@@ -176,15 +177,40 @@ geology.py ──► run_uncertainty.py ──► run_spe1.py (one process per r
           <tbody>
             <tr><td>Petrophysics</td><td>Lognormal permeability, normal porosity, porosity–permeability correlation, vertical anisotropy</td><td><code>kx/ky/kz</code> and <code>poro</code> arrays</td></tr>
             <tr><td>Facies</td><td>Truncated-Gaussian categories, requested proportions, per-facies permeability and porosity effects</td><td>After continuous multipliers, before clipping</td></tr>
-            <tr><td>Structure</td><td>Correlated vertical shift per x-y column; optional planar fault throws</td><td>Cell-centre depth and hydrostatic initial pressure</td></tr>
+            <tr><td>Structure</td><td>Correlated vertical shift per x-y column; optional planar fault throws; optional fault-face transmissibility multiplier (<code>0</code> = sealed, <code>1</code> = open)</td><td>Cell-centre depth, hydrostatic initial pressure, and TPFA face transmissibility</td></tr>
             <tr><td>Contacts</td><td>OWC depth, saturations above/below, optional transition width</td><td>Initial water saturation</td></tr>
-            <tr><td>Scalars</td><td>Initial pressure, well controls, PVT multipliers, relperm multipliers</td><td>Solver initial state and well/PVT setup</td></tr>
+            <tr><td>Scalars</td><td>Initial pressure, well controls, fault-seal factor, PVT multipliers, relperm multipliers</td><td>Solver initial state, well/PVT setup, fault-face transmissibility</td></tr>
           </tbody>
         </table>
         <p>The generated ensemble is driven by <code>run_uncertainty.py</code>. It writes one run per realization, records failures, and produces a <code>forecast_input.json</code> for the aggregation layer.</p>
         <div class="doc-callout doc-callout--warn">
           <p><strong>Contact warning:</strong> a completely water-filled cell gives the three-phase unknowns no oil left to solve. Keep a residual oil saturation below the contact (<code>sw_below</code> default is <code>0.8</code>), and treat a contact that crosses the producer as a case to inspect, not a routine default.</p>
         </div>
+      </section>
+
+      <section id="faults">
+        <h2>Fault barriers</h2>
+        <p>Each fault in <code>structure.faults</code> may carry a <code>transmissibility_multiplier</code> in <code>[0, 1]</code>. The default is <code>1.0</code>, which preserves the pre-barrier behaviour. Aliases are <code>transmissibility</code>, <code>transmissibility_factor</code> and <code>barrier_multiplier</code>; specifying more than one alias is rejected.</p>
+        <pre><code>"structure": {
+  "enabled": true,
+  "sigma_ft": 0.0,
+  "faults": [
+    {"axis": "x", "position_ft": 3000.0, "throw_ft": 12.0,
+     "side": "positive", "transmissibility_multiplier": 0.0}
+  ]
+}
+
+"scalars": {
+  "fault_transmissibility_multiplier": {
+    "distribution": "uniform", "min": 0.0, "max": 1.0
+  }
+}</code></pre>
+        <p>A fault normal to x or y acts on the cross-fault faces between the last cell centre below <code>position_ft</code> and the first cell centre at or above it. This is the same boundary the structural throw uses. <code>side</code> selects the displaced block, not the barrier face. Multiple faults on one face multiply. The effective factor is the per-fault baseline times the sampled global scalar. Set <code>structure.enabled</code> to true; a disabled structure emits no fault barrier.</p>
+        <p>The realization summary records <code>summary.fault_barrier</code>. The applied grid exposes <code>grid.face_multiplier</code> with one value per <code>grid.faces</code> entry, and a run artifact records <code>fault_summary</code>. The run configuration also stores the fault block and scalar override for provenance.</p>
+        <div class="doc-callout">
+          <p><strong>Scope:</strong> this is a user-supplied TPFA face multiplier, not juxtaposition or a shale-gouge/capillary seal calculation. Faults are vertical planes on a regular x/y grid; well completions and cell permeability are unchanged. A zero multiplier removes the connection, so isolated-compartment cases should be reviewed for pressure and material-balance behaviour.</p>
+        </div>
+        <p>Full public explanation: <a href="/docs/engine/fault-barriers.html">Fault-flow barriers</a>. Source schema: <code>engine/GEOLOGICAL_UNCERTAINTY.md</code>.</p>
       </section>
 
       <section id="forecast">
@@ -232,6 +258,7 @@ geology.py ──► run_uncertainty.py ──► run_spe1.py (one process per r
         <h2>Limits you must state before showing it</h2>
         <ul>
           <li><strong>Not a full-field simulator.</strong> Cartesian SPE1-class grids; no corner-point/EGRID, no SPE9, no real field grids.</li>
+          <li><strong>Not a fault-seal calculator.</strong> Fault-face transmissibility is a user-supplied multiplier. There is no juxtaposition, shale-gouge, capillary-entry-pressure or geomechanical seal model, and faults are vertical planes on a regular x/y grid.</li>
           <li><strong>Not fast.</strong> It is slower than OPM Flow; the value is inspection and cross-checking, not throughput.</li>
           <li><strong>Not history-matched.</strong> The uncertainty ensemble is not conditioned to observed production.</li>
           <li><strong>Not a reserves certification.</strong> P10/P50/P90 are descriptive outputs of the supplied model and distributions.</li>
@@ -248,10 +275,10 @@ geology.py ──► run_uncertainty.py ──► run_spe1.py (one process per r
           <thead><tr><th>File</th><th>Responsibility</th></tr></thead>
           <tbody>
             <tr><td><code>deckparse.py</code></td><td>SPE1-style deck tokenizer and parser</td></tr>
-            <tr><td><code>fieldgrid.py</code></td><td>Cartesian grid, depths, volumes, transmissibilities</td></tr>
+            <tr><td><code>fieldgrid.py</code></td><td>Cartesian grid, depths, volumes, transmissibilities, per-face multipliers</td></tr>
             <tr><td><code>blackoil_vs.py</code></td><td>Three-phase black oil with variable switching</td></tr>
             <tr><td><code>run_spe1.py</code></td><td>Case driver, initial state, schedule, material balance, provenance</td></tr>
-            <tr><td><code>geology.py</code></td><td>Facies, petrophysics, structure, contacts, scalars</td></tr>
+            <tr><td><code>geology.py</code></td><td>Facies, petrophysics, structure, fault-face barriers, contacts, scalars</td></tr>
             <tr><td><code>run_uncertainty.py</code></td><td>Ensemble generation, execution and experiment record</td></tr>
             <tr><td><code>forecast.py</code></td><td>Common-horizon aggregation and statistics</td></tr>
             <tr><td><code>run_forecast.py</code></td><td>Forecast CLI and JSON/CSV export</td></tr>
@@ -285,6 +312,7 @@ geology.py ──► run_uncertainty.py ──► run_spe1.py (one process per r
           <thead><tr><th>Feature</th><th>Documentation</th><th>Status</th></tr></thead>
           <tbody>
             <tr><td>Geological uncertainty</td><td><a href="/docs/engine/index.html#uncertainty">Uncertainty workflow</a></td><td>shipped</td></tr>
+            <tr><td>Fault-face flow barriers</td><td><a href="/docs/engine/fault-barriers.html">Fault barriers</a></td><td><span class="doc-badge doc-badge--ok">new</span></td></tr>
             <tr><td>Forecast aggregation</td><td><a href="/docs/engine/index.html#forecast">Forecast layer</a></td><td>shipped</td></tr>
             <tr><td>Parallel ensemble execution</td><td><a href="/docs/engine/parallel-ensembles.html">Parallel ensembles</a></td><td><span class="doc-badge doc-badge--ok">new</span></td></tr>
           </tbody>

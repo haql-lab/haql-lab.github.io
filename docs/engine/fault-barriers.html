@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fault-flow barriers — haql-engine feature guide</title>
+<meta name="description" content="A plain-language guide to fault-face transmissibility barriers in haql-engine: how a fault can restrict or seal flow, how the multiplier is recorded, and what the model does not claim.">
+<link rel="canonical" href="https://haql-lab.github.io/docs/engine/fault-barriers.html">
+<meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="brand" href="/index.html" aria-label="Haql Labs — home">
+      <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#0B1B33"/><path fill="#F6F4EE" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#F6F4EE" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#4F9BFF" stroke-width="2.1" stroke-linecap="round"/></svg></span>
+      <span class="brand__word">haql<span class="brand__lab">Labs</span></span>
+    </a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="/haql-engine.html">haql-engine</a>
+      <a href="/docs/engine/index.html" aria-current="page">Docs</a>
+      <a href="/index.html#pricing">Pricing</a>
+      <a href="/downloads.html">Downloads</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=Fault%20barrier%20question">Ask a question</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="doc-hero">
+    <div class="wrap">
+      <p class="eyebrow">haql-engine · feature guide</p>
+      <h1>A fault can move the rock. <em>It can also stop the flow.</em></h1>
+      <p class="lede">A fault is not only a break in the layers. It can be a partial barrier to fluid moving from one side to the other. This guide explains the new fault-face multiplier, how to set it, and what the result does — and does not — mean.</p>
+      <div class="doc-badges">
+        <span class="doc-badge doc-badge--ok">new</span>
+        <span class="doc-badge">sealing or partial barrier</span>
+        <span class="doc-badge">recorded output</span>
+        <span class="doc-badge">solver equations unchanged</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap doc-layout">
+    <aside class="doc-side" aria-label="Feature guide contents">
+      <span class="doc-side__label">On this page</span>
+      <a href="#idea" aria-current="page">The idea</a>
+      <a href="#input">What you set</a>
+      <a href="#meaning">What the number means</a>
+      <a href="#uncertainty">Sampling the seal</a>
+      <a href="#output">What you get back</a>
+      <a href="#checks">How it is checked</a>
+      <a href="#try">How to try it</a>
+      <a href="#limits">Limits</a>
+      <a href="#faq">Questions</a>
+      <hr>
+      <a href="/docs/index.html">All product guides</a>
+      <a href="/docs/engine/index.html">← Public guide</a>
+      <a href="/docs/engine/technical-reference.html">Technical reference</a>
+      <a href="/haql-engine.html">Product page</a>
+    </aside>
+
+    <article class="doc-main">
+      <p class="doc-meta">Feature: fault-face transmissibility barriers · Available in <code>geology.py</code> and <code>run_uncertainty.py</code> · Status: shipped</p>
+
+      <section id="idea">
+        <h2>The idea, in one picture</h2>
+        <p>Imagine two rooms joined by a doorway. Moving the doorway up or down changes the shape of the rooms. Putting a door in the opening changes whether air can pass between them. A geological fault can do both.</p>
+        <p>The engine already had the first part: a planar fault can shift one side of the grid vertically. That is a <strong>fault throw</strong>. The new part is the second: the same fault can now scale the flow capacity of the faces it crosses. That is a <strong>fault-face transmissibility barrier</strong>.</p>
+        <div class="doc-compare">
+          <div class="doc-compare__item">
+            <span>Throw only</span>
+            <strong>Structure changes</strong>
+            <p>The rock layers move, but fluid crosses the fault face as easily as before.</p>
+          </div>
+          <div class="doc-compare__item doc-compare__item--accent">
+            <span>Throw + barrier</span>
+            <strong>Structure and flow change</strong>
+            <p>The layers move, and the fault face can be open, partly restrictive or sealed.</p>
+          </div>
+        </div>
+        <p>This matters because fault sealing is one of the largest sources of disagreement in a production forecast. A fault that is open in one model and sealed in another can split a field into compartments and change pressure support, well rates and recovery.</p>
+        <blockquote class="doc-quote">The barrier is an input assumption, not a hidden geological verdict. The engine records the number so the assumption can be reviewed.</blockquote>
+      </section>
+
+      <section id="input">
+        <h2>What you set</h2>
+        <p>Add <code>transmissibility_multiplier</code> to a fault in the uncertainty input. The existing throw fields still work exactly as before.</p>
+        <pre><code>"structure": {
+  "enabled": true,
+  "sigma_ft": 0.0,
+  "faults": [
+    {
+      "axis": "x",
+      "position_ft": 3000.0,
+      "throw_ft": 12.0,
+      "side": "positive",
+      "transmissibility_multiplier": 0.0
+    }
+  ]
+}</code></pre>
+        <table class="doc-table">
+          <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+          <tbody>
+            <tr><td><code>axis</code></td><td>The fault plane is normal to <code>x</code> or <code>y</code>. Only these two orientations are supported.</td></tr>
+            <tr><td><code>position_ft</code></td><td>The fault position in feet. The barrier lands on the grid face between the cell centres on either side.</td></tr>
+            <tr><td><code>throw_ft</code></td><td>Vertical displacement of the selected side. Set it to <code>0</code> if the fault should only affect flow.</td></tr>
+            <tr><td><code>side</code></td><td>Which block moves for the throw. It does not change which faces are barriers.</td></tr>
+            <tr><td><code>transmissibility_multiplier</code></td><td>Flow factor on the fault face. <code>0</code> is sealed, <code>1</code> is open, and values between are partial restrictions.</td></tr>
+          </tbody>
+        </table>
+        <p>The aliases <code>transmissibility</code>, <code>transmissibility_factor</code> and <code>barrier_multiplier</code> are accepted for the last field. Use only one of them in a fault object.</p>
+        <p>If you leave the field out, the fault is open (<code>1.0</code>). Existing inputs therefore keep their previous behaviour.</p>
+        <p>Set <code>structure.enabled</code> to true. It defaults to true when faults are present; a disabled structure ignores the faults as well as the structural shift.</p>
+      </section>
+
+      <section id="meaning">
+        <h2>What the number means</h2>
+        <p>The multiplier scales the original transmissibility of the crossed grid face. Transmissibility is the face's capacity to carry flow for a given pressure difference.</p>
+        <table class="doc-table">
+          <thead><tr><th>Multiplier</th><th>Effect</th><th>Plain-language reading</th></tr></thead>
+          <tbody>
+            <tr><td><code>1.0</code></td><td>No change</td><td>The fault is open; only the throw applies.</td></tr>
+            <tr><td><code>0.5</code></td><td>Half the original transmissibility</td><td>The fault is restrictive, not sealed.</td></tr>
+            <tr><td><code>0.1</code></td><td>One tenth of the original transmissibility</td><td>A strong barrier. This is <strong>not</strong> “90% sealed” in a geological sense; it is a 10% flow factor.</td></tr>
+            <tr><td><code>0.0</code></td><td>No cross-fault flow</td><td>The face is closed in the numerical model.</td></tr>
+          </tbody>
+        </table>
+        <p>The barrier acts on the TPFA face between the two cells that straddle the fault. It does not change the permeability of either cell, the well completions or the porosity. Multiple faults on the same face combine multiplicatively, so a second barrier can only reduce the factor further.</p>
+        <div class="doc-callout">
+          <p><strong>On the SPE1 grid:</strong> an x-normal fault at 3,000 ft crosses the x-face between the third and fourth cell columns. In the 10 × 10 × 3 grid that is 30 faces — one for each y cell in each layer. The output reports the count rather than asking you to count it by hand.</p>
+        </div>
+      </section>
+
+      <section id="uncertainty">
+        <h2>Sampling the seal</h2>
+        <p>A single fault multiplier is a single assumption. When the seal strength is uncertain, sample one global factor per realization:</p>
+        <pre><code>"scalars": {
+  "fault_transmissibility_multiplier": {
+    "distribution": "uniform",
+    "min": 0.0,
+    "max": 1.0
+  }
+}</code></pre>
+        <p>The effective multiplier is:</p>
+        <p><code>fault.transmissibility_multiplier × scalar.fault_transmissibility_multiplier</code></p>
+        <p>That means a fault can have a different baseline from another fault, while one sampled scenario factor moves all faults together. The sampled scalar is stored in the realization's <code>scalars</code> object, and the effective face factors are applied before the solver starts.</p>
+        <div class="doc-callout doc-callout--ok">
+          <p><strong>Why one global factor?</strong> It is simple to audit and avoids pretending that every fault has an independent, calibrated seal distribution. If a study needs per-fault uncertainty, use separate fault baselines or separate scenario configurations and label the assumption.</p>
+        </div>
+      </section>
+
+      <section id="output">
+        <h2>What you get back</h2>
+        <p>The result is recorded in three places, so a reviewer can move from the assumption to the numerical effect:</p>
+        <table class="doc-table">
+          <thead><tr><th>Output</th><th>What it contains</th></tr></thead>
+          <tbody>
+            <tr><td><code>realization["structure"]["faults"]</code></td><td>The normalized fault — axis, position, throw, side and the baseline multiplier.</td></tr>
+            <tr><td><code>realization["summary"]["fault_barrier"]</code></td><td>Fault count, affected face count, minimum multiplier, global factor and per-fault detail.</td></tr>
+            <tr><td><code>grid.face_multiplier</code></td><td>One applied factor for every TPFA face in the realization. This is the array the solver actually sees.</td></tr>
+            <tr><td><code>run["fault_summary"]</code></td><td>The same summary in a single <code>run_spe1.py</code> result, alongside the usual material-balance and provenance blocks.</td></tr>
+          </tbody>
+        </table>
+        <p>The run's provenance configuration also records the fault block and the scalar override, so changing the seal assumption changes the content-addressed configuration identity.</p>
+      </section>
+
+      <section id="checks">
+        <h2>How it is checked</h2>
+        <p>The feature is tested at several levels:</p>
+        <ul>
+          <li><strong>Face mapping.</strong> A fault at a known position must affect only the expected grid faces. The test checks that an SPE1 x-fault at 3,000 ft changes 30 faces and leaves the other 710 unchanged.</li>
+          <li><strong>Zero flow.</strong> A two-cell problem with a zero-multiplier face produces zero cross-cell residual flux, while the same problem with an open face produces a nonzero flux.</li>
+          <li><strong>End-to-end run.</strong> A short SPE1 realization with a fault and a sampled multiplier completes, closes material balance and reports the expected effective multiplier.</li>
+          <li><strong>Configuration validation.</strong> Negative multipliers, values above one, duplicate aliases and out-of-range sampled scalars are rejected before a run starts.</li>
+        </ul>
+        <p>These checks prove that the multiplier is applied where it claims to be applied and that a sealed face does not leak in the numerical flux. They do not prove that a particular geological fault should be sealed in the real field. That remains an interpretation and must be stated as one.</p>
+      </section>
+
+      <section id="try">
+        <h2>How to try it</h2>
+        <p>The checked-in example already includes a fault with a baseline multiplier of <code>0.5</code> and a sampled global factor between <code>0.2</code> and <code>1.0</code>.</p>
+        <pre><code>cd engine
+python3 run_uncertainty.py \
+  --input uncertainty_input.example.json \
+  --out uncertainty_out --dry-run
+
+python3 run_spe1.py \
+  --realization uncertainty_out/realizations/real-0000.json \
+  --T 2 --json fault_run.json --quiet
+
+python3 -c "import json; print(json.load(open('fault_run.json'))['fault_summary'])"</code></pre>
+        <p>The dry run is enough to inspect the generated fault and its summary. The short solver run shows the same block in the run artifact and confirms that the case still closes material balance.</p>
+      </section>
+
+      <section id="limits">
+        <h2>Limits you should state</h2>
+        <ul>
+          <li><strong>It is an input barrier, not a seal calculation.</strong> The engine does not compute shale gouge, clay smear, juxtaposition, capillary entry pressure or geomechanical seal capacity.</li>
+          <li><strong>The fault is vertical and planar.</strong> It is normal to x or y on the regular SPE1-style Cartesian grid. There is no corner-point fault surface, relay ramp or listric geometry.</li>
+          <li><strong>The grid must be regular in x and y.</strong> The fault-to-face mapping uses the same axis coordinates as the existing structural shift.</li>
+          <li><strong>It changes faces, not wells.</strong> A well completion on either side is untouched. The barrier does not create a new well or move an existing one.</li>
+          <li><strong>It is not calibrated.</strong> A multiplier is a user assumption. The forecast is conditional on that assumption, not a prediction of the real fault's sealing behaviour.</li>
+          <li><strong>It does not add fault permeability.</strong> There is no separate fault-zone flow path or cross-fault capillary model.</li>
+        </ul>
+        <div class="doc-callout doc-callout--warn">
+          <p><strong>Do not present the multiplier as a measured seal.</strong> Present it as a transparent scenario assumption with a recorded value, and show the range of multipliers the study tested.</p>
+        </div>
+      </section>
+
+      <section id="faq">
+        <h2>Questions</h2>
+        <div class="doc-faq">
+          <details>
+            <summary>Is a multiplier of 0.1 the same as 90% sealing?</summary>
+            <p>No. It means the fault face keeps 10% of its original transmissibility in this numerical model. “Sealing” is a geological interpretation; the engine is recording a flow factor.</p>
+          </details>
+          <details>
+            <summary>Does the barrier change the fault throw?</summary>
+            <p>No. The throw and the barrier are separate fields on the same fault object. Set <code>throw_ft</code> to <code>0</code> for a flow-only fault, or set the multiplier to <code>1.0</code> for a structure-only fault.</p>
+          </details>
+          <details>
+            <summary>Can I give each fault its own multiplier?</summary>
+            <p>Yes. Each fault has its own baseline multiplier. The sampled <code>fault_transmissibility_multiplier</code> is a single global factor applied to all faults, so per-fault uncertainty needs separate baselines or separate scenario configurations.</p>
+          </details>
+          <details>
+            <summary>What if the fault position is outside the grid?</summary>
+            <p>The fault is still recorded in the realization, but it affects no faces. The summary reports zero affected faces, which is a useful signal that the position or the grid is wrong.</p>
+          </details>
+          <details>
+            <summary>Does this make the solver unstable?</summary>
+            <p>A zero multiplier removes a connection, which can isolate compartments or make a producer and injector independent. The solver still runs, but the case should be reviewed for pressure and material-balance behaviour like any other scenario. The regression suite includes a short fault run and a separate zero-flux check.</p>
+          </details>
+          <details>
+            <summary>Where is the engineering detail?</summary>
+            <p>The schema, defaults and limitations are in <a href="/docs/engine/technical-reference.html#faults">the technical reference</a>. The source-level description is in <code>engine/GEOLOGICAL_UNCERTAINTY.md</code>.</p>
+          </details>
+        </div>
+      </section>
+
+      <div class="doc-pager">
+        <a href="/docs/engine/index.html">← Public guide</a>
+        <a href="/docs/engine/technical-reference.html">Technical reference →</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__bottom">
+      <p>© <span id="yr">2026</span> Haql Labs · A plain-language guide to an inspectable reservoir engine.</p>
+      <p><a href="/index.html">Home</a> · <a href="/haql-engine.html">haql-engine</a> · <a href="mailto:kunleaz100@gmail.com">Contact</a></p>
+    </div>
+  </div>
+</footer>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

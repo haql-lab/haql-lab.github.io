@@ -20,6 +20,8 @@ One page per product:
 - `docs/index.html` — public documentation hub for every product
 - `docs/engine/index.html` — public engine guide: plain-language explanation
   of the problem, workflow, results, evidence and limits
+- `docs/engine/fault-barriers.html` — public guide to fault-face
+  transmissibility barriers: sealing assumptions, schema and limits
 - `docs/engine/parallel-ensembles.html` — public guide to parallel scenario
   execution and what it does (and does not) change
 - `docs/engine/technical-reference.html` — engineering reference: numerical

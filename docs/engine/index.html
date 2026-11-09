@@ -59,6 +59,7 @@
       <a href="#works">How it works</a>
       <a href="#results">Reading results</a>
       <a href="#uncertainty">Uncertainty</a>
+      <a href="/docs/engine/fault-barriers.html">Fault barriers</a>
       <a href="#parallel">Scenario speed</a>
       <a href="#trust">Can I trust it?</a>
       <a href="#limits">Limits</a>
@@ -198,7 +199,8 @@
             <p>Shows which assumptions move the result, and how often the outcome changes.</p>
           </div>
         </div>
-        <p>The uncertainty layer can vary rock quality and connectivity, rock type, structure and fault throw, fluid contacts, initial pressure, well controls and selected fluid-behaviour multipliers. Each variation is recorded and fingerprinted before the solver sees it.</p>
+        <p>The uncertainty layer can vary rock quality and connectivity, rock type, structure and fault throw, fault-flow restriction, fluid contacts, initial pressure, well controls and selected fluid-behaviour multipliers. Each variation is recorded and fingerprinted before the solver sees it.</p>
+        <p>A fault can now be open, partly restrictive or sealed on the grid face it crosses. The assumption is recorded as a transmissibility multiplier rather than hidden in the solver. <a href="/docs/engine/fault-barriers.html">See how fault barriers work →</a></p>
         <p><a href="/docs/engine/parallel-ensembles.html">See how a scenario study is run →</a></p>
       </section>
 
@@ -315,6 +317,7 @@
           <thead><tr><th>Feature</th><th>What it means for you</th><th>Guide</th></tr></thead>
           <tbody>
             <tr><td>Geological uncertainty</td><td>Run a range of plausible fields instead of one guess.</td><td><a href="#uncertainty">Uncertainty</a></td></tr>
+            <tr><td>Fault-flow barriers</td><td>Test an open, partly restrictive or sealed fault without leaving the assumption implicit.</td><td><a href="/docs/engine/fault-barriers.html">Fault barriers</a></td></tr>
             <tr><td>Forecast aggregation</td><td>Turn a set of scenarios into a readable range and summary statistics.</td><td><a href="#results">Reading results</a></td></tr>
             <tr><td>Parallel scenario execution</td><td>Finish a scenario study sooner while keeping every result traceable.</td><td><a href="/docs/engine/parallel-ensembles.html">Scenario speed</a></td></tr>
           </tbody>
