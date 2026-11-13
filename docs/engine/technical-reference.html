@@ -58,6 +58,7 @@
       <a href="#quickstart">Quick start</a>
       <a href="#architecture">Architecture</a>
       <a href="#solve">How a run works</a>
+      <a href="#jacobian">Analytic Jacobian</a>
       <a href="#uncertainty">Uncertainty workflow</a>
       <a href="#faults">Fault barriers</a>
       <a href="#forecast">Forecast layer</a>
@@ -110,6 +111,7 @@
 
 # 1. Fast internal checks: Jacobian, conservation, determinism.
 python3 selftest.py
+python3 validate_jacobian_vs.py
 
 # 2. One short SPE1 run.
 python3 run_spe1.py --T 30 --quiet --json /tmp/spe1_30.json
@@ -162,11 +164,34 @@ geology.py ──► run_uncertainty.py ──► run_spe1.py (one process per r
           <li><strong>Build the grid.</strong> <code>fieldgrid.py</code> creates the Cartesian cells, layer depths, volumes, transmissibilities and well indices.</li>
           <li><strong>Initialise the state.</strong> Pressure, solution GOR and saturations are set from the datum pressure, contacts and optional scalar overrides.</li>
           <li><strong>Assemble the residual.</strong> <code>blackoil_vs.py</code> writes the mass-balance equations for oil, water and gas, including well source terms.</li>
-          <li><strong>Solve Newton.</strong> The Jacobian is assembled and the linear system is solved until the residual gate is met or the timestep is cut.</li>
+          <li><strong>Solve Newton.</strong> The analytic Jacobian is assembled and the sparse linear system is solved until the residual gate is met or the timestep is cut.</li>
           <li><strong>Switch variables when needed.</strong> Each cell carries either free-gas saturation or dissolved gas, depending on its phase state.</li>
           <li><strong>Record the result.</strong> The driver writes report-step records, material-balance drift, a terminal status and a provenance block.</li>
         </ol>
         <p>The full numerical detail is in <code>engine/README.md</code> and <code>engine/VALIDATION.md</code>; this page is the map, not a substitute for those documents.</p>
+      </section>
+
+      <section id="jacobian">
+        <h2>Analytic Jacobian</h2>
+        <p>The variable-switching production path assembles its Newton Jacobian from differentiated residual terms instead of finite differences. It differentiates the same accumulation, TPFA face flux and well/control expressions that the residual uses:</p>
+        <ul>
+          <li><strong>Accumulation:</strong> <code>phi(p)</code>, <code>Bo(p,Rs)</code>, <code>mu_o(p,Rs)</code>, <code>Bg(p)</code>, <code>Bw(p)</code>, saturated <code>Rs(p)</code>, and the <code>Sg</code>/<code>Rs</code> switch.</li>
+          <li><strong>Faces:</strong> oil, water and gas-component mobility, upstream selection, phase-potential gravity including density derivatives, and fault-face transmissibility multipliers.</li>
+          <li><strong>Wells:</strong> BHP sources, producing/injecting phase mobility, the rate-constraint row and the rate-well BHP unknown.</li>
+        </ul>
+        <p>The matrix is sparse. At an exact PVT/relperm knot or an upwind flip, the derivative is one-sided: the code takes the subgradient selected by the same interpolation search and ignores the derivative of the discrete upwind selector. The flux is continuous at a flip, so this is the standard Newton linearisation.</p>
+        <table class="doc-table">
+          <thead><tr><th>Measurement</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>Analytic vs central FD, four branches</td><td>Mixed free/dissolved, rate control, depth + fault multipliers, frozen-Rs: max relative error <strong>3.9e-6</strong> (gate 1e-5)</td></tr>
+            <tr><td>Build time, 300 cells / 901 unknowns</td><td><strong>0.030 s</strong> analytic vs 0.155 s coloured FD; zero <code>residual()</code> calls for the analytic build</td></tr>
+            <tr><td>Full SPE1 run, 3,285 d</td><td><strong>49.0 s</strong>, 129 steps, 994 analytic builds; final Jacobian <strong>6,848 nnz</strong></td></tr>
+            <tr><td>Dense FD work avoided</td><td>1,789,480 residual evaluations over the same run</td></tr>
+            <tr><td>Final cumulative oil vs pre-analytic run</td><td>4.51285e7 vs 4.51292e7 STB (<strong>0.0015%</strong> difference)</td></tr>
+          </tbody>
+        </table>
+        <p>The dense and distance-2 coloured finite-difference builders remain in <code>blackoil_vs.py</code> as independent oracles. <code>validate_jacobian_vs.py</code> compares the analytic path against central FD; <code>selftest.py</code> pins the four-branch result.</p>
+        <p>Plain-language explanation: <a href="/docs/engine/analytic-jacobian.html">Analytic Jacobian</a>. Source detail: <code>engine/README.md</code> and <code>engine/VALIDATION.md</code>.</p>
       </section>
 
       <section id="uncertainty">
@@ -245,8 +270,10 @@ geology.py ──► run_uncertainty.py ──► run_spe1.py (one process per r
           <thead><tr><th>Claim</th><th>Evidence</th><th>Status</th></tr></thead>
           <tbody>
             <tr><td>SPE1 oil material balance</td><td>−4.59e-7 over 3,285 days; gate 1e-6</td><td>PASS</td></tr>
-            <tr><td>Cumulative oil vs OPM Flow</td><td>RMS 1.57%, max 3.14%</td><td>Published comparison, not the pre-registered 1 psi gate</td></tr>
+            <tr><td>Cumulative oil vs OPM Flow</td><td>RMS 1.57%, max 3.13%</td><td>Published comparison, not the pre-registered 1 psi gate</td></tr>
             <tr><td>Flowing BHP vs OPM Flow</td><td>RMS 3.63%, max 20.1%</td><td>Published comparison</td></tr>
+            <tr><td>3-phase analytic Jacobian vs central FD</td><td>Max relative error 3.9e-6 across four state branches</td><td>PASS</td></tr>
+            <tr><td>SPE1 runtime, analytic Jacobian</td><td>49.0 s / 129 steps / 994 builds; OPM Flow 14.8 s</td><td>~3.3× slower; measured, single host</td></tr>
             <tr><td>Determinism</td><td>Fixture replay and provenance identity tests</td><td>PASS</td></tr>
             <tr><td>Full-field simulation</td><td>No EGRID/corner-point reader</td><td>NOT SUPPORTED</td></tr>
           </tbody>
@@ -259,7 +286,7 @@ geology.py ──► run_uncertainty.py ──► run_spe1.py (one process per r
         <ul>
           <li><strong>Not a full-field simulator.</strong> Cartesian SPE1-class grids; no corner-point/EGRID, no SPE9, no real field grids.</li>
           <li><strong>Not a fault-seal calculator.</strong> Fault-face transmissibility is a user-supplied multiplier. There is no juxtaposition, shale-gouge, capillary-entry-pressure or geomechanical seal model, and faults are vertical planes on a regular x/y grid.</li>
-          <li><strong>Not fast.</strong> It is slower than OPM Flow; the value is inspection and cross-checking, not throughput.</li>
+          <li><strong>Not a speed product.</strong> The analytic Jacobian cut the full SPE1 run to 49.0 s, about 3.3× slower than OPM Flow on the same host at the 1e-6 gate. It remains single-threaded Python; the value is inspection and cross-checking, not throughput.</li>
           <li><strong>Not history-matched.</strong> The uncertainty ensemble is not conditioned to observed production.</li>
           <li><strong>Not a reserves certification.</strong> P10/P50/P90 are descriptive outputs of the supplied model and distributions.</li>
           <li><strong>Not a commercial support product.</strong> There is no SLA, no enterprise security certification and no client field audit yet.</li>
@@ -276,7 +303,8 @@ geology.py ──► run_uncertainty.py ──► run_spe1.py (one process per r
           <tbody>
             <tr><td><code>deckparse.py</code></td><td>SPE1-style deck tokenizer and parser</td></tr>
             <tr><td><code>fieldgrid.py</code></td><td>Cartesian grid, depths, volumes, transmissibilities, per-face multipliers</td></tr>
-            <tr><td><code>blackoil_vs.py</code></td><td>Three-phase black oil with variable switching</td></tr>
+            <tr><td><code>blackoil_vs.py</code></td><td>Three-phase black oil with variable switching; analytic Jacobian plus retained FD oracles</td></tr>
+            <tr><td><code>validate_jacobian_vs.py</code></td><td>Four-branch central-FD check of the three-phase analytic Jacobian</td></tr>
             <tr><td><code>run_spe1.py</code></td><td>Case driver, initial state, schedule, material balance, provenance</td></tr>
             <tr><td><code>geology.py</code></td><td>Facies, petrophysics, structure, fault-face barriers, contacts, scalars</td></tr>
             <tr><td><code>run_uncertainty.py</code></td><td>Ensemble generation, execution and experiment record</td></tr>
@@ -301,6 +329,9 @@ geology.py ──► run_uncertainty.py ──► run_spe1.py (one process per r
             <tr><td>Common horizon</td><td>The last time shared by every eligible run; longer runs are truncated for a fair comparison.</td></tr>
             <tr><td>Provenance manifest</td><td>Content-addressed record of inputs, settings, outputs and environment for one run.</td></tr>
             <tr><td>Mass-balance gate</td><td>The relative material-balance drift that must be below a configured threshold for a run to pass.</td></tr>
+            <tr><td>Jacobian</td><td>The matrix of derivatives of the residual equations with respect to the unknowns, used to compute a Newton step.</td></tr>
+            <tr><td>Analytic Jacobian</td><td>A Jacobian assembled from differentiated formulas rather than finite-difference perturbations.</td></tr>
+            <tr><td>One-sided derivative</td><td>The slope from one side of a table knot or flow-direction flip, where no unique two-sided derivative exists.</td></tr>
           </tbody>
         </table>
       </section>
@@ -311,10 +342,11 @@ geology.py ──► run_uncertainty.py ──► run_spe1.py (one process per r
         <table class="doc-table">
           <thead><tr><th>Feature</th><th>Documentation</th><th>Status</th></tr></thead>
           <tbody>
+            <tr><td>Analytic three-phase Jacobian</td><td><a href="/docs/engine/analytic-jacobian.html">Analytic Jacobian</a></td><td><span class="doc-badge doc-badge--ok">new</span></td></tr>
             <tr><td>Geological uncertainty</td><td><a href="/docs/engine/index.html#uncertainty">Uncertainty workflow</a></td><td>shipped</td></tr>
-            <tr><td>Fault-face flow barriers</td><td><a href="/docs/engine/fault-barriers.html">Fault barriers</a></td><td><span class="doc-badge doc-badge--ok">new</span></td></tr>
+            <tr><td>Fault-face flow barriers</td><td><a href="/docs/engine/fault-barriers.html">Fault barriers</a></td><td>shipped</td></tr>
             <tr><td>Forecast aggregation</td><td><a href="/docs/engine/index.html#forecast">Forecast layer</a></td><td>shipped</td></tr>
-            <tr><td>Parallel ensemble execution</td><td><a href="/docs/engine/parallel-ensembles.html">Parallel ensembles</a></td><td><span class="doc-badge doc-badge--ok">new</span></td></tr>
+            <tr><td>Parallel ensemble execution</td><td><a href="/docs/engine/parallel-ensembles.html">Parallel ensembles</a></td><td>shipped</td></tr>
           </tbody>
         </table>
       </section>

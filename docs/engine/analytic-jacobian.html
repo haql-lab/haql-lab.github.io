@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analytic Jacobian — haql-engine feature guide</title>
+<meta name="description" content="A plain-language guide to the analytic three-phase Jacobian in haql-engine: why the solver needed derivatives, how the new path avoids finite differences, what improved, and what it does not claim.">
+<link rel="canonical" href="https://haql-lab.github.io/docs/engine/analytic-jacobian.html">
+<meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="brand" href="/index.html" aria-label="Haql Labs — home">
+      <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#0B1B33"/><path fill="#F6F4EE" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#F6F4EE" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#4F9BFF" stroke-width="2.1" stroke-linecap="round"/></svg></span>
+      <span class="brand__word">haql<span class="brand__lab">Labs</span></span>
+    </a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="/haql-engine.html">haql-engine</a>
+      <a href="/docs/engine/index.html" aria-current="page">Docs</a>
+      <a href="/index.html#pricing">Pricing</a>
+      <a href="/downloads.html">Downloads</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=Analytic%20Jacobian%20question">Ask a question</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="doc-hero">
+    <div class="wrap">
+      <p class="eyebrow">haql-engine · feature guide</p>
+      <h1>Same physics. <em>Better derivatives.</em></h1>
+      <p class="lede">Every Newton step needs to know which way the equations are heading. The engine now calculates that direction from formulas instead of measuring it by repeatedly perturbing the model. The result is the same black-oil physics, a shorter run, and one less numerical approximation in the loop.</p>
+      <div class="doc-badges">
+        <span class="doc-badge doc-badge--ok">new</span>
+        <span class="doc-badge">analytic three-phase Jacobian</span>
+        <span class="doc-badge">same conservation gate</span>
+        <span class="doc-badge">checked against finite differences</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap doc-layout">
+    <aside class="doc-side" aria-label="Feature guide contents">
+      <span class="doc-side__label">On this page</span>
+      <a href="#idea" aria-current="page">The idea</a>
+      <a href="#why">Why the old way was slow</a>
+      <a href="#change">What changed</a>
+      <a href="#stays">What did not change</a>
+      <a href="#evidence">What the evidence shows</a>
+      <a href="#kinks">The awkward part</a>
+      <a href="#try">How to check it</a>
+      <a href="#limits">Limits</a>
+      <a href="#faq">Questions</a>
+      <hr>
+      <a href="/docs/index.html">All product guides</a>
+      <a href="/docs/engine/index.html">← Public guide</a>
+      <a href="/docs/engine/technical-reference.html">Technical reference</a>
+      <a href="/haql-engine.html">Product page</a>
+    </aside>
+
+    <article class="doc-main">
+      <p class="doc-meta">Feature: analytic three-phase Jacobian · Available in <code>blackoil_vs.py</code>, <code>run_spe1.py</code> and <code>run_blackoil_vs.py</code> · Status: shipped</p>
+
+      <section id="idea">
+        <h2>The idea, in one sentence</h2>
+        <p>A reservoir simulator solves a large set of equations by making a guess, measuring how wrong it is, and then taking a better guess. To take that better guess it needs the <strong>slope</strong> of every equation with respect to every unknown. That table of slopes is called the <strong>Jacobian</strong>.</p>
+        <p>There are two ways to get the slopes:</p>
+        <div class="doc-compare">
+          <div class="doc-compare__item">
+            <span>Finite difference</span>
+            <strong>Measure the slope</strong>
+            <p>Nudge each unknown a tiny amount, rerun the equations, and divide the change in the answer by the nudge. It works, but it needs many extra evaluations and it is only an approximation.</p>
+          </div>
+          <div class="doc-compare__item doc-compare__item--accent">
+            <span>Analytic</span>
+            <strong>Calculate the slope</strong>
+            <p>Differentiate the equations once, by hand and in code. The slopes come from the same formulas the equations already use, without nudging the model.</p>
+          </div>
+        </div>
+        <p>The new path calculates the slopes for the full three-phase, variable-switching black-oil model: oil, water, free gas, dissolved gas, gravity, wells, porosity compressibility and fault-face transmissibility. The equations themselves are unchanged.</p>
+        <blockquote class="doc-quote">This is a solver improvement, not a new geological model. The answer is still constrained by the same equations and the same mass-balance gate.</blockquote>
+      </section>
+
+      <section id="why">
+        <h2>Why the old way was slow</h2>
+        <p>The SPE1 benchmark has 300 cells. Each cell carries three unknowns — pressure, water saturation, and either gas saturation or dissolved gas. That is roughly 900 unknowns. A dense finite-difference Jacobian would need two extra evaluations for every unknown: about 1,800 per Newton step.</p>
+        <p>The engine already used a distance-2 colouring trick. Cells that cannot affect the same equations are nudged together, so one pass covers many unknowns. That cut the work from 1,802 evaluations to 68 — a measured 26.5× saving. It was exact against the dense check, but it was still measuring slopes rather than calculating them.</p>
+        <div class="doc-callout">
+          <p><strong>The catch:</strong> a finite difference has a truncation error and a round-off floor. Near a sharp change in a table, the measured slope can be noisy, and the solver can stop earlier than the equations deserve. The old full SPE1 run needed 143 steps and 504–618 seconds.</p>
+        </div>
+      </section>
+
+      <section id="change">
+        <h2>What changed</h2>
+        <p>The production solver now assembles the Jacobian from three groups of derivatives:</p>
+        <table class="doc-table">
+          <thead><tr><th>Part of the equation</th><th>What is differentiated</th></tr></thead>
+          <tbody>
+            <tr><td>What is stored in each cell</td><td>Porosity as pressure changes; oil, water and gas volumes; dissolved gas; the switch between free gas and dissolved gas.</td></tr>
+            <tr><td>Flow between cells</td><td>Oil, water and gas mobility; upstream-cell selection; pressure differences; gravity; phase density changes; fault-face multipliers.</td></tr>
+            <tr><td>Wells and controls</td><td>BHP source terms; producing and injecting phases; the rate constraint; the well-BHP unknown.</td></tr>
+          </tbody>
+        </table>
+        <p>The result is a <strong>sparse</strong> matrix: it stores only the connections that can be nonzero. On the final SPE1 step the Jacobian has 6,848 stored entries. A dense matrix of the same size would have about 811,000.</p>
+        <p>An analytic build takes <strong>0.030 s</strong> on a 300-cell test state, against <strong>0.155 s</strong> for the coloured finite-difference build. More importantly, it makes <strong>zero extra equation evaluations</strong> to build the slopes. The old path still exists as an independent check, but production runs no longer use it.</p>
+      </section>
+
+      <section id="stays">
+        <h2>What did not change</h2>
+        <p>This matters as much as the speed-up. The feature is deliberately narrow:</p>
+        <ul>
+          <li><strong>The physics is the same.</strong> Same black-oil equations, same PVT and relative-permeability tables, same gravity, same Peaceman well model.</li>
+          <li><strong>The conservation gate is the same.</strong> The full run still has to close oil, water and gas within 1e-6 relative material balance.</li>
+          <li><strong>Variable switching is the same.</strong> A cell still switches between free gas and dissolved gas by conserving the gas component.</li>
+          <li><strong>Fault barriers are the same.</strong> Per-face transmissibility multipliers enter the flux and its derivative exactly as before.</li>
+          <li><strong>The evidence is the same.</strong> The committed SPE1 fixture and its provenance manifest were regenerated with the analytic path, so the published numbers and the current code agree.</li>
+        </ul>
+        <p>The finite-difference builders remain in the code as <strong>oracles</strong>: independent ways to check the analytic result. They are not the production path.</p>
+      </section>
+
+      <section id="evidence">
+        <h2>What the evidence shows</h2>
+        <table class="doc-table">
+          <thead><tr><th>Check</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>Analytic vs central finite difference, four branches</td><td>Mixed free/dissolved gas, rate control, depth plus fault multipliers, and frozen-Rs: max relative difference <strong>3.9e-6</strong> (gate 1e-5).</td></tr>
+            <tr><td>Full SPE1 run, 3,285 days</td><td><strong>49.0 s</strong> and <strong>129 steps</strong>, against 504–618 s and 143 steps before the change.</td></tr>
+            <tr><td>Final cumulative oil</td><td><strong>4.51285e7 STB</strong>, versus 4.51292e7 in the pre-analytic run — a <strong>0.0015%</strong> difference.</td></tr>
+            <tr><td>Mass balance</td><td>Oil <strong>−4.59e-7</strong>, water <strong>+4.56e-14</strong>, gas <strong>+2.98e-7</strong>; gate 1e-6. PASS.</td></tr>
+            <tr><td>Comparison with OPM Flow</td><td>Cumulative oil <strong>+3.13%</strong>, flowing BHP RMS <strong>3.6%</strong>. The accuracy gap is essentially unchanged; this feature is about the solver, not the geological match.</td></tr>
+            <tr><td>Jacobian work</td><td><strong>994 analytic builds</strong>; the dense finite-difference equivalent would have used <strong>1,789,480</strong> equation evaluations.</td></tr>
+          </tbody>
+        </table>
+        <div class="doc-callout doc-callout--ok">
+          <p><strong>The honest speed statement:</strong> on this two-core machine, OPM Flow still finishes SPE1 in 14.8 s, so the engine is about <strong>3.3× slower</strong> at the 1e-6 gate. That is a large improvement from 26–42×, but it is not a claim to be faster than a production simulator.</p>
+        </div>
+      </section>
+
+      <section id="kinks">
+        <h2>The awkward part: corners in the tables</h2>
+        <p>The fluid and rock properties come from tables: oil formation volume factor, gas solubility, viscosity, relative permeability. Between table points the engine interpolates in straight lines. At a table point, the straight line changes slope. There is no single derivative at that corner.</p>
+        <p>The same thing happens when the upstream cell changes: the flow direction flips, and the mobility switches from one cell to the other. The flux itself is continuous through the flip, but the derivative is not unique at the exact crossing.</p>
+        <p>The analytic path chooses a <strong>one-sided derivative</strong>: it uses the interval selected by the same search that the interpolator uses. It does not smooth the tables and it does not invent a derivative for the discrete upstream selector. This is the standard Newton linearisation for a piecewise-linear model. It can still cost an iteration if the state sits exactly on a corner, but it keeps the step defined and reproducible.</p>
+      </section>
+
+      <section id="try">
+        <h2>How to check it</h2>
+        <p>The feature is exercised by the fast suite and by two independent slope checks:</p>
+        <pre><code>cd engine
+python3 selftest.py                 # 11 checks, about 4 s
+python3 validate_jacobian_vs.py     # analytic vs central FD, four branches
+python3 validate_jacobian.py        # two-phase analytic vs central FD
+
+# Full 3,285-day SPE1 run, about 50 s
+python3 run_spe1.py --T 3285 --quiet --strict \
+  --json fixtures/spe1_full.json
+python3 compare_spe1.py --run fixtures/spe1_full.json</code></pre>
+        <p>The committed fixture records the analytic build count, the sparse size and the dense finite-difference work that was avoided. The provenance manifest seals the input, code identity and output hashes, so a regenerated run can be checked rather than taken on trust.</p>
+      </section>
+
+      <section id="limits">
+        <h2>Limits you should state</h2>
+        <ul>
+          <li><strong>It does not improve the geological match.</strong> The OPM comparison is still about 3.1% on cumulative oil. Analytic derivatives make the solve faster and cleaner; they do not fix relative-permeability or upscaling differences.</li>
+          <li><strong>It is not a speed record.</strong> The engine remains single-threaded Python and is slower than OPM Flow. The claim is the measured 49.0 s at the 1e-6 gate on this host, not a general throughput promise.</li>
+          <li><strong>It is not a global convergence proof.</strong> Four test branches and the full SPE1 conservation run are strong evidence, not a guarantee for every possible state or deck.</li>
+          <li><strong>Corners remain corners.</strong> At an exact table knot or upstream flip the derivative is one-sided. A run can still need an extra Newton iteration there.</li>
+          <li><strong>The scope is still narrow.</strong> Cartesian SPE1-class grids; no corner-point/EGRID, no SPE9, no full SCHEDULE parser, no history matching.</li>
+          <li><strong>One machine, one case.</strong> The timings are from the two-core reference host. Absolute times will differ elsewhere; the relative comparison and the conservation result are the reproducible parts.</li>
+        </ul>
+        <div class="doc-callout doc-callout--warn">
+          <p><strong>Do not present this as an accuracy upgrade.</strong> Present it as a solver upgrade with the same physics and the same conservation gate, verified against the old finite-difference path.</p>
+        </div>
+      </section>
+
+      <section id="faq">
+        <h2>Questions</h2>
+        <div class="doc-faq">
+          <details>
+            <summary>Does the engine use a different reservoir model now?</summary>
+            <p>No. The residual equations, PVT tables, relative permeability, wells and fault barriers are unchanged. Only the way the solver computes the derivatives of those equations changed.</p>
+          </details>
+          <details>
+            <summary>Why keep the finite-difference code if it is slower?</summary>
+            <p>It is an independent oracle. If the analytic derivative has a sign error or a missed term, the finite-difference comparison is likely to catch it. Keeping both makes the faster path easier to defend.</p>
+          </details>
+          <details>
+            <summary>Does the full SPE1 answer change?</summary>
+            <p>Only slightly. Final cumulative oil differs by 0.0015% from the pre-analytic run, because the Newton path and stopping point differ at round-off level. The material-balance result and the comparison with OPM Flow are effectively unchanged.</p>
+          </details>
+          <details>
+            <summary>Is 49 seconds fast?</summary>
+            <p>It is about 10–12× faster than the previous tight-tolerance run on the same host, but still about 3.3× slower than OPM Flow. It makes the engine practical for small verification studies; it does not make it a full-field production simulator.</p>
+          </details>
+          <details>
+            <summary>What happens at a table corner?</summary>
+            <p>The code uses a one-sided derivative from the selected interpolation interval. The flux is continuous, so the Newton step remains defined. A state exactly on a corner can be less smooth than one between corners.</p>
+          </details>
+          <details>
+            <summary>Where is the engineering detail?</summary>
+            <p>The formulation and measurements are in <code>engine/README.md</code> and <code>engine/VALIDATION.md</code>. The public technical map is <a href="/docs/engine/technical-reference.html#jacobian">the technical reference</a>.</p>
+          </details>
+        </div>
+      </section>
+
+      <div class="doc-pager">
+        <a href="/docs/engine/index.html">← Public guide</a>
+        <a href="/docs/engine/technical-reference.html">Technical reference →</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__bottom">
+      <p>© <span id="yr">2026</span> Haql Labs · A plain-language guide to an inspectable reservoir engine.</p>
+      <p><a href="/index.html">Home</a> · <a href="/haql-engine.html">haql-engine</a> · <a href="mailto:kunleaz100@gmail.com">Contact</a></p>
+    </div>
+  </div>
+</footer>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

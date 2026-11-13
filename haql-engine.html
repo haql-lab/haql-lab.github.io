@@ -94,7 +94,7 @@
         <a class="btn btn--s" href="docs/engine/index.html">Read the engine docs</a>
         <a class="btn btn--s" href="#evidence">See the evidence</a>
       </div>
-      <p class="reassure"><b>Not a faster simulator:</b> on SPE1 the engine is about 10× slower than OPM Flow at its loosest setting and 25–40× slower at the tolerance that passes its mass-balance gate. Its value is independent verification, not speed.</p>
+      <p class="reassure"><b>Not a faster simulator:</b> on SPE1 the engine is about 3.3× slower than OPM Flow at the tolerance that passes its mass-balance gate (49.0 s vs 14.8 s). The analytic Jacobian removed the finite-difference tax; its value is independent verification, not speed.</p>
     </div>
 
     <div class="hero__panel">
@@ -129,7 +129,7 @@ verdict           <span class="r">FAIL</span>  1 high</pre>
     <div class="io">
       <div class="io__b">
         <h4>The engine</h4>
-        <p>Three-phase black oil — oil, water, free gas and dissolved gas — with implicit finite volumes, TPFA fluxes, upstream mobility, Peaceman wells, and variable switching between <code>Sg</code> and <code>Rs</code>. Python/NumPy, one CPU thread, Cartesian grids. It is a verification instrument, not a production simulator.</p>
+        <p>Three-phase black oil — oil, water, free gas and dissolved gas — with implicit finite volumes, TPFA fluxes, upstream mobility, Peaceman wells, variable switching between <code>Sg</code> and <code>Rs</code>, and an analytic three-phase Jacobian. Python/NumPy, one CPU thread, Cartesian grids. It is a verification instrument, not a production simulator. <a href="docs/engine/analytic-jacobian.html">See how the analytic Jacobian works →</a></p>
       </div>
       <div class="io__b">
         <h4>The audit</h4>
@@ -183,11 +183,11 @@ verdict           <span class="r">FAIL</span>  1 high</pre>
     <h2>The scorecard, including the failures.</h2>
     <div class="stats">
       <div class="stat"><b>4.6e-7</b><span>SPE1 oil mass balance, 3,285 days — gate 1e-6</span></div>
-      <div class="stat"><b>3.14%</b><span>SPE1 cumulative oil vs OPM Flow — RMS 1.6%</span></div>
+      <div class="stat"><b>3.13%</b><span>SPE1 cumulative oil vs OPM Flow — RMS 1.6%</span></div>
       <div class="stat"><b>3.6%</b><span>SPE1 flowing BHP RMS vs OPM Flow</span></div>
       <div class="stat"><b>113,344</b><span>Norne cells audited — 44,927 active</span></div>
     </div>
-    <p class="fine">SPE1 is a comparison, not a pass of the pre-registered 1 psi / 1e-3 saturation gate: the 3.14% cumulative-oil gap is real and largest late in the run. The engine is 10× slower than OPM Flow at the loose setting that fails its own mass-balance gate, and 25–40× slower at the setting that passes. That is the price of a finite-difference Jacobian in Python; the value is an independent, conservative check, not a speed record.</p>
+    <p class="fine">SPE1 is a comparison, not a pass of the pre-registered 1 psi / 1e-3 saturation gate: the 3.13% cumulative-oil gap is real and largest late in the run. The analytic Jacobian cut the full 3,285-day run to 49.0 s (129 steps) at the same 1e-6 conservation gate; OPM Flow takes 14.8 s on this host, so the engine is about 3.3× slower. It is an independent, conservative check, not a speed record.</p>
 
     <div class="pains">
       <article class="pain">
@@ -217,7 +217,7 @@ verdict           <span class="r">FAIL</span>  1 high</pre>
     <h2>What this is not.</h2>
     <ul class="plain">
       <li><b>Not a replacement simulator.</b> SPE1 only; no SPE9, no corner-point/EGRID, no real field grids yet. Cartesian grids, single-threaded Python. The engine is a cross-check, not a development-planning tool.</li>
-      <li><b>Not faster.</b> 10× slower than OPM Flow at the loose setting; 25–40× slower at the tolerance that passes the mass-balance gate. A speed claim would be false.</li>
+      <li><b>Not faster.</b> About 3.3× slower than OPM Flow on SPE1 at the 1e-6 mass-balance gate (49.0 s vs 14.8 s). The analytic Jacobian removed the finite-difference tax, but this is not a throughput claim.</li>
       <li><b>Not a geology or reserves audit.</b> The audit checks numerical and input integrity. It does not judge upscaling, SCAL, hysteresis, history match, or whether the field will produce what the model says.</li>
       <li><b>No client field audit yet.</b> The Norne case is public; it is not a client engagement. The first client audit is priced and scoped as a pilot, with success criteria signed before work starts.</li>
       <li><b>UNKNOWN is not PASS.</b> OPM's release log does not print scaled residuals, so convergence is often UNKNOWN; the audit says so and reports the log-health proxy separately.</li>
@@ -267,7 +267,7 @@ verdict           <span class="r">FAIL</span>  1 high</pre>
     <p class="eyebrow">FAQ</p>
     <h2>Straight answers.</h2>
     <details><summary>Does haql-engine replace Eclipse or CMG?</summary><p>No. It audits their output and cross-checks the physics. The engine is an independent implementation for verification, not a production simulator; it supports SPE1-class Cartesian decks today, not full-field corner-point models.</p></details>
-    <details><summary>Is it faster?</summary><p>No. On SPE1 it is about 10× slower than OPM Flow at the loose setting and 25–40× slower at the tolerance that passes its 1e-6 mass-balance gate. The value is independent verification, not speed.</p></details>
+    <details><summary>Is it faster?</summary><p>Relative to its own previous version, yes: the analytic Jacobian cut the full SPE1 run from 504–618 s to 49.0 s at the 1e-6 gate. Relative to OPM Flow, no — OPM Flow takes 14.8 s on the same host, so the engine is about 3.3× slower. The value is independent verification, not speed.</p></details>
     <details><summary>What exactly does the audit check?</summary><p>Field material balance from the run's own in-place and cumulative vectors; Newton convergence and solver-log health; cell-by-cell pressure, saturation, BHP, oil rate and water cut against a reference; and input integrity — PVT, relperm, grid, units and schedule. It does not judge geology, upscaling, SCAL or history match.</p></details>
     <details><summary>What if my run has no balance vectors?</summary><p>The audit can instrument the deck with output-only FOIP/FWIP/FGIP vectors and re-run it in OPM Flow, then audit the re-run. The report records both runs and says the re-run is an independent reproduction, not your original run. Without that, the gate is UNKNOWN, not passed.</p></details>
     <details><summary>Can we reproduce an audit years later?</summary><p>Yes, and it is designed for that. Every audited input is hashed into a provenance manifest (deck, every INCLUDE file, the gates; the full run tree with <code>--hash-run</code>). The report ID is derived from that content, so relocating the evidence or moving machines does not change it. <code>--selfcheck</code> re-runs the audit twice and requires byte-identical output; <code>doctor.py</code> prints the environment passport. No wall clock enters the report unless you explicitly stamp a date.</p></details>

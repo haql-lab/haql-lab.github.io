@@ -60,6 +60,7 @@
       <a href="#results">Reading results</a>
       <a href="#uncertainty">Uncertainty</a>
       <a href="/docs/engine/fault-barriers.html">Fault barriers</a>
+      <a href="/docs/engine/analytic-jacobian.html">Analytic Jacobian</a>
       <a href="#parallel">Scenario speed</a>
       <a href="#trust">Can I trust it?</a>
       <a href="#limits">Limits</a>
@@ -164,6 +165,7 @@
           </div>
         </div>
         <p>For the numerically curious: the engine divides the field into a grid, tracks oil, water and gas cell by cell, and solves the changing pressure and flow through time. The <a href="/docs/engine/technical-reference.html#solve">technical reference</a> explains the numerical method in detail.</p>
+        <p>The production path now calculates the solver's derivatives analytically rather than measuring them by repeated perturbation. That is a solver change, not a new reservoir model: the same equations, wells, fault barriers and conservation gate still apply. <a href="/docs/engine/analytic-jacobian.html">See how the analytic Jacobian works →</a></p>
       </section>
 
       <section id="results">
@@ -228,7 +230,7 @@
             <p>A published comparison against OPM Flow, an open-source reference simulator. The 1.57% is a root-mean-square difference; pressure differences are larger and are reported openly.</p>
           </div>
           <div class="doc-stat">
-            <strong>76</strong>
+            <strong>83</strong>
             <span>automated checks passing</span>
             <p>Solver, geology, forecast and receipt checks. A passing test is evidence, not a guarantee.</p>
           </div>
@@ -316,6 +318,7 @@
         <table class="doc-table">
           <thead><tr><th>Feature</th><th>What it means for you</th><th>Guide</th></tr></thead>
           <tbody>
+            <tr><td>Analytic three-phase Jacobian</td><td>Solve each timestep from calculated slopes instead of repeated perturbation. The full SPE1 run fell from 504–618 s to 49.0 s at the same conservation gate.</td><td><a href="/docs/engine/analytic-jacobian.html">Analytic Jacobian</a></td></tr>
             <tr><td>Geological uncertainty</td><td>Run a range of plausible fields instead of one guess.</td><td><a href="#uncertainty">Uncertainty</a></td></tr>
             <tr><td>Fault-flow barriers</td><td>Test an open, partly restrictive or sealed fault without leaving the assumption implicit.</td><td><a href="/docs/engine/fault-barriers.html">Fault barriers</a></td></tr>
             <tr><td>Forecast aggregation</td><td>Turn a set of scenarios into a readable range and summary statistics.</td><td><a href="#results">Reading results</a></td></tr>
