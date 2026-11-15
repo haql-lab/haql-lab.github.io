@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>haql-engine — independent reservoir simulation audit | Haql Labs</title>
-<meta name="description" content="A from-scratch three-phase black-oil engine and an independent audit for Eclipse and OPM runs. Mass balance, convergence, reproduction and input integrity — with SHA-256 provenance receipts, quarterly revision diffs, ensemble batch audits and byte-identical reproducibility, verified on your machine.">
+<meta name="description" content="A from-scratch three-phase black-oil engine and an independent audit for Eclipse and OPM runs. Mass balance, convergence, reproduction and input integrity — with SHA-256 provenance receipts, scheduled Model CI gates, quarterly revision diffs, ensemble batch audits and byte-identical reproducibility, verified on your machine.">
 <link rel="canonical" href="https://haql-lab.github.io/haql-engine.html">
 <meta property="og:type" content="website">
 <meta property="og:title" content="haql-engine — independent reservoir simulation audit">
@@ -170,6 +170,10 @@ verdict           <span class="r">FAIL</span>  1 high</pre>
       <article class="pain">
         <h3>Ensembles and pinned references</h3>
         <p><code>ensemble.py</code> audits every history-match realisation with the identical pre-registered gates and reports the worst run, not the average — plus the residual spread. Your ground-truth run is pinned by SHA in the reference library with drift detection, so every later audit can be proved to use the same reference.</p>
+      </article>
+      <article class="pain">
+        <h3>Model CI</h3>
+        <p><code>modelci.py</code> turns the audit into a scheduled gate. It audits every configured run with the same pre-registered gates, applies a reviewed policy, and returns a CI exit code: high findings and audit errors block; medium findings and physics-level deck drift require review. One malformed run is isolated and reported without aborting the batch, and unchanged inputs are reused only after a fingerprint check.</p>
       </article>
     </div>
     <p class="fine">Try it on your own machine: <code>python3 verify/doctor.py</code>, then <code>python3 verify/audit.py --deck CASE.DATA --run RUN/ --selfcheck</code>. The selfcheck runs the audit twice and fails loudly if the outputs differ by a single byte.</p>
