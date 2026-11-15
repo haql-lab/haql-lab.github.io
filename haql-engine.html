@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>haql-engine — independent reservoir simulation audit | Haql Labs</title>
-<meta name="description" content="A from-scratch three-phase black-oil engine and an independent audit for Eclipse and OPM runs. Mass balance, convergence, reproduction and input integrity — with SHA-256 provenance receipts, scheduled Model CI gates, quarterly revision diffs, ensemble batch audits and byte-identical reproducibility, verified on your machine.">
+<meta name="description" content="A from-scratch three-phase black-oil engine and an independent audit for Eclipse and OPM runs. Mass balance, convergence, reproduction and input integrity — with SHA-256 provenance receipts, scheduled Model CI gates, independent OPM second opinions, a Decision Risk Ledger, field maps and VTK export, quarterly revision diffs, ensemble batch audits and byte-identical reproducibility, verified on your machine.">
 <link rel="canonical" href="https://haql-lab.github.io/haql-engine.html">
 <meta property="og:type" content="website">
 <meta property="og:title" content="haql-engine — independent reservoir simulation audit">
@@ -177,6 +177,34 @@ verdict           <span class="r">FAIL</span>  1 high</pre>
       </article>
     </div>
     <p class="fine">Try it on your own machine: <code>python3 verify/doctor.py</code>, then <code>python3 verify/audit.py --deck CASE.DATA --run RUN/ --selfcheck</code>. The selfcheck runs the audit twice and fails loudly if the outputs differ by a single byte.</p>
+  </div>
+</section>
+
+<!-- ============ DECISION ============ -->
+<section class="sec" id="decision">
+  <div class="wrap">
+    <p class="eyebrow">From run to decision</p>
+    <h2>A second opinion, a decision record, and a picture of the field.</h2>
+    <p class="lede lede--c">An audit says whether the numbers hold together. These three layers connect that evidence to the thing a reviewer actually has to do: decide, record the residual risk, and see where the field is changing.</p>
+    <div class="pains">
+      <article class="pain">
+        <h3>Independent second opinion</h3>
+        <p><code>secondopinion.py</code> re-runs the same deck with OPM Flow on this machine, then audits the delivered run against that independent reference. It reports the <strong>first report step</strong> and the <strong>worst cell</strong> where pressure or saturation stops agreeing, with the cell's (I,J,K), both values and the phase state. Calendar dates with a different elapsed <code>TIME</code> are skipped rather than compared as if they were the same step. A hypothesis is never presented as a proven root cause.</p>
+      </article>
+      <article class="pain">
+        <h3>Decision Risk Ledger</h3>
+        <p><code>ledger.py</code> records the decision, its materiality, the audit / Model CI / second-opinion evidence, residual risks, owners, conditions and review triggers. Every evidence file is SHA-256-pinned; <code>--verify-ledger</code> re-hashes it and checks the ledger's own record ID, so a changed file or a hand-edited record is detected. It is a decision record, <strong>not a reserves certification</strong>.</p>
+      </article>
+      <article class="pain">
+        <h3>Field maps and VTK</h3>
+        <p><code>run_spe1.py --save-fields</code> records pressure and saturation snapshots in a self-describing NPZ. <code>plot_fields.py</code> renders layer maps and x/y cross-sections for pressure, Sw, Sg and So, and exports a ParaView-readable <code>.vts</code> structured grid. Plotting is post-processing: the solver core does not import matplotlib.</p>
+      </article>
+      <article class="pain">
+        <h3>What the ledger does not do</h3>
+        <p>It does not make a forecast correct, erase a residual risk, or turn a simulation into a reserves booking. It makes the decision and the evidence behind it inspectable years later — including the checks that were skipped and the assumptions that were accepted.</p>
+      </article>
+    </div>
+    <p class="fine">Field snapshots are cell-centred and Cartesian, matching the engine's current scope. The second opinion needs OPM Flow and restart output; the ledger needs the JSON evidence records, not a live simulator. <a href="/docs/engine/decision-grade.html">Read the decision-grade guide →</a></p>
   </div>
 </section>
 

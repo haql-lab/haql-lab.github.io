@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decision-grade evidence — second opinion, ledger and field maps</title>
+<meta name="description" content="How haql-engine connects an independent OPM second opinion, a Decision Risk Ledger and field maps to a simulation decision — with first-divergence cells, evidence hashes and explicit limits.">
+<link rel="canonical" href="https://haql-lab.github.io/docs/engine/decision-grade.html">
+<meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="brand" href="/index.html" aria-label="Haql Labs — home">
+      <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#0B1B33"/><path fill="#F6F4EE" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#F6F4EE" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#4F9BFF" stroke-width="2.1" stroke-linecap="round"/></svg></span>
+      <span class="brand__word">haql<span class="brand__lab">Labs</span></span>
+    </a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="/haql-engine.html">haql-engine</a>
+      <a href="/docs/engine/index.html" aria-current="page">Docs</a>
+      <a href="/index.html#pricing">Pricing</a>
+      <a href="/downloads.html">Downloads</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=Decision-grade%20evidence%20question">Ask a question</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="doc-hero">
+    <div class="wrap">
+      <p class="eyebrow">haql-engine · decision guide</p>
+      <h1>Evidence is not a decision. <em>Make the decision inspectable.</em></h1>
+      <p class="lede">An audit can say whether a run reproduces and conserves. A decision needs more: where the runs separate, what residual risk is being accepted, who owns it, and what the field actually looks like. These three layers make that record visible.</p>
+      <div class="doc-badges">
+        <span class="doc-badge doc-badge--ok">shipped</span>
+        <span class="doc-badge">independent OPM second opinion</span>
+        <span class="doc-badge">Decision Risk Ledger</span>
+        <span class="doc-badge">field maps and VTK</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap doc-layout">
+    <aside class="doc-side" aria-label="Decision guide contents">
+      <span class="doc-side__label">On this page</span>
+      <a href="#second-opinion">Second opinion</a>
+      <a href="#ledger">Decision Risk Ledger</a>
+      <a href="#fields">Field maps and VTK</a>
+      <a href="#check">How to check it</a>
+      <a href="#limits">Limits</a>
+      <hr>
+      <a href="/docs/index.html">All product guides</a>
+      <a href="/docs/engine/index.html">← Public guide</a>
+      <a href="/haql-engine.html">Product page</a>
+    </aside>
+
+    <article class="doc-main">
+      <p class="doc-meta">Features: <code>verify/secondopinion.py</code>, <code>verify/ledger.py</code>, <code>engine/plot_fields.py</code> · Status: shipped · Evidence: public SPE1 checks and tests</p>
+
+      <section id="second-opinion">
+        <h2>Second opinion: find the first disagreement, not just the verdict</h2>
+        <p>The normal audit compares a delivered run with a reference you supply. The second-opinion path supplies the reference itself: it re-runs the same deck with OPM Flow on this machine, instruments only the output balance vectors, and audits the delivered run against that independent reproduction.</p>
+        <pre><code>python3 verify/secondopinion.py \
+  --deck CASE.DATA --run delivered/ \
+  --workdir /tmp/case-opm \
+  --out secondopinion.md --json secondopinion.json</code></pre>
+        <p>The useful output is not a single pass/fail. It is the earliest matched report step where pressure or saturation fails the pre-registered gate, the worst active cell and its (I,J,K), both values, and the same-cell phase state. That is where an engineer starts looking.</p>
+        <div class="doc-callout">
+          <p><strong>Schedule-aware.</strong> A calendar date is compared only when both summaries record the same elapsed <code>TIME</code>. If a reference was generated with a different <code>TSTEP</code>/<code>DATES</code> schedule, the tool skips the mismatched pairs and reports them instead of calling a timestep difference a model difference. If no pair shares an elapsed time, it stops rather than pretending the comparison is valid.</p>
+        </div>
+        <p>A hypothesis is labelled as a hypothesis. The tool can say the candidate puts gas where the reference has none; it does not claim that RS/PB is the proven root cause. The engineer tests it.</p>
+      </section>
+
+      <section id="ledger">
+        <h2>Decision Risk Ledger: record the risk you are accepting</h2>
+        <p>The ledger is a decision record, not a reserves certification. It records the decision, its materiality, the evidence records, residual risks, owners, conditions and review triggers. Every evidence file is SHA-256-pinned, and the ledger has a content-derived record ID.</p>
+        <pre><code>python3 verify/ledger.py --config decision.json \
+  --out ledger.md --json ledger.json
+python3 verify/ledger.py --verify-ledger ledger.json</code></pre>
+        <p><code>--verify-ledger</code> re-hashes the evidence and checks the ledger's own record ID. A changed evidence file, a missing file, or a hand-edited record is detected. The hash is tamper-evident, not a signature: a writer who can change both the evidence and the ledger can recompute it. For a signed decision, use the organisation's signing process.</p>
+        <table class="doc-table">
+          <thead><tr><th>Record</th><th>Question it answers</th></tr></thead>
+          <tbody>
+            <tr><td>Decision and owner</td><td>What was decided, by whom, and when?</td></tr>
+            <tr><td>Materiality</td><td>What error would change the decision?</td></tr>
+            <tr><td>Evidence</td><td>Which audit, Model CI and second-opinion records support it, and have they changed?</td></tr>
+            <tr><td>Residual risk</td><td>What remains uncertain, who owns it, how is it mitigated, and what trigger forces a review?</td></tr>
+            <tr><td>Conditions</td><td>What must be closed before the decision is unconditional?</td></tr>
+          </tbody>
+        </table>
+        <div class="doc-callout doc-callout--warn">
+          <p><strong>Not a certification.</strong> The ledger does not judge geology, upscaling, history match or reserves. It makes the decision and its accepted uncertainty inspectable years later. A high-severity audit finding can be recorded, but it cannot be made to disappear by writing a ledger.</p>
+        </div>
+      </section>
+
+      <section id="fields">
+        <h2>Field maps: see where the state is changing</h2>
+        <p>Summary curves show the wells; they do not show the field. <code>run_spe1.py --save-fields</code> records pressure, water saturation, gas saturation and dissolved gas ratio in a self-describing compressed NPZ. <code>plot_fields.py</code> renders layer maps and x/y cross-sections, and exports a ParaView-readable structured grid.</p>
+        <pre><code>python3 run_spe1.py --T 3285 --save-fields --fields-every 10 \
+  --json run.json --fields-file run_fields.npz
+python3 plot_fields.py run_fields.npz \
+  --time 3285 --layer 3 --section x --index 5 \
+  --out fields.png --vtk fields.vts</code></pre>
+        <p>The plot is two rows: pressure, Sw, Sg and So layer maps on top; cross-sections below. <code>--time</code> selects the nearest stored snapshot; <code>--layer</code> is 1-based in the solver's k-major order. The VTK file carries <code>pressure</code>, <code>sw</code>, <code>sg</code>, <code>so</code>, <code>rs</code> and <code>TIME</code> as point data, with no VTK Python package required.</p>
+        <p>Plotting is post-processing. The solver core does not import matplotlib, and a run does not need plotting installed.</p>
+      </section>
+
+      <section id="check">
+        <h2>How to check it</h2>
+        <pre><code># second opinion and ledger regressions
+python3 verify/tests.py
+
+# field snapshots, maps, cross-sections and VTK
+cd engine
+python3 -m unittest -v test_fields
+
+# the complete engine suite
+python3 -m unittest discover -p 'test_*.py'</code></pre>
+        <p>The public SPE1 reference is checked in, so the regression suite can compare a run with itself and exercise the first-divergence path without requiring OPM on every machine. The actual OPM path is the command at the top of this page; it records the reference directory and command in the JSON.</p>
+      </section>
+
+      <section id="limits">
+        <h2>Limits you should state</h2>
+        <ul>
+          <li><strong>The second opinion is an independent reproduction, not the client's original run.</strong> It uses this machine's OPM build and stock settings.</li>
+          <li><strong>A divergence is not automatically a defect.</strong> It is evidence that two implementations disagree; the first failing cell is where to investigate.</li>
+          <li><strong>The ledger is not a reserves certification.</strong> It records a decision and its residual risk; it does not validate geology, upscaling or history match.</li>
+          <li><strong>The ledger hash is tamper-evident, not a signature.</strong> Use a signing process when the record must be non-repudiable.</li>
+          <li><strong>Field maps are Cartesian and cell-centred.</strong> No corner-point/EGRID geometry, flux vectors or streamlines yet.</li>
+          <li><strong>No client field audit is claimed.</strong> The public evidence is SPE1 and the public Norne case; the first client engagement is a pilot.</li>
+        </ul>
+      </section>
+
+      <div class="doc-pager">
+        <a href="/docs/engine/index.html">← Public guide</a>
+        <a href="/haql-engine.html#decision">Product page →</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__bottom">
+      <p>© <span id="yr">2026</span> Haql Labs · A plain-language guide to an inspectable reservoir engine.</p>
+      <p><a href="/index.html">Home</a> · <a href="/haql-engine.html">haql-engine</a> · <a href="mailto:kunleaz100@gmail.com">Contact</a></p>
+    </div>
+  </div>
+</footer>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>
