@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Haql Labs — Deterministic software for oil & gas data</title>
+<title>Haql Labs — Deterministic software for oil &amp; gas data</title>
 <meta name="description" content="Deterministic, offline software for oil and gas data: production QC, month-end closeout, 45Q carbon credit MRV, emissions/GHG inventory MRV, Texas RRC filing QC, A&amp;D dataroom QC, simulation audit, units and coordinates. No AI, no cloud uploads.">
 <link rel="canonical" href="https://haql-lab.github.io/">
 <meta property="og:type" content="website">
@@ -20,15 +20,14 @@
 <meta name="twitter:description" content="Deterministic, offline tools for oil and gas data: production QC, closeout, 45Q, emissions MRV, RRC filing QC, A&amp;D dataroom QC, simulation audit, units, coordinates. Offline, traceable, and transparent.">
 <meta name="twitter:image" content="https://haql-lab.github.io/assets/img/og-cover.png">
 <meta name="twitter:image:alt" content="Haql Labs — catch what the summary hides, over a sunset view of the Trans-Alaska Pipeline">
-<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f2efe6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16140e" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="favicon.ico" sizes="32x32">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<link rel="preload" href="assets/fonts/inter-latin-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/fonts/space-grotesk-latin-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" as="image" href="assets/img/field/pipeline-2000.webp" type="image/webp" imagesrcset="assets/img/field/pipeline-1000.webp 1000w, assets/img/field/pipeline-2000.webp 2000w" imagesizes="100vw" fetchpriority="high">
+<link rel="preload" href="assets/fonts/bricolage-latin-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/spline-sans-mono-latin-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/style.css">
 <script type="application/ld+json">
 {
@@ -67,9 +66,9 @@
           <a class="menu__item" href="haql-dataroom.html"><b>haql-dataroom</b><span>A&amp;D dataroom QC</span></a>
           <a class="menu__item" href="haql-revenue.html"><b>haql-revenue</b><span>Purchaser statements</span></a>
           <a class="menu__item" href="haql-engine.html"><b>haql-engine</b><span>Simulation audit</span></a>
-          <a class="menu__item" href="haql-units.html"><b>haql-units</b><span>Unit conversions · MIT</span></a>
-          <a class="menu__item" href="haql-coords.html"><b>haql-coords</b><span>Wellbore math · MIT</span></a>
-          <a class="menu__all" href="index.html#tools">All ten tools →</a>
+          <a class="menu__item" href="haql-units.html"><b>haql-units</b><span>Unit conversions (MIT)</span></a>
+          <a class="menu__item" href="haql-coords.html"><b>haql-coords</b><span>Wellbore math (MIT)</span></a>
+          <a class="menu__all" href="index.html#tools">All ten tools</a>
         </div>
       </details>
       <a href="index.html#how">How it works</a>
@@ -84,18 +83,10 @@
 <main id="main">
 
 <!-- ============ HERO ============ -->
-<section class="hero hero--field" id="top">
-  <div class="hero__media" aria-hidden="true">
-    <picture>
-      <source type="image/webp" srcset="assets/img/field/pipeline-1000.webp 1000w, assets/img/field/pipeline-2000.webp 2000w" sizes="100vw">
-      <img src="assets/img/field/pipeline-2000.jpg" srcset="assets/img/field/pipeline-1000.jpg 1000w, assets/img/field/pipeline-2000.jpg 2000w" sizes="100vw" alt="" width="2000" height="1100" fetchpriority="high" decoding="async">
-    </picture>
-  </div>
-  <div class="hero__veil" aria-hidden="true"></div>
+<section class="hero" id="top">
   <div class="wrap hero__in">
     <div class="hero__copy">
-      <p class="eyebrow">Deterministic software for oil &amp; gas data</p>
-      <h1>Software that catches what the summary <em>hides</em>.</h1>
+      <h1>Software that catches what the summary hides.</h1>
       <p class="lede">A monthly total still adds up when four wells carry negative volumes. Haql tools read the export you already have and point at the exact row where the numbers contradict each other.</p>
       <div class="cta">
         <a class="btn btn--p" href="mailto:kunleaz100@gmail.com?subject=Free%20sample%20check%20request">Request a free sample check</a>
@@ -110,92 +101,124 @@
     </div>
 
     <div class="hero__panel">
-      <div class="panel__bar"><span class="dot"></span>haql-qc · audit receipt</div>
-      <pre class="panel__body" tabindex="0" aria-label="Example report output"><span class="c">$ haql-qc -i production.csv -r audit.json</span>
-<span class="k">rows</span>=15634  <span class="k">wells</span>=7  <span class="k">findings</span>=<span class="w">80</span>
-
-<span class="r">high</span>   QC010_NEGATIVE_RATE
-       well    NO 15/9-F-12 H
-       date    2008-04-23
-       row     1984
-       value   <span class="r">−14.19</span> Sm3  (BORE_WAT_VOL)
-
-<span class="c"># read-only: the export is never modified</span>
-<span class="c"># input SHA-256 recorded in every report</span>
-<span class="c"># identical bytes in → identical findings out</span></pre>
-      <p class="panel__cap">An example finding from the published validation run. Every finding carries a stable rule ID and a 1-indexed source row; the report records the SHA-256 of the exact input audited.</p>
+      <div class="panel__bar"><span class="dot" aria-hidden="true"></span><span>haql-qc</span><span aria-hidden="true" style="margin-left:auto">audit receipt</span></div>
+      <div class="log" role="img" aria-label="Daily water rate for well NO 15/9-F-12 H. The trace holds a low, noisy daily rate until day 47, where one point dips below the zero line and is flagged as finding QC010 at source row 1984.">
+        <svg viewBox="0 0 560 300" width="100%" focusable="false" aria-hidden="true">
+          <!-- log grid -->
+          <g stroke="#31446b" stroke-width="1" opacity="0.55">
+            <line x1="40" y1="52" x2="540" y2="52"/>
+            <line x1="40" y1="91" x2="540" y2="91"/>
+            <line x1="40" y1="130" x2="540" y2="130"/>
+            <line x1="40" y1="169" x2="540" y2="169"/>
+            <line x1="40" y1="208" x2="540" y2="208"/>
+          </g>
+          <g stroke="#31446b" stroke-width="1" opacity="0.28">
+            <line x1="115" y1="40" x2="115" y2="238"/>
+            <line x1="190" y1="40" x2="190" y2="238"/>
+            <line x1="265" y1="40" x2="265" y2="238"/>
+            <line x1="340" y1="40" x2="340" y2="238"/>
+            <line x1="415" y1="40" x2="415" y2="238"/>
+            <line x1="490" y1="40" x2="490" y2="238"/>
+          </g>
+          <!-- zero line -->
+          <line x1="40" y1="169" x2="540" y2="169" stroke="#5b6f96" stroke-width="1.4"/>
+          <text x="540" y="163" text-anchor="end" font-family="Spline Sans Mono, monospace" font-size="10" fill="#8b9ab8">0</text>
+          <text x="540" y="49" text-anchor="end" font-family="Spline Sans Mono, monospace" font-size="10" fill="#8b9ab8">20</text>
+          <!-- trace -->
+          <path pathLength="1000" class="log__trace"
+            d="M40,148 L58,152 L76,145 L94,150 L112,142 L130,149 L148,144 L166,151 L184,146 L202,150 L220,147 L238,150 L248,196 L258,148 L276,150 L294,145 L312,151 L330,146 L348,150 L366,144 L384,149 L402,145 L420,150 L438,146 L456,151 L474,147 L492,150 L510,148 L540,149"
+            fill="none" stroke="#7ba4f4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+          <!-- flagged finding -->
+          <circle cx="248" cy="196" r="9" fill="none" stroke="#f09386" stroke-width="1.8"/>
+          <circle cx="248" cy="196" r="2.6" fill="#f09386"/>
+          <line x1="258" y1="196" x2="330" y2="248" stroke="#f09386" stroke-width="1" opacity="0.7"/>
+          <g font-family="Spline Sans Mono, monospace" font-size="10.5" fill="#f09386">
+            <text x="338" y="246">row 1984</text>
+            <text x="338" y="261">QC010_NEGATIVE_RATE</text>
+            <text x="338" y="276" fill="#e8edf6">−14.19 Sm³</text>
+          </g>
+        </svg>
+        <div class="log__head" aria-hidden="true">
+          <span>NO 15/9-F-12 H</span>
+          <span>BORE_WAT_VOL, Sm³</span>
+        </div>
+      </div>
+      <div class="log__foot">
+        <span class="log__sev">high</span>
+        <p>1 finding in 15,634 rows. The monthly total still footed.</p>
+      </div>
+      <p class="panel__cap">From the published validation run on Equinor's Volve field: every finding carries a stable rule ID and a 1-indexed source row, and the report records the SHA-256 of the exact input audited.</p>
     </div>
   </div>
-  <p class="hero__credit">Trans-Alaska Pipeline · Craig McCaa / BLM Alaska · Public domain</p>
 </section>
 
 <!-- ============ TOOLS ============ -->
 <section class="sec" id="tools">
   <div class="wrap">
-    <p class="eyebrow">The suite</p>
-    <h2>Ten tools. Each one answers one question you already ask.</h2>
-    <p class="lede lede--c">Eight commercial products — six self-contained binaries, one independent simulation audit and one purchaser-statement audit — plus two MIT libraries. All share one stance: read-only, offline, deterministic, traced to a row in your own file.</p>
+    <h2>Ten tools. Each answers one question you already ask.</h2>
+    <p class="lede">Eight commercial products — six self-contained binaries, one independent simulation audit and one purchaser-statement audit — plus two MIT libraries. All share one stance: read-only, offline, deterministic, traced to a row in your own file.</p>
 
-    <div class="suite">
-      <article class="product">
-        <div class="product__hd"><h3>haql-qc</h3><span class="pill">Data quality</span></div>
-        <p>Flags every record in a production export that is missing, negative, contradictory or physically impossible — with the rule ID and the source row.</p>
-        <div class="product__meta"><span>ruleset 1.2.0 · commercial</span><a class="product__link" href="haql-qc.html">View haql-qc</a></div>
-      </article>
-
-      <article class="product">
-        <div class="product__hd"><h3>haql-closeout</h3><span class="pill">Month-end</span></div>
-        <p>Is this month complete and reconciled enough to lock? Cross-checks well tests, downtime, field balances and date continuity.</p>
-        <div class="product__meta"><span>ruleset 1.0.0 · commercial</span><a class="product__link" href="haql-closeout.html">View haql-closeout</a></div>
-      </article>
-
-      <article class="product">
-        <div class="product__hd"><h3>haql-45q</h3><span class="pill">45Q MRV</span></div>
-        <p>Turns a year of capture, injection, monitoring and lab records into a defensible 45Q claim: mass balance and a certification pack.</p>
-        <div class="product__meta"><span>ruleset 1.0.0 · commercial</span><a class="product__link" href="haql-45q.html">View haql-45q</a></div>
-      </article>
-
-      <article class="product">
-        <div class="product__hd"><h3>haql-emission</h3><span class="pill">Emissions MRV</span></div>
-        <p>Reconciles a GHG inventory from activity, flare and vent exports — mass balance, coverage, and an EU ETS allowance position.</p>
-        <div class="product__meta"><span>ruleset 1.0.0 · commercial</span><a class="product__link" href="haql-emission.html">View haql-emission</a></div>
-      </article>
-
-      <article class="product">
-        <div class="product__hd"><h3>haql-rrc</h3><span class="pill">RRC filing</span></div>
-        <p>Checks a Texas RRC Form PR export before it is filed — operator numbers, disposition codes, district range, flare remarks, filing status.</p>
-        <div class="product__meta"><span>ruleset 1.0.0 · commercial</span><a class="product__link" href="haql-rrc.html">View haql-rrc</a></div>
-      </article>
-
-      <article class="product">
-        <div class="product__hd"><h3>haql-dataroom</h3><span class="pill">A&amp;D dataroom</span></div>
-        <p>Cross-checks an acquisition dataroom offline: production, revenue and severance tables, reserves and LAS headers — every contradiction traced to a source row.</p>
-        <div class="product__meta"><span>ruleset 1.0.0 · commercial</span><a class="product__link" href="haql-dataroom.html">View haql-dataroom</a></div>
-      </article>
-
-      <article class="product">
-        <div class="product__hd"><h3>haql-revenue</h3><span class="pill">Revenue audit</span></div>
-        <p>Reconciles produced volumes against purchaser statements: missing statements, price below contract, volume short, duplicate lines and unscheduled deductions, ranked by dollars.</p>
-        <div class="product__meta"><span>ruleset 0.1.0 · commercial</span><a class="product__link" href="haql-revenue.html">View haql-revenue</a></div>
-      </article>
-
-      <article class="product">
-        <div class="product__hd"><h3>haql-engine</h3><span class="pill">Simulation audit</span></div>
-        <p>Independent audit of an Eclipse/OPM run: mass balance, convergence, reproduction and input integrity — with provenance receipts, quarterly revision diffs and ensemble audits. The engine is the verification instrument; the audit is the deliverable, and it reproduces byte-identically on your machine.</p>
-        <div class="product__meta"><span>per engagement · pilot</span><a class="product__link" href="haql-engine.html">View haql-engine</a></div>
-      </article>
-
-      <article class="product">
-        <div class="product__hd"><h3>haql-units</h3><span class="pill pill--open">MIT</span></div>
-        <p>Field-to-SI unit conversions with explicit time bases and round-trip checking, so a unit mismatch is caught rather than inherited.</p>
-        <div class="product__meta"><span>free · open source</span><a class="product__link" href="haql-units.html">View haql-units</a></div>
-      </article>
-
-      <article class="product">
-        <div class="product__hd"><h3>haql-coords</h3><span class="pill pill--open">MIT</span></div>
-        <p>Wellbore geometry and coordinate math engineers use: minimum curvature, DLS, UTM/WGS84 — with round-trip verification.</p>
-        <div class="product__meta"><span>free · open source</span><a class="product__link" href="haql-coords.html">View haql-coords</a></div>
-      </article>
+    <div class="registry">
+      <a class="registry__row" href="haql-qc.html">
+        <span class="registry__name">haql-qc</span>
+        <span class="registry__desc">Flags every record in a production export that is missing, negative, contradictory or physically impossible — with the rule ID and the source row.</span>
+        <span class="registry__tag">ruleset 1.2.0, commercial</span>
+        <span class="registry__go" aria-hidden="true">›</span>
+      </a>
+      <a class="registry__row" href="haql-closeout.html">
+        <span class="registry__name">haql-closeout</span>
+        <span class="registry__desc">Is this month complete and reconciled enough to lock? Cross-checks well tests, downtime, field balances and date continuity.</span>
+        <span class="registry__tag">ruleset 1.0.0, commercial</span>
+        <span class="registry__go" aria-hidden="true">›</span>
+      </a>
+      <a class="registry__row" href="haql-45q.html">
+        <span class="registry__name">haql-45q</span>
+        <span class="registry__desc">Turns a year of capture, injection, monitoring and lab records into a defensible 45Q claim: mass balance and a certification pack.</span>
+        <span class="registry__tag">ruleset 1.0.0, commercial</span>
+        <span class="registry__go" aria-hidden="true">›</span>
+      </a>
+      <a class="registry__row" href="haql-emission.html">
+        <span class="registry__name">haql-emission</span>
+        <span class="registry__desc">Reconciles a GHG inventory from activity, flare and vent exports — mass balance, coverage, and an EU ETS allowance position.</span>
+        <span class="registry__tag">ruleset 1.0.0, commercial</span>
+        <span class="registry__go" aria-hidden="true">›</span>
+      </a>
+      <a class="registry__row" href="haql-rrc.html">
+        <span class="registry__name">haql-rrc</span>
+        <span class="registry__desc">Checks a Texas RRC Form PR export before it is filed — operator numbers, disposition codes, district range, flare remarks, filing status.</span>
+        <span class="registry__tag">ruleset 1.0.0, commercial</span>
+        <span class="registry__go" aria-hidden="true">›</span>
+      </a>
+      <a class="registry__row" href="haql-dataroom.html">
+        <span class="registry__name">haql-dataroom</span>
+        <span class="registry__desc">Cross-checks an acquisition dataroom offline: production, revenue and severance tables, reserves and LAS headers — every contradiction traced to a source row.</span>
+        <span class="registry__tag">ruleset 1.0.0, commercial</span>
+        <span class="registry__go" aria-hidden="true">›</span>
+      </a>
+      <a class="registry__row" href="haql-revenue.html">
+        <span class="registry__name">haql-revenue</span>
+        <span class="registry__desc">Reconciles produced volumes against purchaser statements: missing statements, price below contract, volume short, duplicate lines and unscheduled deductions, ranked by dollars.</span>
+        <span class="registry__tag">ruleset 0.1.0, commercial</span>
+        <span class="registry__go" aria-hidden="true">›</span>
+      </a>
+      <a class="registry__row" href="haql-engine.html">
+        <span class="registry__name">haql-engine</span>
+        <span class="registry__desc">Independent audit of an Eclipse/OPM run: mass balance, convergence, reproduction and input integrity — with provenance receipts, quarterly revision diffs and ensemble audits. The engine is the verification instrument; the audit is the deliverable, and it reproduces byte-identically on your machine.</span>
+        <span class="registry__tag">per engagement, pilot</span>
+        <span class="registry__go" aria-hidden="true">›</span>
+      </a>
+      <a class="registry__row" href="haql-units.html">
+        <span class="registry__name">haql-units</span>
+        <span class="registry__desc">Field-to-SI unit conversions with explicit time bases and round-trip checking, so a unit mismatch is caught rather than inherited.</span>
+        <span class="registry__tag">free, MIT</span>
+        <span class="registry__go" aria-hidden="true">›</span>
+      </a>
+      <a class="registry__row" href="haql-coords.html">
+        <span class="registry__name">haql-coords</span>
+        <span class="registry__desc">Wellbore geometry and coordinate math engineers use: minimum curvature, DLS, UTM/WGS84 — with round-trip verification.</span>
+        <span class="registry__tag">free, MIT</span>
+        <span class="registry__go" aria-hidden="true">›</span>
+      </a>
     </div>
 
     <p class="fine mt-4">Builds are sent as private links; Linux x86_64 is available now, Windows and macOS on request. <a href="downloads.html">See the downloads page</a> for the request process, hashes and the 30-day evaluation.</p>
@@ -203,11 +226,10 @@
 </section>
 
 <!-- ============ FROM THE FIELD ============ -->
-<section class="sec field" id="field">
+<section class="sec sec--alt field" id="field">
   <div class="wrap">
     <div class="field__hd">
       <div>
-        <p class="eyebrow">From the field</p>
         <h2>The numbers start at the wellhead. They end up on a statement.</h2>
       </div>
       <p class="lede">Between the two, a hundred small handoffs happen. Haql reads the export at the end of that chain and points back to the row where it stopped adding up.</p>
@@ -220,9 +242,9 @@
           <img src="assets/img/field/pumpjack-1200.jpg" srcset="assets/img/field/pumpjack-600.jpg 600w, assets/img/field/pumpjack-1200.jpg 1200w" sizes="(max-width: 860px) 100vw, 55vw" alt="A pumpjack operating in a grass field at Glenn Pool, Oklahoma" width="1200" height="1000" loading="lazy" decoding="async">
         </picture>
         <figcaption class="field__cap">
-          <span class="field__num">01 · Production</span>
-          <b>What the well actually made.</b>
-          <p>Rates, downtime, well tests and the daily records behind them.</p>
+          <span class="field__num">01</span>
+          <b>Production</b>
+          <p>What the well actually made. Rates, downtime, well tests and the daily records behind them.</p>
         </figcaption>
       </figure>
 
@@ -232,9 +254,9 @@
           <img src="assets/img/field/pipes-1200.jpg" srcset="assets/img/field/pipes-600.jpg 600w, assets/img/field/pipes-1200.jpg 1200w" sizes="(max-width: 860px) 100vw, 45vw" alt="Large crude oil pipes at the Bryan Mound Strategic Petroleum Reserve site in Texas" width="1200" height="600" loading="lazy" decoding="async">
         </picture>
         <figcaption class="field__cap">
-          <span class="field__num">02 · Midstream</span>
-          <b>What moved, and where it went.</b>
-          <p>Volumes, destinations and the paper trail between field and purchaser.</p>
+          <span class="field__num">02</span>
+          <b>Midstream</b>
+          <p>What moved, and where it went. Volumes, destinations and the paper trail between field and purchaser.</p>
         </figcaption>
       </figure>
 
@@ -244,21 +266,20 @@
           <img src="assets/img/field/holstein-1200.jpg" srcset="assets/img/field/holstein-600.jpg 600w, assets/img/field/holstein-1200.jpg 1200w" sizes="(max-width: 860px) 100vw, 45vw" alt="The Holstein offshore oil platform lit at dusk in the Gulf of Mexico" width="1200" height="600" loading="lazy" decoding="async">
         </picture>
         <figcaption class="field__cap">
-          <span class="field__num">03 · Operations</span>
-          <b>What the statement says was sold.</b>
-          <p>Purchaser lines, deductions, prices and the dollars that reach the ledger.</p>
+          <span class="field__num">03</span>
+          <b>Operations</b>
+          <p>What the statement says was sold. Purchaser lines, deductions, prices and the dollars that reach the ledger.</p>
         </figcaption>
       </figure>
     </div>
 
-    <p class="field__note">Field photography is illustrative and does not depict customer assets. Credits: Craig McCaa / BLM Alaska (public domain), Roy Luck (CC BY 2.0), U.S. Department of Energy (public domain), GuavaTrain (CC0), Maxx@night (CC BY 2.0). <a href="credits.html">Full image credits</a>.</p>
+    <p class="field__note fine">Field photography is illustrative and does not depict customer assets. Credits: Craig McCaa / BLM Alaska (public domain), Roy Luck (CC BY 2.0), U.S. Department of Energy (public domain), GuavaTrain (CC0), Maxx@night (CC BY 2.0). <a href="credits.html">Full image credits</a>.</p>
   </div>
 </section>
 
 <!-- ============ HOW IT WORKS ============ -->
-<section class="sec sec--alt" id="how">
+<section class="sec" id="how">
   <div class="wrap wrap--narrow">
-    <p class="eyebrow">How it works</p>
     <h2>One step added. Nothing replaced.</h2>
     <p class="lede">No change to how you capture or account for production. Export the file you already have, run the check, and decide what to fix in your source of truth.</p>
 
@@ -269,7 +290,7 @@
       <li><b>Fix</b><span>You correct your source of truth. The tool never writes to your file.</span></li>
     </ol>
 
-    <p class="fine mt-4">Read-only in both directions · no network call · no telemetry · no upload · no model.</p>
+    <p class="fine mt-4">Read-only in both directions. No network call, no telemetry, no upload, no model.</p>
   </div>
 </section>
 
@@ -283,10 +304,9 @@
   </div>
   <div class="wrap field-band__in">
     <div class="field-band__copy">
-      <p class="eyebrow">The field doesn't stop</p>
       <blockquote>The field runs around the clock. <em>The reconciliation shouldn't wait for month-end.</em></blockquote>
       <p>Production, downtime, run tickets, purchaser statements — the data is already there. Haql turns it into a repeatable check, not a once-a-quarter scramble.</p>
-      <p class="field-band__meta">Read-only · Offline · Row-level traceability</p>
+      <p class="field-band__meta">Read-only. Offline. Traceable to the row.</p>
     </div>
   </div>
 </section>
@@ -294,9 +314,8 @@
 <!-- ============ PRICING ============ -->
 <section class="sec" id="pricing">
   <div class="wrap">
-    <p class="eyebrow">Pricing</p>
     <h2>Priced against the hours you already spend.</h2>
-    <p class="lede lede--c">Licenses are annual and verified offline. Evaluation runs for 30 days with no license key, and the two MIT libraries are free forever.</p>
+    <p class="lede">Licenses are annual and verified offline. Evaluation runs for 30 days with no license key, and the two MIT libraries are free forever.</p>
 
     <div class="tiers">
       <div class="tier">
@@ -324,7 +343,6 @@
 <!-- ============ TRUST / FAQ ============ -->
 <section class="sec sec--alt" id="faq">
   <div class="wrap wrap--narrow">
-    <p class="eyebrow">Trust &amp; FAQ</p>
     <h2>Why hand a month of data to a stranger.</h2>
     <p class="lede">The six commercial data tools are single self-contained binaries that run entirely on your machine, offline, with no installer and no Python. haql-revenue is a licensed Python 3.8+ package, standard library only, with a local review UI — still no network call. The simulation audit is a service: send a deck and run, and we return a signed report. The MIT libraries install from PyPI. None of these tools opens a network connection. The rules are numbered permanently — adding a rule never renumbers an existing one.</p>
     <ul class="plain">
@@ -369,7 +387,7 @@
     <div class="ftr__top">
       <div class="ftr__brand">
         <a class="brand" href="index.html" aria-label="Haql Labs — home">
-          <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#0B1B33"/><path fill="#F6F4EE" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#F6F4EE" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#4F9BFF" stroke-width="2.1" stroke-linecap="round"/></svg></span>
+          <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#4F9BFF"/><path fill="#0B1B33" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#0B1B33" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#F6F4EE" stroke-width="2.1" stroke-linecap="round"/></svg></span>
           <span class="brand__word">haql<span class="brand__lab">Labs</span></span>
         </a>
         <p>Deterministic, offline software for oil and gas production data. Every finding cites the rule and source row; every report records the input hash.</p>
@@ -410,7 +428,7 @@
       </div>
     </div>
     <div class="ftr__bottom">
-      <p>© <span id="yr">2026</span> Haql Labs · Built and maintained by an independent reservoir and production software engineer.</p>
+      <p>© <span id="yr">2026</span> Haql Labs. Built and maintained by an independent reservoir and production software engineer.</p>
       <p>No cookies, no trackers, no analytics, no backend.</p>
     </div>
   </div>

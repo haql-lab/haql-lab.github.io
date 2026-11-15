@@ -59,9 +59,12 @@
   var path = window.location.pathname.split("/").pop() || "index.html";
   Array.prototype.forEach.call(document.querySelectorAll(".nav a[href]"), function (a) {
     var href = a.getAttribute("href") || "";
-    var target = href.split("/").pop().split("#")[0];
+    var clean = href.split("#")[0];
+    var target = clean.split("/").pop();
     var hash = href.indexOf("#") > -1 ? "#" + href.split("#")[1] : "";
-    if (target === path && (!hash || hash === window.location.hash)) {
+    /* a directory index link (e.g. docs/index.html) must not mark the site root */
+    var isRootAlias = target === "index.html" && clean.indexOf("/") > -1 && path === "index.html";
+    if (target === path && !isRootAlias && (!hash || hash === window.location.hash)) {
       a.setAttribute("aria-current", "page");
     }
   });
