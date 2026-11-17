@@ -176,7 +176,7 @@ python3 compare_spe1.py --run fixtures/spe1_full.json</code></pre>
           <li><strong>It is not a speed record.</strong> The engine remains single-threaded Python and is slower than OPM Flow. The claim is the measured 49.0 s at the 1e-6 gate on this host, not a general throughput promise.</li>
           <li><strong>It is not a global convergence proof.</strong> Four test branches and the full SPE1 conservation run are strong evidence, not a guarantee for every possible state or deck.</li>
           <li><strong>Corners remain corners.</strong> At an exact table knot or upstream flip the derivative is one-sided. A run can still need an extra Newton iteration there.</li>
-          <li><strong>The scope is still narrow.</strong> Cartesian SPE1-class grids; no corner-point/EGRID, no SPE9, no full SCHEDULE parser, no history matching.</li>
+          <li><strong>The scope is still narrow.</strong> Native runs are SPE1-only. Deck PVT/relperm tables and the standard Cartesian SPE9 static grid now load, but there is no native SPE9 schedule/time-stepping, no corner-point/EGRID, no full SCHEDULE parser and no history matching.</li>
           <li><strong>One machine, one case.</strong> The timings are from the two-core reference host. Absolute times will differ elsewhere; the relative comparison and the conservation result are the reproducible parts.</li>
         </ul>
         <div class="doc-callout doc-callout--warn">

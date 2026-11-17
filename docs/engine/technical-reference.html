@@ -100,7 +100,7 @@
           </div>
         </div>
         <div class="doc-callout">
-          <p><strong>Read this first:</strong> the engine is a verification and teaching instrument, not a replacement for Eclipse, CMG or tNavigator. It currently supports SPE1-style Cartesian grids and a deliberately narrow well/schedule model.</p>
+          <p><strong>Read this first:</strong> the engine is a verification and teaching instrument, not a replacement for Eclipse, CMG or tNavigator. Native simulation currently supports SPE1-style Cartesian runs and a deliberately narrow well/schedule model. The deck reader can also load PVT/relperm tables and the standard Cartesian SPE9 static grid, but not yet the SPE9 wells or 900-day schedule.</p>
         </div>
       </section>
 
@@ -284,7 +284,7 @@ geology.py ──► run_uncertainty.py ──► run_spe1.py (one process per r
       <section id="limits">
         <h2>Limits you must state before showing it</h2>
         <ul>
-          <li><strong>Not a full-field simulator.</strong> Cartesian SPE1-class grids; no corner-point/EGRID, no SPE9, no real field grids.</li>
+          <li><strong>Not a full-field simulator.</strong> Native runs are SPE1-only. The standard Cartesian SPE9 static grid and deck PVT/relperm tables load, but the SPE9 schedule/time-stepping are not implemented; there is no corner-point/EGRID support and no real field grids.</li>
           <li><strong>Not a fault-seal calculator.</strong> Fault-face transmissibility is a user-supplied multiplier. There is no juxtaposition, shale-gouge, capillary-entry-pressure or geomechanical seal model, and faults are vertical planes on a regular x/y grid.</li>
           <li><strong>Not a speed product.</strong> The analytic Jacobian cut the full SPE1 run to 49.0 s, about 3.3× slower than OPM Flow on the same host at the 1e-6 gate. It remains single-threaded Python; the value is inspection and cross-checking, not throughput.</li>
           <li><strong>Not history-matched.</strong> The uncertainty ensemble is not conditioned to observed production.</li>
@@ -302,7 +302,9 @@ geology.py ──► run_uncertainty.py ──► run_spe1.py (one process per r
           <thead><tr><th>File</th><th>Responsibility</th></tr></thead>
           <tbody>
             <tr><td><code>deckparse.py</code></td><td>SPE1-style deck tokenizer and parser</td></tr>
-            <tr><td><code>fieldgrid.py</code></td><td>Cartesian grid, depths, volumes, transmissibilities, per-face multipliers</td></tr>
+            <tr><td><code>fieldgrid.py</code></td><td>Cartesian grid, depths, volumes, transmissibilities, per-face multipliers; SPE1 and standard SPE9 static-grid assembly</td></tr>
+            <tr><td><code>deckparse.py</code></td><td>Deck records, recursive <code>INCLUDE</code>, <code>COPY</code>/<code>MULTIPLY</code> array operations</td></tr>
+            <tr><td><code>deckprops.py</code></td><td>Deck <code>PVTO</code>/<code>PVDG</code>/<code>PVTW</code>/<code>SWOF</code>/<code>SGOF</code>/<code>DENSITY</code> tables for <code>PVT</code></td></tr>
             <tr><td><code>blackoil_vs.py</code></td><td>Three-phase black oil with variable switching; analytic Jacobian plus retained FD oracles</td></tr>
             <tr><td><code>validate_jacobian_vs.py</code></td><td>Four-branch central-FD check of the three-phase analytic Jacobian</td></tr>
             <tr><td><code>run_spe1.py</code></td><td>Case driver, initial state, schedule, material balance, provenance</td></tr>

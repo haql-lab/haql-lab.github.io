@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck-driven PVT and the SPE9 static grid — haql-engine</title>
+<meta name="description" content="How haql-engine reads PVTO/PVDG/PVTW/SWOF/SGOF/DENSITY tables, resolves INCLUDE and COPY/MULTIPLY, and assembles the 9,000-cell Cartesian SPE9 static grid — with explicit limits.">
+<link rel="canonical" href="https://haql-lab.github.io/docs/engine/deck-properties.html">
+<meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/docs.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr__in">
+    <a class="brand" href="/index.html" aria-label="Haql Labs — home">
+      <span class="brand__mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26" focusable="false"><rect width="32" height="32" rx="7" fill="#0B1B33"/><path fill="#F6F4EE" d="M6.5 8.6 L10.5 7.75 L10.5 24.25 L6.5 23.4 Z"/><path fill="#F6F4EE" d="M21.5 7.75 L25.5 8.6 L25.5 23.4 L21.5 24.25 Z"/><path d="M3.6 18.75 C 9.9 18.75, 11.4 15.6, 16 15.6 C 20.6 15.6, 22.1 12.9, 28.4 12.9" fill="none" stroke="#4F9BFF" stroke-width="2.1" stroke-linecap="round"/></svg></span>
+      <span class="brand__word">haql<span class="brand__lab">Labs</span></span>
+    </a>
+    <button class="burger" type="button" aria-expanded="false" aria-controls="nav" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="/haql-engine.html">haql-engine</a>
+      <a href="/docs/engine/index.html" aria-current="page">Docs</a>
+      <a href="/index.html#pricing">Pricing</a>
+      <a href="/downloads.html">Downloads</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=Deck%20property%20question">Ask a question</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="doc-hero">
+    <div class="wrap">
+      <p class="eyebrow">haql-engine · deck and grid support</p>
+      <h1>The deck is the input. <em>Now more of its properties are too.</em></h1>
+      <p class="lede">The native solver still runs the SPE1 CASE1 driver. This increment moves the property and static-grid layer off hard-coded SPE1 constants: fluid tables come from the deck, includes are resolved, COPY/MULTIPLY is applied, and the standard 9,000-cell SPE9 grid assembles.</p>
+      <div class="doc-badges">
+        <span class="doc-badge doc-badge--ok">shipped</span>
+        <span class="doc-badge">deck PVT/relperm</span>
+        <span class="doc-badge">INCLUDE + COPY/MULTIPLY</span>
+        <span class="doc-badge">SPE9 static grid</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap doc-layout">
+    <aside class="doc-side" aria-label="Deck support contents">
+      <span class="doc-side__label">On this page</span>
+      <a href="#changed">What changed</a>
+      <a href="#why">Why SPE9, not corner-point first</a>
+      <a href="#use">How to use it</a>
+      <a href="#grid">The SPE9 grid</a>
+      <a href="#check">How to check it</a>
+      <a href="#limits">Limits</a>
+      <hr>
+      <a href="/docs/index.html">All product guides</a>
+      <a href="/docs/engine/index.html">← Public guide</a>
+      <a href="/haql-engine.html">Product page</a>
+    </aside>
+
+    <article class="doc-main">
+      <p class="doc-meta">Features: <code>engine/deckprops.py</code>, <code>engine/deckparse.py</code>, <code>engine/fieldgrid.py</code> · Status: shipped · Evidence: deck parser, table and grid tests</p>
+
+      <section id="changed">
+        <h2>What changed</h2>
+        <p>Before this increment, <code>blackoil_vs.PVT()</code> carried the SPE1 PVT and relative-permeability tables as module constants. That was correct for SPE1 and misleading for every other deck. The engine now accepts a deck's own tables:</p>
+        <table class="doc-table">
+          <thead><tr><th>Deck keyword</th><th>Now used for</th></tr></thead>
+          <tbody>
+            <tr><td><code>PVTO</code></td><td>Saturated <code>Rs</code>, <code>Bo</code>, <code>mu_o</code> and undersaturated <code>Bo(p,Rs)</code>, <code>mu_o(p,Rs)</code></td></tr>
+            <tr><td><code>PVDG</code></td><td><code>Bg(p)</code>, <code>mu_g(p)</code></td></tr>
+            <tr><td><code>PVTW</code></td><td><code>Bw(p)</code>, <code>mu_w(p)</code></td></tr>
+            <tr><td><code>SWOF</code> / <code>SGOF</code></td><td>Three-phase water/gas/oil relative permeability</td></tr>
+            <tr><td><code>DENSITY</code></td><td>Surface densities and gravity</td></tr>
+          </tbody>
+        </table>
+        <p><code>PVT()</code> still gives the historical SPE1 tables. A regression test asserts that the SPE1 deck tables are bit-identical to those defaults, so existing SPE1 results do not move.</p>
+        <div class="doc-callout">
+          <p><strong>Deck reading is broader, but still bounded.</strong> <code>deckparse.py</code> now resolves recursive <code>INCLUDE</code> files relative to the including deck, detects include cycles, expands <code>N*value</code> and <code>N*</code>, and applies <code>COPY</code>/<code>MULTIPLY</code> array operations, including optional six-index I/J/K regions.</p>
+        </div>
+      </section>
+
+      <section id="why">
+        <h2>Why SPE9, not corner-point first</h2>
+        <p>The standard SPE9 deck is Cartesian: <strong>24 × 25 × 15 = 9,000 cells</strong>. Its published grid uses <code>DX</code>, <code>DY</code>, <code>DZ</code>, <code>TOPS</code> and <code>PERMX</code>, not corner-point <code>COORD</code>/<code>ZCORN</code>. Starting with corner-point geometry would add geometric risk before the property and schedule layers are deck-driven.</p>
+        <p>The real SPE9 blockers are the tables and the schedule: 25 producers, one water injector, <code>WELSPECS</code>/<code>COMPDAT</code>, wildcard well names, <code>WCONPROD</code>/<code>WCONINJE</code>, and a 900-day sequence of rate periods. This increment closes the static-grid and property part. The schedule and native time-stepping are the next increment.</p>
+      </section>
+
+      <section id="use">
+        <h2>How to use it</h2>
+        <pre><code>from deckparse import parse
+from deckprops import tables_from_db
+from blackoil_vs import PVT
+from fieldgrid import build_cartesian
+
+db = parse("benchmark/decks/spe9/SPE9.DATA")
+pvt = PVT(tables_from_db(db))
+grid = build_cartesian(db)
+
+print(grid.nx, grid.ny, grid.nz)   # 24 25 15
+print(grid.n)                       # 9000
+print(pvt.density)                  # SPE9 DENSITY</code></pre>
+        <p>The table builder accepts optional undersaturated PVTO continuations in the usual <code>p Bo mu_o</code> form. <code>PVT</code> validates monotonic pressures and saturations, positive densities and positive water properties, and reports a clear error instead of falling back to SPE1 values.</p>
+      </section>
+
+      <section id="grid">
+        <h2>The SPE9 static grid</h2>
+        <p><code>fieldgrid.build_cartesian</code> assembles and validates the standard SPE9 geometry:</p>
+        <ul>
+          <li>24 × 25 × 15 cells, 9,000 active cells;</li>
+          <li>300 ft in x and y;</li>
+          <li>the 15 published layer thicknesses from 20 ft to 100 ft;</li>
+          <li><code>TOPS</code> per column, including the 10-degree x-direction dip;</li>
+          <li><code>PERMX</code>, <code>PERMY</code>, <code>PERMZ</code>, <code>PORO</code> and <code>TOPS</code> shape, finiteness and positivity checks.</li>
+        </ul>
+        <p>The SPE9 include file copies <code>PERMX</code> to <code>PERMY</code> and <code>PERMZ</code>, then multiplies <code>PERMZ</code> by <code>0.01</code>. The test suite asserts that result, not just that a parser returned a number.</p>
+        <div class="doc-callout doc-callout--warn">
+          <p><strong>No native SPE9 run yet.</strong> The static grid and tables load; the wells, controls and 900-day schedule do not. SPE9 audit work still uses OPM Flow as the external reference through <code>verify/rerun.py</code>. Calling this an in-house SPE9 simulation would be false.</p>
+        </div>
+      </section>
+
+      <section id="check">
+        <h2>How to check it</h2>
+        <pre><code>cd engine
+python3 -m unittest -v test_deck_tables
+python3 -m unittest -v test_provenance test_forecast test_geology test_fields
+python3 selftest.py</code></pre>
+        <p><code>test_deck_tables.py</code> covers include expansion, missing/cyclic includes, <code>COPY</code>/<code>MULTIPLY</code>, the SPE9 grid, SPE9 PVT/relperm values, rejection of non-monotonic tables, and the SPE1 default-equivalence check. The full engine suite remains green at 86 tests; the selftest remains 11/11.</p>
+      </section>
+
+      <section id="limits">
+        <h2>Limits you should state</h2>
+        <ul>
+          <li><strong>No native SPE9 schedule or time-stepping.</strong> The static grid and properties are ready; the well model and 900-day driver are not.</li>
+          <li><strong>No corner-point geometry.</strong> <code>COORD</code>, <code>ZCORN</code> and EGRID-based full-field grids remain future work.</li>
+          <li><strong>One table per keyword.</strong> Multiple PVT/rock regions and <code>EQUALS</code> are not dispatched yet.</li>
+          <li><strong>Piecewise-linear interpolation.</strong> Derivatives are one-sided at exact table knots, the same convention as the SPE1 path.</li>
+          <li><strong>This is a property/static-grid proof, not a new validation case.</strong> It does not claim an SPE9 history match or a match to the OPM reference.</li>
+        </ul>
+      </section>
+
+      <div class="doc-pager">
+        <a href="/docs/engine/index.html">← Public guide</a>
+        <a href="/haql-engine.html">Product page →</a>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer class="ftr">
+  <div class="wrap">
+    <div class="ftr__bottom">
+      <p>© <span id="yr">2026</span> Haql Labs · A plain-language guide to an inspectable reservoir engine.</p>
+      <p><a href="/index.html">Home</a> · <a href="/haql-engine.html">haql-engine</a> · <a href="mailto:kunleaz100@gmail.com">Contact</a></p>
+    </div>
+  </div>
+</footer>
+<script src="/assets/js/main.js" defer></script>
+</body>
+</html>

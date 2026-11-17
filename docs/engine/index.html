@@ -61,6 +61,7 @@
       <a href="#uncertainty">Uncertainty</a>
       <a href="/docs/engine/fault-barriers.html">Fault barriers</a>
       <a href="/docs/engine/analytic-jacobian.html">Analytic Jacobian</a>
+      <a href="/docs/engine/deck-properties.html">Deck PVT and SPE9 grid</a>
       <a href="/docs/engine/decision-grade.html">Decision-grade evidence</a>
       <a href="#parallel">Scenario speed</a>
       <a href="#trust">Can I trust it?</a>
@@ -249,7 +250,7 @@
         <table class="doc-table">
           <thead><tr><th>Current scope</th><th>Not yet supported</th></tr></thead>
           <tbody>
-            <tr><td>Small rectangular grids and SPE1-style cases</td><td>Corner-point/EGRID decks, SPE9 and real full-field grids</td></tr>
+            <tr><td>Cartesian grids; SPE1 runs; SPE9 static grid and deck-property loading</td><td>Native SPE9 schedule/time-stepping, corner-point/EGRID decks and real full-field grids</td></tr>
             <tr><td>A limited well and schedule model</td><td>Full commercial schedules, multi-segment wells and complex controls</td></tr>
             <tr><td>Local scenario parallelism on one machine</td><td>Cluster scheduling, MPI, GPU and distributed runs</td></tr>
             <tr><td>Reproducible benchmark and uncertainty studies</td><td>History matching, production assimilation and reserves certification</td></tr>
@@ -304,7 +305,7 @@
           </details>
           <details>
             <summary>Can I use my own field deck?</summary>
-            <p>Not yet. The current reader supports the SPE1-style subset described in the technical reference. A full corner-point deck is outside the present scope.</p>
+            <p>Not for a native simulation yet. The reader now handles the SPE1 deck and the standard Cartesian SPE9 static grid and fluid tables, including <code>INCLUDE</code> and <code>COPY</code>/<code>MULTIPLY</code>. Native SPE9 wells and the 900-day schedule are still pending, and full corner-point decks remain outside the present scope.</p>
           </details>
           <details>
             <summary>How do I get a case reviewed or run?</summary>
@@ -320,6 +321,7 @@
           <thead><tr><th>Feature</th><th>What it means for you</th><th>Guide</th></tr></thead>
           <tbody>
             <tr><td>Analytic three-phase Jacobian</td><td>Solve each timestep from calculated slopes instead of repeated perturbation. The full SPE1 run fell from 504–618 s to 49.0 s at the same conservation gate.</td><td><a href="/docs/engine/analytic-jacobian.html">Analytic Jacobian</a></td></tr>
+            <tr><td>Deck-driven PVT/relperm and SPE9 static grid</td><td>Load a deck's own fluid and rock tables, resolve includes and <code>COPY</code>/<code>MULTIPLY</code>, and assemble the 9,000-cell Cartesian SPE9 grid — without pretending the SPE9 schedule is supported yet.</td><td><a href="/docs/engine/deck-properties.html">Deck PVT and SPE9 grid</a></td></tr>
             <tr><td>Geological uncertainty</td><td>Run a range of plausible fields instead of one guess.</td><td><a href="#uncertainty">Uncertainty</a></td></tr>
             <tr><td>Fault-flow barriers</td><td>Test an open, partly restrictive or sealed fault without leaving the assumption implicit.</td><td><a href="/docs/engine/fault-barriers.html">Fault barriers</a></td></tr>
             <tr><td>Forecast aggregation</td><td>Turn a set of scenarios into a readable range and summary statistics.</td><td><a href="#results">Reading results</a></td></tr>
