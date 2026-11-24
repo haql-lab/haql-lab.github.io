@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Deck-driven PVT and the SPE9 static grid — haql-engine</title>
-<meta name="description" content="How haql-engine reads PVTO/PVDG/PVTW/SWOF/SGOF/DENSITY tables, resolves INCLUDE and COPY/MULTIPLY, and assembles the 9,000-cell Cartesian SPE9 static grid — with explicit limits.">
+<title>Deck-driven PVT, schedule and the generic SPE9 model — haql-engine</title>
+<meta name="description" content="How haql-engine reads PVTO/PVDG/PVTW/SWOF/SGOF/DENSITY, resolves INCLUDE and COPY/MULTIPLY, builds the 9,000-cell Cartesian SPE9 model and walks a deck's own well schedule — with an explicit statement of what is not yet validated.">
 <link rel="canonical" href="https://haql-lab.github.io/docs/engine/deck-properties.html">
 <meta name="theme-color" content="#0c100f" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
@@ -30,7 +30,7 @@
       <a href="/docs/engine/index.html" aria-current="page">Docs</a>
       <a href="/index.html#pricing">Pricing</a>
       <a href="/downloads.html">Downloads</a>
-      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=Deck%20property%20question">Ask a question</a>
+      <a class="nav__cta" href="mailto:kunleaz100@gmail.com?subject=Deck%20model%20question">Ask a question</a>
     </nav>
   </div>
 </header>
@@ -38,14 +38,14 @@
 <main id="main">
   <section class="doc-hero">
     <div class="wrap">
-      <p class="eyebrow">haql-engine · deck and grid support</p>
-      <h1>The deck is the input. <em>Now more of its properties are too.</em></h1>
-      <p class="lede">The native solver still runs the SPE1 CASE1 driver. This increment moves the property and static-grid layer off hard-coded SPE1 constants: fluid tables come from the deck, includes are resolved, COPY/MULTIPLY is applied, and the standard 9,000-cell SPE9 grid assembles.</p>
+      <p class="eyebrow">haql-engine · deck, schedule and driver</p>
+      <h1>The deck is the input. <em>Now the schedule is too.</em></h1>
+      <p class="lede">The property layer, static grid, well schedule and a generic time-step driver are now deck-driven. The standard SPE9 model builds as 9,000 cells, 26 wells and 900 days. A small synthetic deck runs end to end with a closed mass ledger. The full SPE9 run is deliberately not claimed as validated yet.</p>
       <div class="doc-badges">
-        <span class="doc-badge doc-badge--ok">shipped</span>
+        <span class="doc-badge doc-badge--ok">model + driver shipped</span>
         <span class="doc-badge">deck PVT/relperm</span>
-        <span class="doc-badge">INCLUDE + COPY/MULTIPLY</span>
-        <span class="doc-badge">SPE9 static grid</span>
+        <span class="doc-badge">schedule + multi-completion wells</span>
+        <span class="doc-badge">synthetic end-to-end</span>
       </div>
     </div>
   </section>
@@ -54,9 +54,10 @@
     <aside class="doc-side" aria-label="Deck support contents">
       <span class="doc-side__label">On this page</span>
       <a href="#changed">What changed</a>
-      <a href="#why">Why SPE9, not corner-point first</a>
+      <a href="#why">From grid to model</a>
       <a href="#use">How to use it</a>
-      <a href="#grid">The SPE9 grid</a>
+      <a href="#driver">What the driver does</a>
+      <a href="#grid">SPE9 model and status</a>
       <a href="#check">How to check it</a>
       <a href="#limits">Limits</a>
       <hr>
@@ -66,52 +67,76 @@
     </aside>
 
     <article class="doc-main">
-      <p class="doc-meta">Features: <code>engine/deckprops.py</code>, <code>engine/deckparse.py</code>, <code>engine/fieldgrid.py</code> · Status: shipped · Evidence: deck parser, table and grid tests</p>
+      <p class="doc-meta">Features: <code>engine/deckprops.py</code>, <code>engine/deckparse.py</code>, <code>engine/fieldgrid.py</code>, <code>engine/schedule.py</code>, <code>engine/deckmodel.py</code>, <code>engine/run_deck.py</code> · Status: model and synthetic driver shipped; full SPE9 validation open · Evidence: 15 deck/model tests, synthetic run, SPE9 model-build check</p>
 
       <section id="changed">
         <h2>What changed</h2>
-        <p>Before this increment, <code>blackoil_vs.PVT()</code> carried the SPE1 PVT and relative-permeability tables as module constants. That was correct for SPE1 and misleading for every other deck. The engine now accepts a deck's own tables:</p>
+        <p>Before this increment, <code>blackoil_vs.PVT()</code> carried the SPE1 PVT and relative-permeability tables as module constants, and the only production driver was the SPE1 CASE1 replay. Both boundaries are now explicit:</p>
         <table class="doc-table">
           <thead><tr><th>Deck keyword</th><th>Now used for</th></tr></thead>
           <tbody>
             <tr><td><code>PVTO</code></td><td>Saturated <code>Rs</code>, <code>Bo</code>, <code>mu_o</code> and undersaturated <code>Bo(p,Rs)</code>, <code>mu_o(p,Rs)</code></td></tr>
-            <tr><td><code>PVDG</code></td><td><code>Bg(p)</code>, <code>mu_g(p)</code></td></tr>
-            <tr><td><code>PVTW</code></td><td><code>Bw(p)</code>, <code>mu_w(p)</code></td></tr>
+            <tr><td><code>PVDG</code> / <code>PVTW</code></td><td><code>Bg(p)</code>, <code>mu_g(p)</code>, <code>Bw(p)</code>, <code>mu_w(p)</code></td></tr>
             <tr><td><code>SWOF</code> / <code>SGOF</code></td><td>Three-phase water/gas/oil relative permeability</td></tr>
-            <tr><td><code>DENSITY</code></td><td>Surface densities and gravity</td></tr>
+            <tr><td><code>DENSITY</code> / <code>ROCK</code></td><td>Surface densities, gravity and rock compressibility</td></tr>
+            <tr><td><code>WELSPECS</code> / <code>COMPDAT</code></td><td>Well locations, reference depth and multi-completion intervals</td></tr>
+            <tr><td><code>WCONPROD</code> / <code>WCONINJE</code></td><td>Rate and BHP controls, wildcard well names, producer/injector pressure limits</td></tr>
+            <tr><td><code>TSTEP</code></td><td>The deck's own report-step sequence</td></tr>
           </tbody>
         </table>
         <p><code>PVT()</code> still gives the historical SPE1 tables. A regression test asserts that the SPE1 deck tables are bit-identical to those defaults, so existing SPE1 results do not move.</p>
         <div class="doc-callout">
-          <p><strong>Deck reading is broader, but still bounded.</strong> <code>deckparse.py</code> now resolves recursive <code>INCLUDE</code> files relative to the including deck, detects include cycles, expands <code>N*value</code> and <code>N*</code>, and applies <code>COPY</code>/<code>MULTIPLY</code> array operations, including optional six-index I/J/K regions.</p>
+          <p><strong>Deck reading is broader, but still bounded.</strong> <code>deckparse.py</code> resolves recursive <code>INCLUDE</code> files relative to the including deck, detects include cycles, expands <code>N*value</code> and <code>N*</code>, and applies <code>COPY</code>/<code>MULTIPLY</code> array operations, including optional six-index I/J/K regions.</p>
         </div>
       </section>
 
       <section id="why">
-        <h2>Why SPE9, not corner-point first</h2>
+        <h2>From static grid to a deck model</h2>
         <p>The standard SPE9 deck is Cartesian: <strong>24 × 25 × 15 = 9,000 cells</strong>. Its published grid uses <code>DX</code>, <code>DY</code>, <code>DZ</code>, <code>TOPS</code> and <code>PERMX</code>, not corner-point <code>COORD</code>/<code>ZCORN</code>. Starting with corner-point geometry would add geometric risk before the property and schedule layers are deck-driven.</p>
-        <p>The real SPE9 blockers are the tables and the schedule: 25 producers, one water injector, <code>WELSPECS</code>/<code>COMPDAT</code>, wildcard well names, <code>WCONPROD</code>/<code>WCONINJE</code>, and a 900-day sequence of rate periods. This increment closes the static-grid and property part. The schedule and native time-stepping are the next increment.</p>
+        <p>The model builder now closes the static and schedule part: <code>EQUIL</code>/<code>RSVD</code> initial state, 25 producers with three completions each, one water injector with five completions, wildcard <code>WCONPROD</code> records, and 90 <code>TSTEP</code> entries. <code>run_deck.py</code> is a generic driver over that model, not an SPE9-only wrapper.</p>
+        <p>Unsupported features still fail at the boundary. The builder raises <code>ModelError</code> for non-FIELD units, corner-point geometry, <code>ACTNUM</code>, faults, multiple regions, <code>DRSDT</code>, <code>DATES</code>, <code>WCONHIST</code>, <code>WELTARG</code>, <code>WELOPEN</code>, <code>WELSHUT</code> and group controls. Missing tables never fall back to SPE1 properties.</p>
       </section>
 
       <section id="use">
         <h2>How to use it</h2>
-        <pre><code>from deckparse import parse
-from deckprops import tables_from_db
-from blackoil_vs import PVT
-from fieldgrid import build_cartesian
+        <pre><code>from deckmodel import build_model
+from run_deck import simulate
 
-db = parse("benchmark/decks/spe9/SPE9.DATA")
-pvt = PVT(tables_from_db(db))
-grid = build_cartesian(db)
+model = build_model("benchmark/decks/spe9/SPE9.DATA")
+print(model.grid.n)        # 9000
+print(len(model.wells))    # 26
+print(len(model.steps))    # 90
+print(model.total_days)    # 900.0
 
-print(grid.nx, grid.ny, grid.nz)   # 24 25 15
-print(grid.n)                       # 9000
-print(pvt.density)                  # SPE9 DENSITY</code></pre>
+# A small synthetic deck; the standard SPE9 run is not yet validated.
+model = build_model("fixtures/mini_blackoil.DATA")
+out = simulate(model, T=3.0, dtmax=1.0, practical_tol=2e-4)
+print(out["status"], out["t_reached"], out["mb"])</code></pre>
+        <p>The driver can also be invoked directly:</p>
+        <pre><code>cd engine
+python3 run_deck.py --deck fixtures/mini_blackoil.DATA --T 3 --dtmax 1 \
+    --practical-tol 2e-4
+python3 run_deck.py --deck benchmark/decks/spe9/SPE9.DATA --T 30</code></pre>
         <p>The table builder accepts optional undersaturated PVTO continuations in the usual <code>p Bo mu_o</code> form. <code>PVT</code> validates monotonic pressures and saturations, positive densities and positive water properties, and reports a clear error instead of falling back to SPE1 values.</p>
       </section>
 
+      <section id="driver">
+        <h2>What the generic driver does</h2>
+        <ul>
+          <li>Applies each <code>WCONPROD</code>/<code>WCONINJE</code> record at its position in the deck's event stream.</li>
+          <li>Shares one BHP unknown across all completions of a well; the rate constraint sums the per-completion rates.</li>
+          <li>Substeps to <code>dtmax</code>; the solver retries a failed Newton step at a smaller time step.</li>
+          <li>Can switch a rate-controlled well to its declared BHP limit after a converged step. The switch is explicit and visible in the next record.</li>
+          <li>Records a signed conservation ledger from the same well terms the residual uses; drift is reported, not fabricated from rates alone.</li>
+          <li>Writes run summary JSON and optional field snapshots through the existing field exporter.</li>
+        </ul>
+        <div class="doc-callout">
+          <p><strong>Supported schedule subset:</strong> <code>WELSPECS</code>, <code>COMPDAT</code> (<code>OPEN</code> only), <code>WCONPROD</code> <code>ORAT</code>/<code>RATE</code>/<code>BHP</code>, <code>WCONINJE</code> <code>RATE</code>/<code>BHP</code>, wildcard names and <code>TSTEP</code>. Group controls, shut-in events and historical controls are rejected.</p>
+        </div>
+      </section>
+
       <section id="grid">
-        <h2>The SPE9 static grid</h2>
+        <h2>SPE9 model and status</h2>
         <p><code>fieldgrid.build_cartesian</code> assembles and validates the standard SPE9 geometry:</p>
         <ul>
           <li>24 × 25 × 15 cells, 9,000 active cells;</li>
@@ -122,7 +147,7 @@ print(pvt.density)                  # SPE9 DENSITY</code></pre>
         </ul>
         <p>The SPE9 include file copies <code>PERMX</code> to <code>PERMY</code> and <code>PERMZ</code>, then multiplies <code>PERMZ</code> by <code>0.01</code>. The test suite asserts that result, not just that a parser returned a number.</p>
         <div class="doc-callout doc-callout--warn">
-          <p><strong>No native SPE9 run yet.</strong> The static grid and tables load; the wells, controls and 900-day schedule do not. SPE9 audit work still uses OPM Flow as the external reference through <code>verify/rerun.py</code>. Calling this an in-house SPE9 simulation would be false.</p>
+          <p><strong>Model-build check, not a validated SPE9 run.</strong> The standard deck builds a 9,000-cell model with 25 producers, one injector, 90 steps and 900 days. The first production Newton step currently stalls near a scaled residual of <code>5e-3</code> around free/dissolved switching cells. No comparison against <code>benchmark/references/SPE9/</code> is claimed. The synthetic <code>fixtures/mini_blackoil.DATA</code> deck completes three days with a finite ledger and is the current end-to-end regression.</p>
         </div>
       </section>
 
@@ -132,17 +157,18 @@ print(pvt.density)                  # SPE9 DENSITY</code></pre>
 python3 -m unittest -v test_deck_tables
 python3 -m unittest -v test_provenance test_forecast test_geology test_fields
 python3 selftest.py</code></pre>
-        <p><code>test_deck_tables.py</code> covers include expansion, missing/cyclic includes, <code>COPY</code>/<code>MULTIPLY</code>, the SPE9 grid, SPE9 PVT/relperm values, rejection of non-monotonic tables, and the SPE1 default-equivalence check. The full engine suite remains green at 86 tests; the selftest remains 11/11.</p>
+        <p><code>test_deck_tables.py</code> covers include expansion, missing/cyclic includes, <code>COPY</code>/<code>MULTIPLY</code>, the SPE9 grid, SPE9 PVT/relperm values, rejection of non-monotonic tables, the SPE1 default-equivalence check, the synthetic end-to-end driver, multi-completion wells, schedule controls, BHP-control parsing and rejection of unsupported <code>DRSDT</code>. The full engine suite remains green at 92 tests; the selftest remains 11/11.</p>
       </section>
 
       <section id="limits">
         <h2>Limits you should state</h2>
         <ul>
-          <li><strong>No native SPE9 schedule or time-stepping.</strong> The static grid and properties are ready; the well model and 900-day driver are not.</li>
-          <li><strong>No corner-point geometry.</strong> <code>COORD</code>, <code>ZCORN</code> and EGRID-based full-field grids remain future work.</li>
-          <li><strong>One table per keyword.</strong> Multiple PVT/rock regions and <code>EQUALS</code> are not dispatched yet.</li>
+          <li><strong>Full SPE9 time-stepping is not validated.</strong> The grid, tables, 26 wells and 900-day schedule build; the full nonlinear run and reference comparison remain open. This page does not claim an SPE9 history match.</li>
+          <li><strong>No DRSDT.</strong> <code>DRSDT</code> is rejected rather than ignored. The historical SPE1 replay keeps its separate frozen-Rs <code>DRSDT=0</code> path.</li>
+          <li><strong>No corner-point geometry.</strong> <code>COORD</code>, <code>ZCORN</code>, <code>ACTNUM</code>, faults and EGRID-based full-field grids remain future work.</li>
+          <li><strong>One table per keyword, one region.</strong> Multiple PVT/rock/saturation regions and <code>EQUALS</code> are not dispatched yet.</li>
+          <li><strong>No group or historical controls.</strong> Group controls, shut-ins, <code>DATES</code>, <code>WCONHIST</code>, <code>WELTARG</code>, <code>WELOPEN</code> and <code>WELSHUT</code> are rejected.</li>
           <li><strong>Piecewise-linear interpolation.</strong> Derivatives are one-sided at exact table knots, the same convention as the SPE1 path.</li>
-          <li><strong>This is a property/static-grid proof, not a new validation case.</strong> It does not claim an SPE9 history match or a match to the OPM reference.</li>
         </ul>
       </section>
 
