@@ -84,8 +84,16 @@
 
 <!-- ============ HERO ============ -->
 <section class="hero" id="top">
+  <div class="wrap">
+    <div class="docmeta">
+      <span><b>Haql Labs</b> — product catalogue</span>
+      <span>Rev 04 · November 2026</span>
+      <span>Offline · deterministic · read-only</span>
+    </div>
+  </div>
   <div class="wrap hero__in">
     <div class="hero__copy">
+      <p class="hero__kicker">Oil &amp; gas data verification</p>
       <h1>Software that catches what the summary hides.</h1>
       <p class="lede">A monthly total still adds up when four wells carry negative volumes. Haql tools read the export you already have and point at the exact row where the numbers contradict each other.</p>
       <div class="cta">
@@ -155,70 +163,100 @@
 <!-- ============ TOOLS ============ -->
 <section class="sec" id="tools">
   <div class="wrap">
-    <h2>Ten tools. Each answers one question you already ask.</h2>
-    <p class="lede">Eight commercial products — six self-contained binaries, one independent simulation audit and one purchaser-statement audit — plus two MIT libraries. All share one stance: read-only, offline, deterministic, traced to a row in your own file.</p>
+    <div class="sec__head">
+      <div>
+        <p class="kicker"><b>01</b> Catalogue</p>
+        <h2>Ten tools. Each answers one question you already ask.</h2>
+      </div>
+      <p class="lede">Eight commercial products — six self-contained binaries, one independent simulation audit and one purchaser-statement audit — plus two MIT libraries. All share one stance: read-only, offline, deterministic, traced to a row in your own file.</p>
+    </div>
 
     <div class="registry">
-      <a class="registry__row" href="haql-qc.html">
-        <span class="registry__name">haql-qc</span>
-        <span class="registry__desc">Flags every record in a production export that is missing, negative, contradictory or physically impossible — with the rule ID and the source row.</span>
-        <span class="registry__tag">ruleset 1.2.0, commercial</span>
-        <span class="registry__go" aria-hidden="true">›</span>
-      </a>
-      <a class="registry__row" href="haql-closeout.html">
-        <span class="registry__name">haql-closeout</span>
-        <span class="registry__desc">Is this month complete and reconciled enough to lock? Cross-checks well tests, downtime, field balances and date continuity.</span>
-        <span class="registry__tag">ruleset 1.0.0, commercial</span>
-        <span class="registry__go" aria-hidden="true">›</span>
-      </a>
-      <a class="registry__row" href="haql-45q.html">
-        <span class="registry__name">haql-45q</span>
-        <span class="registry__desc">Turns a year of capture, injection, monitoring and lab records into a defensible 45Q claim: mass balance and a certification pack.</span>
-        <span class="registry__tag">ruleset 1.0.0, commercial</span>
-        <span class="registry__go" aria-hidden="true">›</span>
-      </a>
-      <a class="registry__row" href="haql-emission.html">
-        <span class="registry__name">haql-emission</span>
-        <span class="registry__desc">Reconciles a GHG inventory from activity, flare and vent exports — mass balance, coverage, and an EU ETS allowance position.</span>
-        <span class="registry__tag">ruleset 1.0.0, commercial</span>
-        <span class="registry__go" aria-hidden="true">›</span>
-      </a>
-      <a class="registry__row" href="haql-rrc.html">
-        <span class="registry__name">haql-rrc</span>
-        <span class="registry__desc">Checks a Texas RRC Form PR export before it is filed — operator numbers, disposition codes, district range, flare remarks, filing status.</span>
-        <span class="registry__tag">ruleset 1.0.0, commercial</span>
-        <span class="registry__go" aria-hidden="true">›</span>
-      </a>
-      <a class="registry__row" href="haql-dataroom.html">
-        <span class="registry__name">haql-dataroom</span>
-        <span class="registry__desc">Cross-checks an acquisition dataroom offline: production, revenue and severance tables, reserves and LAS headers — every contradiction traced to a source row.</span>
-        <span class="registry__tag">ruleset 1.0.0, commercial</span>
-        <span class="registry__go" aria-hidden="true">›</span>
-      </a>
-      <a class="registry__row" href="haql-revenue.html">
-        <span class="registry__name">haql-revenue</span>
-        <span class="registry__desc">Reconciles produced volumes against purchaser statements: missing statements, price below contract, volume short, duplicate lines and unscheduled deductions, ranked by dollars.</span>
-        <span class="registry__tag">ruleset 0.1.0, commercial</span>
-        <span class="registry__go" aria-hidden="true">›</span>
-      </a>
-      <a class="registry__row" href="haql-engine.html">
-        <span class="registry__name">haql-engine</span>
-        <span class="registry__desc">Independent audit of an Eclipse/OPM run: mass balance, convergence, reproduction and input integrity — with provenance receipts, quarterly revision diffs and ensemble audits. The engine is the verification instrument; the audit is the deliverable, and it reproduces byte-identically on your machine.</span>
-        <span class="registry__tag">per engagement, pilot</span>
-        <span class="registry__go" aria-hidden="true">›</span>
-      </a>
-      <a class="registry__row" href="haql-units.html">
-        <span class="registry__name">haql-units</span>
-        <span class="registry__desc">Field-to-SI unit conversions with explicit time bases and round-trip checking, so a unit mismatch is caught rather than inherited.</span>
-        <span class="registry__tag">free, MIT</span>
-        <span class="registry__go" aria-hidden="true">›</span>
-      </a>
-      <a class="registry__row" href="haql-coords.html">
-        <span class="registry__name">haql-coords</span>
-        <span class="registry__desc">Wellbore geometry and coordinate math engineers use: minimum curvature, DLS, UTM/WGS84 — with round-trip verification.</span>
-        <span class="registry__tag">free, MIT</span>
-        <span class="registry__go" aria-hidden="true">›</span>
-      </a>
+      <section class="reg__group">
+        <h3 class="reg__label">Production <span>02 tools</span></h3>
+        <a class="registry__row" href="haql-qc.html">
+          <span class="registry__idx">01</span>
+          <span class="registry__name">haql-qc</span>
+          <span class="registry__desc">Flags every record in a production export that is missing, negative, contradictory or physically impossible — with the rule ID and the source row.</span>
+          <span class="registry__tag">ruleset 1.2.0 · commercial</span>
+          <span class="registry__go" aria-hidden="true">→</span>
+        </a>
+        <a class="registry__row" href="haql-closeout.html">
+          <span class="registry__idx">02</span>
+          <span class="registry__name">haql-closeout</span>
+          <span class="registry__desc">Is this month complete and reconciled enough to lock? Cross-checks well tests, downtime, field balances and date continuity.</span>
+          <span class="registry__tag">ruleset 1.0.0 · commercial</span>
+          <span class="registry__go" aria-hidden="true">→</span>
+        </a>
+      </section>
+
+      <section class="reg__group">
+        <h3 class="reg__label">Compliance &amp; reporting <span>03 tools</span></h3>
+        <a class="registry__row" href="haql-rrc.html">
+          <span class="registry__idx">03</span>
+          <span class="registry__name">haql-rrc</span>
+          <span class="registry__desc">Checks a Texas RRC Form PR export before it is filed — operator numbers, disposition codes, district range, flare remarks, filing status.</span>
+          <span class="registry__tag">ruleset 1.0.0 · commercial</span>
+          <span class="registry__go" aria-hidden="true">→</span>
+        </a>
+        <a class="registry__row" href="haql-45q.html">
+          <span class="registry__idx">04</span>
+          <span class="registry__name">haql-45q</span>
+          <span class="registry__desc">Turns a year of capture, injection, monitoring and lab records into a defensible 45Q claim: mass balance and a certification pack.</span>
+          <span class="registry__tag">ruleset 1.0.0 · commercial</span>
+          <span class="registry__go" aria-hidden="true">→</span>
+        </a>
+        <a class="registry__row" href="haql-emission.html">
+          <span class="registry__idx">05</span>
+          <span class="registry__name">haql-emission</span>
+          <span class="registry__desc">Reconciles a GHG inventory from activity, flare and vent exports — mass balance, coverage, and an EU ETS allowance position.</span>
+          <span class="registry__tag">ruleset 1.0.0 · commercial</span>
+          <span class="registry__go" aria-hidden="true">→</span>
+        </a>
+      </section>
+
+      <section class="reg__group">
+        <h3 class="reg__label">Transactions &amp; audit <span>03 tools</span></h3>
+        <a class="registry__row" href="haql-dataroom.html">
+          <span class="registry__idx">06</span>
+          <span class="registry__name">haql-dataroom</span>
+          <span class="registry__desc">Cross-checks an acquisition dataroom offline: production, revenue and severance tables, reserves and LAS headers — every contradiction traced to a source row.</span>
+          <span class="registry__tag">ruleset 1.0.0 · commercial</span>
+          <span class="registry__go" aria-hidden="true">→</span>
+        </a>
+        <a class="registry__row" href="haql-revenue.html">
+          <span class="registry__idx">07</span>
+          <span class="registry__name">haql-revenue</span>
+          <span class="registry__desc">Reconciles produced volumes against purchaser statements: missing statements, price below contract, volume short, duplicate lines and unscheduled deductions, ranked by dollars.</span>
+          <span class="registry__tag">ruleset 0.1.0 · commercial</span>
+          <span class="registry__go" aria-hidden="true">→</span>
+        </a>
+        <a class="registry__row" href="haql-engine.html">
+          <span class="registry__idx">08</span>
+          <span class="registry__name">haql-engine</span>
+          <span class="registry__desc">Independent audit of an Eclipse/OPM run: mass balance, convergence, reproduction and input integrity — with provenance receipts, quarterly revision diffs and ensemble audits. The engine is the verification instrument; the audit is the deliverable, and it reproduces byte-identically on your machine.</span>
+          <span class="registry__tag">per engagement · pilot</span>
+          <span class="registry__go" aria-hidden="true">→</span>
+        </a>
+      </section>
+
+      <section class="reg__group">
+        <h3 class="reg__label">Libraries <span>02 tools</span></h3>
+        <a class="registry__row" href="haql-units.html">
+          <span class="registry__idx">09</span>
+          <span class="registry__name">haql-units</span>
+          <span class="registry__desc">Field-to-SI unit conversions with explicit time bases and round-trip checking, so a unit mismatch is caught rather than inherited.</span>
+          <span class="registry__tag">free · MIT</span>
+          <span class="registry__go" aria-hidden="true">→</span>
+        </a>
+        <a class="registry__row" href="haql-coords.html">
+          <span class="registry__idx">10</span>
+          <span class="registry__name">haql-coords</span>
+          <span class="registry__desc">Wellbore geometry and coordinate math engineers use: minimum curvature, DLS, UTM/WGS84 — with round-trip verification.</span>
+          <span class="registry__tag">free · MIT</span>
+          <span class="registry__go" aria-hidden="true">→</span>
+        </a>
+      </section>
     </div>
 
     <p class="fine mt-4">Builds are sent as private links; Linux x86_64 is available now, Windows and macOS on request. <a href="downloads.html">See the downloads page</a> for the request process, hashes and the 30-day evaluation.</p>
@@ -228,45 +266,52 @@
 <!-- ============ FROM THE FIELD ============ -->
 <section class="sec sec--alt field" id="field">
   <div class="wrap">
-    <div class="field__hd">
+    <div class="sec__head">
       <div>
+        <p class="kicker"><b>02</b> The chain</p>
         <h2>The numbers start at the wellhead. They end up on a statement.</h2>
       </div>
       <p class="lede">Between the two, a hundred small handoffs happen. Haql reads the export at the end of that chain and points back to the row where it stopped adding up.</p>
     </div>
 
     <div class="field__grid">
-      <figure class="field__card field__card--lg">
-        <picture>
-          <source type="image/webp" srcset="assets/img/field/pumpjack-600.webp 600w, assets/img/field/pumpjack-1200.webp 1200w" sizes="(max-width: 860px) 100vw, 55vw">
-          <img src="assets/img/field/pumpjack-1200.jpg" srcset="assets/img/field/pumpjack-600.jpg 600w, assets/img/field/pumpjack-1200.jpg 1200w" sizes="(max-width: 860px) 100vw, 55vw" alt="A pumpjack operating in a grass field at Glenn Pool, Oklahoma" width="1200" height="1000" loading="lazy" decoding="async">
-        </picture>
+      <figure class="field__card">
+        <div class="field__media">
+          <picture>
+            <source type="image/webp" srcset="assets/img/field/pumpjack-600.webp 600w, assets/img/field/pumpjack-1200.webp 1200w" sizes="(max-width: 880px) 100vw, 33vw">
+            <img src="assets/img/field/pumpjack-1200.jpg" srcset="assets/img/field/pumpjack-600.jpg 600w, assets/img/field/pumpjack-1200.jpg 1200w" sizes="(max-width: 880px) 100vw, 33vw" alt="A pumpjack operating in a grass field at Glenn Pool, Oklahoma" width="1200" height="1000" loading="lazy" decoding="async">
+          </picture>
+        </div>
         <figcaption class="field__cap">
-          <span class="field__num">01</span>
+          <span class="field__num">Plate 01</span>
           <b>Production</b>
           <p>What the well actually made. Rates, downtime, well tests and the daily records behind them.</p>
         </figcaption>
       </figure>
 
       <figure class="field__card">
-        <picture>
-          <source type="image/webp" srcset="assets/img/field/pipes-600.webp 600w, assets/img/field/pipes-1200.webp 1200w" sizes="(max-width: 860px) 100vw, 45vw">
-          <img src="assets/img/field/pipes-1200.jpg" srcset="assets/img/field/pipes-600.jpg 600w, assets/img/field/pipes-1200.jpg 1200w" sizes="(max-width: 860px) 100vw, 45vw" alt="Large crude oil pipes at the Bryan Mound Strategic Petroleum Reserve site in Texas" width="1200" height="600" loading="lazy" decoding="async">
-        </picture>
+        <div class="field__media">
+          <picture>
+            <source type="image/webp" srcset="assets/img/field/pipes-600.webp 600w, assets/img/field/pipes-1200.webp 1200w" sizes="(max-width: 880px) 100vw, 33vw">
+            <img src="assets/img/field/pipes-1200.jpg" srcset="assets/img/field/pipes-600.jpg 600w, assets/img/field/pipes-1200.jpg 1200w" sizes="(max-width: 880px) 100vw, 33vw" alt="Large crude oil pipes at the Bryan Mound Strategic Petroleum Reserve site in Texas" width="1200" height="600" loading="lazy" decoding="async">
+          </picture>
+        </div>
         <figcaption class="field__cap">
-          <span class="field__num">02</span>
+          <span class="field__num">Plate 02</span>
           <b>Midstream</b>
           <p>What moved, and where it went. Volumes, destinations and the paper trail between field and purchaser.</p>
         </figcaption>
       </figure>
 
       <figure class="field__card">
-        <picture>
-          <source type="image/webp" srcset="assets/img/field/holstein-600.webp 600w, assets/img/field/holstein-1200.webp 1200w" sizes="(max-width: 860px) 100vw, 45vw">
-          <img src="assets/img/field/holstein-1200.jpg" srcset="assets/img/field/holstein-600.jpg 600w, assets/img/field/holstein-1200.jpg 1200w" sizes="(max-width: 860px) 100vw, 45vw" alt="The Holstein offshore oil platform lit at dusk in the Gulf of Mexico" width="1200" height="600" loading="lazy" decoding="async">
-        </picture>
+        <div class="field__media">
+          <picture>
+            <source type="image/webp" srcset="assets/img/field/holstein-600.webp 600w, assets/img/field/holstein-1200.webp 1200w" sizes="(max-width: 880px) 100vw, 33vw">
+            <img src="assets/img/field/holstein-1200.jpg" srcset="assets/img/field/holstein-600.jpg 600w, assets/img/field/holstein-1200.jpg 1200w" sizes="(max-width: 880px) 100vw, 33vw" alt="The Holstein offshore oil platform lit at dusk in the Gulf of Mexico" width="1200" height="600" loading="lazy" decoding="async">
+          </picture>
+        </div>
         <figcaption class="field__cap">
-          <span class="field__num">03</span>
+          <span class="field__num">Plate 03</span>
           <b>Operations</b>
           <p>What the statement says was sold. Purchaser lines, deductions, prices and the dollars that reach the ledger.</p>
         </figcaption>
@@ -279,18 +324,23 @@
 
 <!-- ============ HOW IT WORKS ============ -->
 <section class="sec" id="how">
-  <div class="wrap wrap--narrow">
-    <h2>One step added. Nothing replaced.</h2>
-    <p class="lede">No change to how you capture or account for production. Export the file you already have, run the check, and decide what to fix in your source of truth.</p>
+  <div class="wrap">
+    <div class="sec__head">
+      <div>
+        <p class="kicker"><b>03</b> Method</p>
+        <h2>One step added. Nothing replaced.</h2>
+      </div>
+      <p class="lede">No change to how you capture or account for production. Export the file you already have, run the check, and decide what to fix in your source of truth.</p>
+    </div>
 
-    <ol class="flow">
+    <ol class="ledger">
       <li><b>Export</b><span>Your production, monitoring or MRV data — no change to your capture or accounting system.</span></li>
       <li><b>Run</b><span>Run the CLI yourself offline, or email the file for a free sample check. Both use the same rules.</span></li>
       <li><b>Review</b><span>Every finding names the rule, the well, the date and the 1-indexed source row.</span></li>
       <li><b>Fix</b><span>You correct your source of truth. The tool never writes to your file.</span></li>
     </ol>
 
-    <p class="fine mt-4">Read-only in both directions. No network call, no telemetry, no upload, no model.</p>
+    <p class="fine mt-5">Read-only in both directions. No network call, no telemetry, no upload, no model.</p>
   </div>
 </section>
 
@@ -304,6 +354,7 @@
   </div>
   <div class="wrap field-band__in">
     <div class="field-band__copy">
+      <p class="kicker">Field note</p>
       <blockquote>The field runs around the clock. <em>The reconciliation shouldn't wait for month-end.</em></blockquote>
       <p>Production, downtime, run tickets, purchaser statements — the data is already there. Haql turns it into a repeatable check, not a once-a-quarter scramble.</p>
       <p class="field-band__meta">Read-only. Offline. Traceable to the row.</p>
@@ -314,25 +365,56 @@
 <!-- ============ PRICING ============ -->
 <section class="sec" id="pricing">
   <div class="wrap">
-    <h2>Priced against the hours you already spend.</h2>
-    <p class="lede">Licenses are annual and verified offline. Evaluation runs for 30 days with no license key, and the two MIT libraries are free forever.</p>
+    <div class="sec__head">
+      <div>
+        <p class="kicker"><b>04</b> Pricing</p>
+        <h2>Priced against the hours you already spend.</h2>
+      </div>
+      <p class="lede">Licenses are annual and verified offline. Evaluation runs for 30 days with no license key, and the two MIT libraries are free forever.</p>
+    </div>
 
     <div class="tiers">
       <div class="tier">
+        <p class="tier__lead">Start here</p>
         <h3>Sample check</h3>
         <p class="tier__p"><b>Free</b></p>
         <p>One month of data, on the house. No key, no seat limit, no card. The point is to hit one finding you did not know about.</p>
+        <ul class="tier__list">
+          <li>One month of data</li>
+          <li>No key, no card</li>
+          <li>Same ruleset as the licensed build</li>
+          <li>Every finding cited to a source row</li>
+        </ul>
         <a class="btn btn--p btn--sm" href="mailto:kunleaz100@gmail.com?subject=Free%20sample%20check%20request">Send me your CSV</a>
       </div>
-      <div class="tier tier--mid">
+
+      <div class="tier tier--ink">
+        <p class="tier__flag">Most teams</p>
+        <p class="tier__lead">Annual · up to 10 users</p>
         <h3>Team</h3>
-        <p class="tier__p"><b>$349</b>/month</p>
-        <p>Annual commitment, up to 10 users, unlimited fields. Roughly one engineer-day of loaded cost.</p>
+        <p class="tier__p"><b>$349</b><span>/month</span></p>
+        <p>Roughly one engineer-day of loaded cost.</p>
+        <ul class="tier__list">
+          <li>Up to 10 users</li>
+          <li>Unlimited fields</li>
+          <li>Offline Ed25519 licence</li>
+          <li>No activation server</li>
+        </ul>
+        <a class="btn btn--p btn--sm" href="mailto:kunleaz100@gmail.com?subject=Team%20licence">Request a licence</a>
       </div>
+
       <div class="tier">
+        <p class="tier__lead">Annual · per site</p>
         <h3>On-premise</h3>
-        <p class="tier__p"><b>$1,750</b>/month</p>
-        <p>Annual, per site, unlimited users on that site. On-premise is not a feature — under most data-residency policies it is the premise.</p>
+        <p class="tier__p"><b>$1,750</b><span>/month</span></p>
+        <p>Unlimited users on that site. On-premise is not a feature — under most data-residency policies it is the premise.</p>
+        <ul class="tier__list">
+          <li>Unlimited users per site</li>
+          <li>Runs on your own infrastructure</li>
+          <li>Offline licence, no activation server</li>
+          <li>Annual commitment</li>
+        </ul>
+        <a class="btn btn--s btn--sm" href="mailto:kunleaz100@gmail.com?subject=On-premise%20licence">Talk to us</a>
       </div>
     </div>
 
@@ -342,41 +424,46 @@
 
 <!-- ============ TRUST / FAQ ============ -->
 <section class="sec sec--alt" id="faq">
-  <div class="wrap wrap--narrow">
-    <h2>Why hand a month of data to a stranger.</h2>
-    <p class="lede">The six commercial data tools are single self-contained binaries that run entirely on your machine, offline, with no installer and no Python. haql-revenue is a licensed Python 3.8+ package, standard library only, with a local review UI — still no network call. The simulation audit is a service: send a deck and run, and we return a signed report. The MIT libraries install from PyPI. None of these tools opens a network connection. The rules are numbered permanently — adding a rule never renumbers an existing one.</p>
-    <ul class="plain">
-      <li><b>Never corrupt source data.</b> Read-only by construction. Correcting requires knowing which of two contradictory fields is wrong, and the data cannot supply that.</li>
-      <li><b>Never guess.</b> Units are declared by you and recorded in the report as your declaration.</li>
-      <li><b>Never be untraceable.</b> Every finding ties to a stable rule ID, a row you can open, and a hash of the input.</li>
-    </ul>
-    <p class="fine">haql-qc is validated against one public field — Equinor's Volve dataset, 15,634 daily and 526 monthly rows, producing 80 findings. One field is a starting point, not a general guarantee, and we will not claim otherwise. <a href="sample-audit.json" download>Download the sample audit report</a>.</p>
+  <div class="wrap faq2">
+    <div class="faq2__head">
+      <p class="kicker"><b>05</b> Trust</p>
+      <h2>Why hand a month of data to a stranger.</h2>
+      <p class="lede">The six commercial data tools are single self-contained binaries that run entirely on your machine, offline, with no installer and no Python. haql-revenue is a licensed Python 3.8+ package, standard library only, with a local review UI — still no network call. The simulation audit is a service: send a deck and run, and we return a signed report. The MIT libraries install from PyPI. None of these tools opens a network connection. The rules are numbered permanently — adding a rule never renumbers an existing one.</p>
+      <p class="fine">haql-qc is validated against one public field — Equinor's Volve dataset, 15,634 daily and 526 monthly rows, producing 80 findings. One field is a starting point, not a general guarantee, and we will not claim otherwise. <a href="sample-audit.json" download>Download the sample audit report</a>.</p>
+    </div>
 
-    <details><summary>Does it use AI?</summary><p>No. Every rule is deterministic arithmetic on your data — comparisons, monotonicity checks, medians. No model, no network call. Running the same file twice gives the same answer.</p></details>
-    <details><summary>Does my data leave my computer?</summary><p>Run locally, nothing leaves your machine — the code makes no outbound calls. If you use the free sample check, you choose to email us the file, and you can ask for it back anonymised or deleted.</p></details>
-    <details><summary>What do I need to install?</summary><p>Nothing, if you use the free sample check. To run the tools yourself, request a private build link from the <a href="downloads.html">downloads page</a> — no Python, nothing else to configure. <span class="mono">haql-revenue</span> is the exception: it runs from Python 3.8+ with no third-party packages. Linux x86_64 is available now; Windows and macOS builds are made on request.</p></details>
-    <details><summary>How is it licensed?</summary><p>The commercial tools are proprietary: running them requires a signed Ed25519 token carrying company, tier, seats and expiry, verified entirely offline. No activation server. <span class="mono">haql-units</span> and <span class="mono">haql-coords</span> are MIT and need no license.</p></details>
+    <div class="faq2__body">
+      <ul class="plain">
+        <li><b>Never corrupt source data.</b> Read-only by construction. Correcting requires knowing which of two contradictory fields is wrong, and the data cannot supply that.</li>
+        <li><b>Never guess.</b> Units are declared by you and recorded in the report as your declaration.</li>
+        <li><b>Never be untraceable.</b> Every finding ties to a stable rule ID, a row you can open, and a hash of the input.</li>
+      </ul>
+
+      <details><summary>Does it use AI?</summary><p>No. Every rule is deterministic arithmetic on your data — comparisons, monotonicity checks, medians. No model, no network call. Running the same file twice gives the same answer.</p></details>
+      <details><summary>Does my data leave my computer?</summary><p>Run locally, nothing leaves your machine — the code makes no outbound calls. If you use the free sample check, you choose to email us the file, and you can ask for it back anonymised or deleted.</p></details>
+      <details><summary>What do I need to install?</summary><p>Nothing, if you use the free sample check. To run the tools yourself, request a private build link from the <a href="downloads.html">downloads page</a> — no Python, nothing else to configure. <span class="mono">haql-revenue</span> is the exception: it runs from Python 3.8+ with no third-party packages. Linux x86_64 is available now; Windows and macOS builds are made on request.</p></details>
+      <details><summary>How is it licensed?</summary><p>The commercial tools are proprietary: running them requires a signed Ed25519 token carrying company, tier, seats and expiry, verified entirely offline. No activation server. <span class="mono">haql-units</span> and <span class="mono">haql-coords</span> are MIT and need no license.</p></details>
+    </div>
   </div>
 </section>
 
 <!-- ============ CONTACT ============ -->
-<section class="sec" id="contact">
-  <div class="wrap">
-    <div class="band">
-      <div>
-        <h2>Send us a month of data.</h2>
-        <p>Tell us which field, anonymise it if you need to, and mention anything unusual about how your operator reports — a sign convention, a units quirk, a column that means something other than its name.</p>
-      </div>
-      <div>
-        <a class="btn btn--p btn--lg" href="mailto:kunleaz100@gmail.com?subject=Free%20sample%20check%20request">kunleaz100@gmail.com</a>
-      </div>
+<section class="close" id="contact">
+  <div class="wrap close__in">
+    <div>
+      <p class="kicker"><b>06</b> Contact</p>
+      <h2>Send us a month of data.</h2>
+      <p>Tell us which field, anonymise it if you need to, and mention anything unusual about how your operator reports — a sign convention, a units quirk, a column that means something other than its name.</p>
+      <a class="close__mail" href="mailto:kunleaz100@gmail.com?subject=Free%20sample%20check%20request">kunleaz100@gmail.com</a>
     </div>
-    <div class="links mt-4">
-      <div><b>Downloads</b><a href="downloads.html">haql-lab.github.io/downloads</a></div>
-      <div><b>GitHub</b><a href="https://github.com/haql-lab" rel="noopener">github.com/haql-lab</a></div>
-      <div><b>Validation data</b><a href="sample-audit.json" download>sample-audit.json</a></div>
+    <div>
+      <div class="close__meta">
+        <div><b>Downloads</b><a href="downloads.html">Private build links</a></div>
+        <div><b>GitHub</b><a href="https://github.com/haql-lab" rel="noopener">github.com/haql-lab</a></div>
+        <div><b>Validation data</b><a href="sample-audit.json" download>sample-audit.json</a></div>
+      </div>
+      <p class="fine mt-4">This site is static, hosted on GitHub Pages. No cookies, no trackers, no analytics, no backend. Findings are advisory; the judgment is yours.</p>
     </div>
-    <p class="fine">This site is static, hosted on GitHub Pages. No cookies, no trackers, no analytics, no backend. Findings are advisory; the judgment is yours.</p>
   </div>
 </section>
 
